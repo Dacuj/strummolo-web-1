@@ -26,13 +26,6 @@ const formatDate = (date: Date) => {
 
     <a href="/" class="home-badge">← HOME</a>
 
-    <div style="background: #222; color: #FC60B7; padding: 20px; margin-top: 80px; font-family: monospace; border: 2px solid red;">
-        <p>STATUS SYSTEM:</p>
-        <p>Articoli trovati: {posts.length}</p>
-        <p>Lista Slug: {posts.map(p => p.slug).join(' | ')}</p>
-        <p>Primo post style: {posts.length > 0 ? posts[0].data.style : 'Nessuno'}</p>
-    </div>
-
     <div class="wall-grid">
 
         {posts.map((post) => (
