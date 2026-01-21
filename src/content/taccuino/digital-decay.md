@@ -1,7 +1,7 @@
 ---
 title: Digital Decay
 description: Quando i pixel muoiono e i dati si corrompono. Un'analisi estetica.
-date: 2026-01-21
+date: 2025-04-20
 style: editorial
 fileNumber: FILE_01
 tags:
