@@ -1,0 +1,303 @@
+---
+import { getCollection } from 'astro:content';
+
+// Recuperiamo tutti gli articoli dalla cartella 'taccuino'
+const posts = await getCollection('taccuino');
+
+// Ordiniamo per data (dal più recente)
+posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+// Funzione helper per formattare la data stile "24.10"
+const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: '2-digit' }).format(date);
+};
+---
+
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>strummolo123 | ARCHIVE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&family=Playfair+Display:ital,wght@1,400;1,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <a href="/" class="home-badge">← HOME</a>
+
+    <div class="wall-grid">
+
+        {posts.map((post) => (
+            <a href={`/taccuino/${post.slug}`} class={`poster-item style-${post.data.style}`}>
+                
+                {/* --- LOGICA STILE: TECH --- */}
+                {post.data.style === 'tech' && (
+                    <>
+                        <div class="item-header">
+                            <span>{post.data.fileNumber || 'FILE_ERR'}</span>
+                            <span>{formatDate(post.data.date)}</span>
+                        </div>
+                        <div class="item-line"></div>
+                        <h2 class="item-title">{post.data.title}</h2>
+                        <p class="item-desc">{post.data.description}</p>
+                        {post.data.tags && <span class="meta-tag">{post.data.tags[0]}</span>}
+                    </>
+                )}
+
+                {/* --- LOGICA STILE: EDITORIAL --- */}
+                {post.data.style === 'editorial' && (
+                    <>
+                        <div class="item-circle">{post.data.fileNumber || '00'}</div>
+                        <h2 class="item-title">{post.data.title}</h2>
+                        <div class="item-line"></div>
+                        <p class="item-desc">{post.data.description}</p>
+                        <span class="ascii-deco">
+                          .   .
+                           | |
+                         .-' '-.
+                        </span>
+                    </>
+                )}
+
+                {/* --- LOGICA STILE: BRUTAL --- */}
+                {post.data.style === 'brutal' && (
+                    <>
+                        <div class="item-header">
+                            <span>{post.data.fileNumber || 'RAW'}</span>
+                            <span>AI_ART</span>
+                        </div>
+                        <h2 class="item-title">{post.data.title}</h2>
+                        <p class="item-desc">{post.data.description}</p>
+                        <div class="item-line" style="width: 100%;"></div>
+                        {post.data.tags && <span class="meta-tag">{post.data.tags[0]}</span>}
+                    </>
+                )}
+
+                {/* --- LOGICA STILE: NOTEBOOK --- */}
+                {post.data.style === 'notebook' && (
+                    <>
+                        <span class="ascii-deco">
+                        ////////////
+                        ////////////
+                        </span>
+                        <h2 class="item-title">{post.data.title}</h2>
+                        <p class="item-desc">{post.data.description}</p>
+                        {post.data.tags && <span class="meta-tag">{post.data.tags[0]}</span>}
+                    </>
+                )}
+
+            </a>
+        ))}
+
+    </div>
+
+</body>
+</html>
+
+<style is:global>
+    /* --- RESET --- */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body, html {
+        background-color: #000;
+        color: #fff;
+        font-family: 'Space Mono', monospace;
+        overflow-x: hidden;
+        cursor: crosshair;
+    }
+
+    /* --- TASTO HOME --- */
+    .home-badge {
+        position: fixed;
+        top: 30px;
+        left: 30px;
+        z-index: 2000;
+        background: #000;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        font-weight: 900;
+        text-decoration: none;
+        padding: 10px 15px;
+        text-transform: uppercase;
+        font-size: 1rem;
+        border: 2px solid #fff;
+        box-shadow: 4px 4px 0px #fff;
+        transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .home-badge:hover {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0px #fff;
+        background: #fff;
+        color: #000;
+    }
+
+    /* --- MASONRY GRID CONTAINER --- */
+    .wall-grid {
+        column-count: 3; 
+        column-gap: 20px;
+        padding: 100px 20px 50px 20px;
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    /* --- CARD / POSTER --- */
+    .poster-item {
+        position: relative;
+        background: #000;
+        border: 1px solid #333;
+        margin-bottom: 20px; 
+        padding: 30px;
+        display: inline-block; 
+        width: 100%;
+        text-decoration: none;
+        color: #fff;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        break-inside: avoid; 
+    }
+
+    /* --- VARIAZIONI DI STILE (Creatività) --- */
+    
+    /* Stile 1: Minimal Tech */
+    .style-tech {
+        border-left: 5px solid #fff;
+    }
+
+    /* Stile 2: Editoriale (Serif) */
+    .style-editorial {
+        border: 1px solid #fff;
+        padding: 40px 20px;
+        text-align: center;
+    }
+
+    /* Stile 3: Brutal (Invertito) */
+    .style-brutal {
+        background: #111;
+        border: 2px solid #fff;
+    }
+
+    /* Stile 4: Dotted (Taccuino) */
+    .style-notebook {
+        border: 2px dashed #555;
+    }
+
+    /* --- HOVER EFFECTS --- */
+    .poster-item:hover {
+        background: #fff;
+        color: #000;
+        border-color: #000;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(255,255,255,0.1);
+        z-index: 10;
+    }
+
+    .poster-item:hover .item-line { background: #000; }
+    .poster-item:hover .item-circle { border-color: #000; }
+    .poster-item:hover .meta-tag { border-color: #000; color: #000; }
+
+    /* --- TYPOGRAPHY & DETAILS --- */
+    .item-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        opacity: 0.6;
+    }
+
+    .item-title {
+        font-family: 'Inter', sans-serif;
+        font-weight: 900;
+        font-size: 2.5rem;
+        line-height: 0.9;
+        text-transform: uppercase;
+        letter-spacing: -1px;
+        margin-bottom: 15px;
+        word-wrap: break-word;
+    }
+
+    /* Titolo Serif */
+    .style-editorial .item-title {
+        font-family: 'Playfair Display', serif;
+        font-style: italic;
+        font-size: 3rem;
+        font-weight: 400;
+    }
+
+    .item-desc {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        opacity: 0.8;
+    }
+
+    /* --- ELEMENTI GRAFICI --- */
+    .item-line {
+        width: 50px;
+        height: 2px;
+        background: #fff;
+        margin: 20px 0;
+    }
+
+    .style-editorial .item-line {
+        margin: 20px auto; 
+    }
+
+    .item-circle {
+        width: 40px;
+        height: 40px;
+        border: 1px solid #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        margin-bottom: 15px;
+    }
+
+    .meta-tag {
+        display: inline-block;
+        border: 1px solid #fff;
+        padding: 2px 8px;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        margin-top: 15px;
+    }
+
+    /* --- ASCII ART DECORATIONS --- */
+    .ascii-deco {
+        font-family: monospace;
+        font-size: 0.6rem;
+        opacity: 0.5;
+        white-space: pre;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    /* --- MOBILE --- */
+    @media (max-width: 768px) {
+        .wall-grid {
+            column-count: 1; 
+            padding: 100px 15px 50px 15px;
+        }
+
+        .item-title {
+            font-size: 2.2rem;
+        }
+
+        .style-editorial .item-title {
+            font-size: 2.5rem;
+        }
+        
+        .home-badge {
+            top: 20px;
+            left: 20px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+    }
+</style>

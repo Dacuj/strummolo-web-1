@@ -1,16 +1,554 @@
 ---
-
+/* INDEX.ASTRO
+  Web 1.0 Experience - Brutalist Style
+*/
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>strummolo123 | Web 1.0 Experience</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Arvo:wght@700&family=Permanent+Marker&family=Special+Elite&family=Bebas+Neue&family=Courier+Prime&family=Inter:wght@200;300;400;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <canvas id="glcanvas"></canvas>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec2 a_position;
+        void main() {
+            gl_Position = vec4(a_position, 0.0, 1.0);
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        #ifdef GL_ES
+        precision mediump float;
+        #endif
+
+        uniform vec2 u_resolution;
+        uniform float u_time;
+
+        // Funzione di rotazione
+        mat2 rotate(float angle) {
+            float s = sin(angle);
+            float c = cos(angle);
+            return mat2(c, -s, s, c);
+        }
+
+        void main() {
+            // --- 1. SETUP GRIGLIA ---
+            float gridDensity = 80.0; 
+
+            vec2 st = gl_FragCoord.xy / u_resolution.y;
+            vec2 gridUV = fract(st * gridDensity); 
+            vec2 gridID = floor(st * gridDensity); 
+
+            // Posizione normalizzata per calcolare le forme grandi
+            vec2 p = gridID / gridDensity;
+            p -= vec2(0.5 * (u_resolution.x/u_resolution.y), 0.5);
+
+            // --- 2. MOVIMENTO LENTO E PESANTE ---
+            float t = u_time * 0.2; 
+
+            // --- 3. FORME GEOMETRICHE GIGANTI ---
+            
+            // Ruotiamo lo spazio molto lentamente
+            vec2 pRot = rotate(t * 0.5) * p;
+
+            // Creiamo un grande quadrato centrale (Box Distance)
+            float bigShape = max(abs(pRot.x), abs(pRot.y));
+
+            // --- 4. CREAZIONE DELLE FASCE (Predominanza Nera) ---
+            float rings = sin(bigShape * 6.0 - t * 2.0);
+
+            // --- IL TRUCCO DEL NERO ---
+            float shapeMask = step(0.90, rings);
+
+            // Aggiungiamo una seconda forma ancora più grande e lenta per variare (opzionale)
+            // Un incrocio diagonale gigante
+            vec2 pRot2 = rotate(-t * 0.3) * p;
+            float crossShape = min(abs(pRot2.x), abs(pRot2.y)); // Forma a croce infinita
+            // Una fascia solitaria che passa ogni tanto
+            float crossMask = step(0.98, sin(crossShape * 4.0 + t)); 
+
+            // Uniamo le due forme (Logica OR: se c'è una o l'altra)
+            float finalPattern = max(shapeMask, crossMask);
+
+            // --- 5. RIFINITURA PIXEL ---
+            // Bordo nero sottile tra i quadratini per mantenere l'effetto griglia
+            float borderSize = 0.1; 
+            float pixelBorder = step(borderSize, gridUV.x) * step(borderSize, gridUV.y) * step(gridUV.x, 1.0 - borderSize) * step(gridUV.y, 1.0 - borderSize);
+
+            // Colore finale
+            gl_FragColor = vec4(vec3(finalPattern * pixelBorder), 1.0);
+        }
+    </script>
+
+    <header>
+        <a href="/" class="logo">
+            <span>s</span><span>t</span><span>r</span><span>u</span><span>m</span><span>m</span><span>o</span><span>l</span><span>o</span><span class="arrows">123</span>
+        </a>
+        <nav class="navbar">
+            <a href="/about" class="nav-link">about</a>
+            <a href="/archive" class="nav-link">taccuino</a>
+            <a href="#more" class="nav-link">more</a>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="ransom-container">
+            <div class="ransom-line">
+                <span class="letter lt-i">I</span>
+                <span style="width: 25px;"></span> <span class="letter lt-h">H</span>
+                <span class="letter lt-a1">A</span>
+                <span class="letter lt-t">T</span>
+                <span class="letter lt-e">E</span>
+            </div>
+            <div class="ransom-line" style="margin-left: 20px;">
+                <span class="letter lt-n">N</span>
+                <span class="letter lt-a2">A</span>
+                <span class="letter lt-p">P</span>
+                <span class="letter lt-o">O</span>
+                <span class="letter lt-l">L</span>
+                <span class="letter lt-i2">I</span>
+            </div>
+        </div>
+    </main>
+
+    <div class="pin-container">
+        <img src="/img/HAVEANEROTIC.png" draggable="false" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png'" alt="Spilla Vintage" class="pin-image">
+    </div>
+
+    <script>
+        const canvas = document.getElementById("glcanvas");
+        // @ts-ignore
+        const gl = canvas.getContext("webgl");
+
+        if (!gl) { alert("WebGL non supportato"); }
+
+        function createShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                gl.deleteShader(shader); return null;
+            }
+            return shader;
+        }
+
+        const program = gl.createProgram();
+        // @ts-ignore
+        const vs = createShader(gl, gl.VERTEX_SHADER, document.getElementById("vertex-shader").text);
+        // @ts-ignore
+        const fs = createShader(gl, gl.FRAGMENT_SHADER, document.getElementById("fragment-shader").text);
+        gl.attachShader(program, vs);
+        gl.attachShader(program, fs);
+        gl.linkProgram(program);
+
+        const posLoc = gl.getAttribLocation(program, "a_position");
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+
+        const resLoc = gl.getUniformLocation(program, "u_resolution");
+        const timeLoc = gl.getUniformLocation(program, "u_time");
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function render(time) {
+            gl.useProgram(program);
+            gl.enableVertexAttribArray(posLoc);
+            gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+            gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+            gl.uniform2f(resLoc, canvas.width, canvas.height);
+            gl.uniform1f(timeLoc, time * 0.001); // Tempo in secondi
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            requestAnimationFrame(render);
+        }
+        render(0);
+    </script>
+	<script>
+		if (window.netlifyIdentity) {
+		  window.netlifyIdentity.on("init", user => {
+			if (!user) {
+			  window.netlifyIdentity.on("login", () => {
+				document.location.href = "/admin/";
+			  });
+			}
+		  });
+		}
+	  </script>
+</body>
 </html>
+
+<style is:global>
+    /* Reset e blocco scroll */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body, html {
+        background-color: #000;
+        color: #fff;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden; 
+        font-family: 'Courier New', Courier, monospace;
+        cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), auto;
+        touch-action: none; 
+    }
+
+    /* Canvas Sfondo - WebGL */
+    #glcanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0; 
+        pointer-events: none;
+        display: block;
+    }
+
+    /* Elementi Interattivi */
+    a, button, .logo, .nav-link, .pin-container, .letter {
+        cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), pointer;
+    }
+
+    /* Header */
+    header {
+        width: 100%;
+        padding: 20px;
+        display: flex;
+        align-items: flex-start; 
+        justify-content: space-between;
+        background-color: transparent; 
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        pointer-events: none; 
+    }
+
+    /* Riabilitiamo i click sugli elementi interni dell'header */
+    .logo, .navbar {
+        pointer-events: auto;
+    }
+
+    .logo {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.7rem;
+        text-decoration: none;
+        display: flex;
+        gap: 2px;
+        text-shadow: 2px 2px 0px #000; 
+        background: rgba(0,0,0,0.8);
+        padding: 8px;
+        margin-top: 10px; 
+        transform: rotate(-1deg); 
+        flex-shrink: 0;
+    }
+
+    /* Colori Logo */
+    .logo span:nth-child(1) { color: #ea4335; } 
+    .logo span:nth-child(2) { color: #fbbc05; } 
+    .logo span:nth-child(3) { color: #4285f4; } 
+    .logo span:nth-child(4) { color: #34a853; } 
+    .logo span:nth-child(5) { color: #ea4335; } 
+    .logo span:nth-child(6) { color: #fff; }    
+    .logo span:nth-child(7) { color: #fff; }    
+    .logo .arrows { color: #4285f4; margin-left: 5px; }
+    .logo:hover { opacity: 0.8; }
+
+    .navbar {
+        display: flex;
+        align-items: flex-start;
+        flex-grow: 1; /* Occupa tutto lo spazio rimanente */
+        padding-left: 60px; /* Spazio dal logo */
+        padding-right: 20px;
+    }
+
+    .nav-link {
+        font-family: 'Inter', 'Helvetica Neue', 'Arial', sans-serif; 
+        font-weight: 300; 
+        font-size: 2.8rem; 
+        letter-spacing: -2px; 
+        color: #000; 
+        text-decoration: none;
+        text-transform: uppercase; 
+        padding: 0px 2px; 
+        line-height: 0.75; 
+        background: #fff; 
+        border: none;
+        transition: transform 0.1s, background 0.1s, color 0.1s;
+        display: inline-block; 
+        box-shadow: 2px 2px 0px rgba(0,0,0,0.5); 
+    }
+
+    /* --- STILE BOX FUCSIA "DREAM" --- */
+    .dream-text {
+        font-family: 'Inter', 'Helvetica Neue', 'Arial', sans-serif;
+        font-weight: 300;
+        font-size: 3.5rem; 
+        letter-spacing: -2px;
+        color: #000;
+        padding: 0px 4px;
+        line-height: 0.85;
+        background: #FC60B7; 
+        box-shadow: 4px 4px 0px rgba(0,0,0,0.5); 
+        display: inline-block;
+        transform: rotate(-1.5deg);
+    }
+
+    .dream-top {
+        margin-bottom: 5px;
+        margin-left: 25px; 
+        align-self: flex-start;
+    }
+
+    .dream-bottom {
+        margin-top: 15px; 
+        margin-left: 520px; 
+        transform: rotate(2deg); 
+    }
+
+    /* --- POSIZIONAMENTO DESKTOP (Split Layout) --- */
+    
+    .navbar a:nth-child(1) {
+        margin-right: auto; 
+        margin-top: 0px; 
+        transform: rotate(-2deg);
+    }
+
+    .navbar a:nth-child(2) {
+        margin-top: 15px; 
+        margin-right: 40px; 
+        transform: rotate(3deg);
+    }
+
+    .navbar a:nth-child(3) {
+        margin-top: 5px;
+        transform: rotate(-3deg);
+    }
+
+    .nav-link:hover { 
+        transform: scale(1.02) rotate(0deg) !important;
+        z-index: 10;
+        background: #000; 
+        color: #fff;
+    }
+
+    /* Main Content */
+    .main-content {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center; 
+        align-items: flex-start;
+        padding-left: 10%;
+        padding-top: 40px;
+        position: relative;
+        z-index: 10;
+        pointer-events: none; 
+    }
+
+    .ransom-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        transform: scale(0.9);
+        transform-origin: left center;
+        pointer-events: auto; 
+    }
+
+    .ransom-line {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .letter {
+        display: inline-block;
+        padding: 15px 25px;
+        text-transform: uppercase;
+        font-weight: 900;
+        line-height: 0.85;
+        filter: drop-shadow(8px 8px 0px #000); 
+        user-select: none;
+        transition: transform 0.1s;
+    }
+    
+    .letter:hover {
+        transform: translate(2px, 2px);
+    }
+
+    /* Font Classes */
+    .lt-i { background: #fff; color: #000; font-family: 'Impact', sans-serif; font-size: 8rem; transform: rotate(-4deg); clip-path: polygon(2% 0%, 98% 5%, 95% 95%, 5% 100%); }
+    .lt-h { background: #000; color: #fff; font-family: 'Special Elite', serif; font-size: 6rem; transform: rotate(5deg) translateY(10px); clip-path: polygon(0 10%, 100% 0, 90% 100%, 10% 90%); border: 2px solid #fff; }
+    .lt-a1 { background: #222; color: #eee; font-family: 'Bebas Neue', sans-serif; font-size: 7.5rem; transform: rotate(-3deg) translateY(-5px); clip-path: polygon(5% 0, 100% 5%, 95% 95%, 0 100%); }
+    .lt-t { background: #fff; color: #000; font-family: 'Permanent Marker', cursive; font-size: 6.5rem; transform: rotate(6deg) translateY(-15px); clip-path: polygon(0 5%, 100% 15%, 85% 95%, 5% 85%); border-left: 5px solid #000; }
+    .lt-e { background: #111; color: #fff; font-family: 'Courier Prime', monospace; font-size: 5.5rem; transform: rotate(-6deg) translateY(5px); clip-path: polygon(0 0, 95% 10%, 100% 90%, 5% 100%); text-decoration: underline; }
+    .lt-n { background: #ccc; color: #000; font-family: 'Impact', sans-serif; font-size: 9rem; transform: rotate(4deg); clip-path: polygon(5% 5%, 100% 0, 95% 95%, 0 100%); }
+    .lt-a2 { background: #000; color: #fff; font-family: 'Special Elite', serif; font-size: 6rem; transform: rotate(-5deg) translateY(-10px); clip-path: polygon(0 15%, 100% 5%, 90% 95%, 5% 100%); border: 2px dashed #fff; }
+    .lt-p { background: #fff; color: #000; font-family: 'Arvo', serif; font-size: 7rem; transform: rotate(5deg) translateY(15px); border: 4px solid #000; }
+    .lt-o { background: #eee; color: #111; font-family: 'Special Elite', serif; font-size: 8rem; transform: rotate(-7deg) translateY(-15px); clip-path: polygon(10% 0, 95% 10%, 90% 95%, 5% 90%); }
+    .lt-l { background: #111; color: #eee; font-family: 'Permanent Marker', cursive; font-size: 6rem; transform: rotate(5deg) translateY(5px); clip-path: polygon(15% 0, 95% 12%, 85% 90%, 5% 100%); }
+    .lt-i2 { background: #000; color: #fff; font-family: 'VT323', monospace; font-size: 7.5rem; transform: rotate(-4deg) translateY(-20px); border: 4px solid #fff; }
+
+    /* Pin */
+    .pin-container {
+        position: fixed;
+        bottom: 40px;
+        right: 40px;
+        width: 130px; 
+        height: 130px;
+        z-index: 2000; 
+        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
+        animation: rotatePin 8s linear infinite;
+        pointer-events: auto;
+    }
+
+    .pin-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+    }
+
+    @keyframes rotatePin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* --- MEDIA QUERIES (FIXED FOR MOBILE) --- */
+
+    /* Tablet e Mobile Landscape */
+    @media (max-width: 768px) {
+        header { 
+            padding: 10px; 
+            flex-direction: column; 
+            gap: 10px; 
+            background-color: rgba(0,0,0,0.8);
+            pointer-events: auto; 
+        }
+        .logo { 
+            font-size: 1rem; 
+            width: 100%; 
+            justify-content: center; 
+            margin-top: 0; 
+            transform: none; 
+        }
+        .navbar { 
+            gap: 15px; 
+            width: 100%; 
+            justify-content: center; 
+            padding-right: 0;
+            padding-left: 0; /* Reset padding desktop */
+        }
+
+        .navbar a:nth-child(n) {
+            margin-top: 0;
+            margin-right: 0; 
+            transform: none;
+        }
+        
+        .nav-link {
+            font-size: 1.5rem; 
+            line-height: 0.8;
+            letter-spacing: -1px;
+        }
+
+        .main-content { 
+            padding-left: 0; 
+            padding-top: 0; 
+            align-items: center; 
+            justify-content: center; 
+        }
+
+        .ransom-container { 
+            transform: scale(1); 
+            width: 100%; 
+            align-items: center; 
+            gap: 15px; 
+        }
+
+        .ransom-line { 
+            justify-content: center; 
+            width: 100%; 
+            margin-left: 0 !important; 
+            gap: 10px; 
+        }
+
+        .letter { 
+            padding: 10px 15px !important; 
+        }
+        
+        .pin-container { width: 100px; height: 100px; bottom: 15px; right: 15px; }
+
+        .dream-top {
+            margin-left: 0;
+        }
+        .dream-bottom {
+            margin-left: 0;
+            margin-top: 10px;
+            padding-right: 0;
+        }
+    }
+
+    /* Smartphone Portrait (Schermi piccoli) */
+    @media (max-width: 480px) {
+        .main-content {
+            padding-top: 150px; 
+            justify-content: flex-start; 
+        }
+
+        /* Font molto più grande su mobile */
+        .lt-i, .lt-h, .lt-a1, .lt-t, .lt-e, .lt-n, .lt-a2, .lt-p, .lt-o, .lt-l, .lt-i2 {
+            font-size: 4.2rem !important; 
+        }
+        
+        .lt-i { font-size: 4.5rem !important; }
+        .lt-n { font-size: 4.5rem !important; }
+
+        .ransom-line {
+            gap: 2px; 
+            flex-wrap: nowrap; 
+        }
+
+        .letter {
+            padding: 5px 5px !important; 
+            filter: drop-shadow(4px 4px 0px #000); 
+        }
+
+        .dream-text {
+            font-size: 2.2rem; 
+        }
+        
+        .dream-top {
+            margin-left: 0;
+            align-self: center;
+        }
+
+        .dream-bottom {
+            margin-left: 0; 
+            margin-top: 5px;
+            align-self: flex-end; 
+            padding-right: 10px;
+        }
+    }
+</style>

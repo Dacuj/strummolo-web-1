@@ -1,0 +1,38 @@
+backend:
+  name: git-gateway
+  branch: main # Assicurati che il tuo branch principale su GitHub si chiami 'main' o 'master'
+
+# Dove salvare le immagini caricate dal CMS
+media_folder: "public/img"
+public_folder: "/img"
+
+# URL del tuo sito (opzionale, ma utile per le preview)
+site_url: https://iltuosito.netlify.app
+
+collections:
+  - name: "taccuino" # Nome collezione
+    label: "Taccuino (Articoli)"
+    folder: "src/content/taccuino" # Dove Astro legge i file
+    create: true # Permetti di creare nuovi post
+    slug: "{{slug}}" # Nome del file generato
+    fields:
+      - { label: "Titolo", name: "title", widget: "string" }
+      - { label: "Descrizione", name: "description", widget: "text", hint: "Breve intro per la card" }
+      - { label: "Data Pubblicazione", name: "date", widget: "datetime", format: "YYYY-MM-DD" }
+      
+      # Qui c'è la magia: il selettore di stile
+      - label: "Stile Artistico"
+        name: "style"
+        widget: "select"
+        default: "tech"
+        options:
+          - { label: "Tech (Minimal/Bordo sx)", value: "tech" }
+          - { label: "Editorial (Serif/Centrato)", value: "editorial" }
+          - { label: "Brutal (Nero/Invertito)", value: "brutal" }
+          - { label: "Notebook (Tratteggiato)", value: "notebook" }
+      
+      - { label: "Numero File", name: "fileNumber", widget: "string", default: "FILE_XXX", required: false }
+      - { label: "Tag", name: "tags", widget: "list", default: ["ESSAY"], required: false }
+      
+      # Il corpo dell'articolo
+      - { label: "Contenuto Articolo", name: "body", widget: "markdown" }

@@ -1,0 +1,307 @@
+---
+import { getCollection } from 'astro:content';
+
+// 1. Genera i percorsi statici per ogni articolo
+export async function getStaticPaths() {
+  const posts = await getCollection('taccuino');
+  // Ordina i post per data per calcolare il "next post"
+  posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+  return posts.map((post, index) => ({
+    params: { slug: post.slug },
+    props: { 
+        post,
+        // Passiamo anche il post successivo (se esiste) per il footer
+        nextPost: index > 0 ? posts[index - 1] : null 
+    },
+  }));
+}
+
+// 2. Recupera i dati passati da getStaticPaths
+const { post, nextPost } = Astro.props;
+const { Content } = await post.render();
+
+// Helper formattazione data (YYYY.MM.DD)
+const formatDate = (date: Date) => {
+    return date.toISOString().split('T')[0].replace(/-/g, '.');
+};
+---
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>strummolo123 | {post.data.title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Arvo:wght@700&family=Permanent+Marker&family=Inter:wght@200;300;400;900&family=Courier+Prime&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav>
+        <a href="/archive" class="nav-btn">← Taccuino</a>
+        <a href="/" class="nav-btn">Home</a>
+    </nav>
+
+    <article class="article-container">
+        
+        <header class="article-header">
+            <span class="meta-data">FILE: {post.data.fileNumber || 'UNK'} // DATE: {formatDate(post.data.date)}</span>
+            <h1>{post.data.title}</h1>
+            <p class="intro">
+                {post.data.description}
+            </p>
+        </header>
+
+        <div class="content">
+            <Content />
+
+            <p style="text-align: center; margin-top: 50px; font-family: 'Press Start 2P'; color: #FC60B7;">
+                *** END OF TRANSMISSION ***
+            </p>
+        </div>
+
+        <footer class="article-footer">
+            <div class="prev-post">
+                </div>
+            
+            {nextPost && (
+                <a href={`/taccuino/${nextPost.slug}`} class="next-post">
+                    <span class="next-label">NEXT FILE →</span>
+                    <span class="next-title">{nextPost.data.title}</span>
+                </a>
+            )}
+        </footer>
+
+    </article>
+
+</body>
+</html>
+
+<style is:global>
+    /* --- RESET & BASIC --- */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* Selezione testo Fucsia */
+    ::selection {
+        background: #FC60B7;
+        color: #000;
+    }
+
+    body, html {
+        background-color: #000;
+        color: #ccc; 
+        min-height: 100vh;
+        width: 100vw;
+        overflow-x: hidden;
+        font-family: 'Courier Prime', monospace; 
+        cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), auto;
+        line-height: 1.6;
+    }
+
+    /* --- HEADER NAVIGAZIONE --- */
+    nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        z-index: 1000;
+        background: linear-gradient(to bottom, #000 0%, rgba(0,0,0,0) 100%);
+        pointer-events: none;
+    }
+
+    .nav-btn {
+        pointer-events: auto;
+        text-decoration: none;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.7rem;
+        color: #fff;
+        background: #000;
+        padding: 10px 15px;
+        border: 1px solid #333;
+        transition: all 0.2s;
+        text-transform: uppercase;
+    }
+
+    .nav-btn:hover {
+        background: #fff;
+        color: #000;
+        border-color: #fff;
+        box-shadow: 4px 4px 0px #FC60B7; /* Ombra fucsia */
+        transform: translate(-2px, -2px);
+    }
+
+    /* --- CONTAINER ARTICOLO --- */
+    .article-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 120px 20px 100px 20px; 
+        position: relative;
+    }
+
+    /* --- HEADER ARTICOLO --- */
+    .article-header {
+        margin-bottom: 60px;
+        border-bottom: 1px solid #333;
+        padding-bottom: 40px;
+    }
+
+    .meta-data {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.6rem;
+        color: #FC60B7;
+        margin-bottom: 20px;
+        display: block;
+        letter-spacing: 1px;
+    }
+
+    h1 {
+        font-family: 'Inter', sans-serif;
+        font-weight: 900;
+        font-size: 4rem; 
+        line-height: 0.9;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: -2px;
+        margin-bottom: 30px;
+    }
+
+    .intro {
+        font-family: 'Inter', sans-serif;
+        font-weight: 300;
+        font-size: 1.5rem;
+        line-height: 1.3;
+        color: #fff;
+        border-left: 2px solid #FC60B7;
+        padding-left: 20px;
+    }
+
+    /* --- CONTENUTO (Markdown Styles) --- */
+    .content p {
+        margin-bottom: 30px;
+        font-size: 1.1rem;
+    }
+
+    /* Stile Link nel testo */
+    .content a {
+        color: #fff;
+        text-decoration: none;
+        border-bottom: 1px solid #FC60B7;
+        transition: background 0.2s;
+        cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), pointer;
+    }
+
+    .content a:hover {
+        background: #FC60B7;
+        color: #000;
+    }
+
+    /* Immagini nell'articolo */
+    .content img {
+        margin: 50px 0;
+        width: 100%;
+        height: auto;
+        border: 1px solid #fff; 
+        filter: grayscale(100%) contrast(1.2); 
+        transition: filter 0.3s;
+        display: block;
+    }
+
+    .content img:hover {
+        filter: grayscale(0%) contrast(1);
+    }
+
+    /* Citazioni */
+    blockquote {
+        font-family: 'Inter', sans-serif;
+        font-weight: 900;
+        font-size: 2rem;
+        text-transform: uppercase;
+        line-height: 1;
+        margin: 60px 0;
+        padding: 0 20px;
+        color: #fff;
+        text-align: center;
+        letter-spacing: -1px;
+        border: none; /* Reset eventuale bordo default */
+    }
+
+    /* Codice inline e blocchi */
+    code {
+        font-family: 'VT323', monospace;
+        background: #222;
+        padding: 2px 5px;
+        color: #FC60B7;
+        font-size: 1.1em;
+    }
+    
+    pre {
+        background: #111;
+        padding: 20px;
+        border: 1px dashed #333;
+        overflow-x: auto;
+        margin-bottom: 30px;
+    }
+
+    pre code {
+        background: transparent;
+        color: #ccc;
+        padding: 0;
+    }
+
+    /* --- FOOTER NAVIGAZIONE --- */
+    .article-footer {
+        margin-top: 100px;
+        padding-top: 50px;
+        border-top: 1px dashed #333;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .next-post {
+        text-align: right;
+        text-decoration: none;
+    }
+
+    .next-label {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.6rem;
+        color: #888;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .next-title {
+        font-family: 'Inter', sans-serif;
+        font-weight: 900;
+        font-size: 2rem;
+        color: #fff;
+        text-transform: uppercase;
+        transition: color 0.2s;
+    }
+
+    .next-post:hover .next-title {
+        color: #FC60B7;
+        text-decoration: underline;
+    }
+
+    /* --- MOBILE --- */
+    @media (max-width: 768px) {
+        h1 { font-size: 2.5rem; }
+        .intro { font-size: 1.2rem; }
+        .article-container { padding: 100px 15px 50px 15px; }
+        blockquote { font-size: 1.5rem; }
+        
+        .article-footer { flex-direction: column; gap: 30px; align-items: flex-start; }
+        .next-post { text-align: left; }
+    }
+</style>
