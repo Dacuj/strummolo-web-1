@@ -7,7 +7,7 @@ fileNumber: FILE_01
 tags:
   - ESSAY
 ---
-> `Esplorazione visiva della degradazione digitale nel contesto urbano moderno. Quando i pixel muoiono, nascono nuove forme d'arte involontaria.`
+> Esplorazione visiva della degradazione digitale nel contesto urbano moderno. Quando i pixel muoiono, nascono nuove forme d'arte involontaria.
 
 Viviamo in un'epoca in cui la permanenza è un'illusione. I dati si corrompono, gli schermi si bruciano, e il codice decade. Questo fenomeno, che chiamo [Digital Decay](#), non è un errore del sistema, ma una sua caratteristica intrinseca.
 
