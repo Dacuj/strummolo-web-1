@@ -116,119 +116,124 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Strummolo Admin Panel | Decap CMS</title>
   <link rel="icon" href="https://cur.cursors-4u.net/nature/nat-10/nat926.cur">
+  
+  <script>
+    (function() {
+      console.log("📡 Auth Listener attivo e in attesa...");
+      
+      window.addEventListener("message", (event) => {
+        const data = event.data;
+        
+        // Debug: vediamo cosa arriva
+        // console.log("📩 Messaggio ricevuto:", data);
+
+        if (typeof data === 'string' && data.startsWith("authorization:github:success:")) {
+          console.log("⚡ Token intercettato con successo!");
+          
+          const parts = data.split(":");
+          const token = parts[3]; 
+          
+          if (token) {
+            const userObj = { backendName: "github", token: token };
+            const userStr = JSON.stringify(userObj);
+            
+            // SALVIAMO SU ENTRAMBE LE CHIAVI PER SICUREZZA (v2 e v3)
+            localStorage.setItem("netlify-cms-user", userStr);
+            localStorage.setItem("decap-cms-user", userStr);
+            
+            console.log("💾 Token salvato in LocalStorage. Ricarico tra 200ms...");
+            
+            // Ricarica forzata
+            setTimeout(() => { 
+                window.location.reload(); 
+            }, 200);
+          } else {
+            console.error("❌ Errore: Token vuoto nel messaggio ricevuta.");
+          }
+        }
+      });
+    })();
+  </script>
+
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
 
-  <script>
-    window.addEventListener("message", (event) => {
-      const data = event.data;
-      if (typeof data === 'string' && data.startsWith("authorization:github:success:")) {
-        console.log("⚡ Token intercettato!");
-        const parts = data.split(":");
-        const token = parts[3]; 
-        if (token) {
-          const userObj = { backendName: "github", token: token };
-          localStorage.setItem("netlify-cms-user", JSON.stringify(userObj));
-          console.log("💾 Salvato. Reload...");
-          setTimeout(() => { window.location.reload(); }, 200);
-        }
-      }
-    });
-  </script>
-
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script src="https://unpkg.com/decap-cms@^3.1.0/dist/decap-cms.js"></script>
   
   <script>
-    // 1. Registra lo stile CSS esterno
+    // Registra CSS
     CMS.registerPreviewStyle("/admin/preview.css");
 
-    // 2. Setup React Moderno (No JSX)
-    const h = window.React.createElement;
+    // --- SETUP REACT ---
+    // Decap espone React globalmente, ma per sicurezza facciamo un check
+    const h = window.React ? window.React.createElement : null;
 
-    // 3. Helper Formattazione Data (Simula Astro Logic)
-    // Trasforma Date object o stringa ISO in YYYY.MM.DD
-    const formatDate = (dateRaw) => {
-        if (!dateRaw) return 'YYYY.MM.DD';
-        try {
-            const d = new Date(dateRaw);
-            // Assicura che la data sia valida
-            if (isNaN(d.getTime())) return String(dateRaw);
-            return d.toISOString().split('T')[0].replace(/-/g, '.');
-        } catch (e) {
-            return String(dateRaw);
-        }
-    };
+    if (!h) {
+        console.error("❌ Errore Critico: React non trovato. Decap CMS non caricato correttamente.");
+    } else {
+        console.log("✅ React caricato. Inizializzazione Preview...");
 
-    // 4. Componente Preview (Functional Component / Arrow Function)
-    const PostPreview = (props) => {
-        // Estrazione dati immutable
-        const entry = props.entry;
-        const data = entry.get('data');
-        
-        // Campi
-        const title = data.get('title') || 'Senza Titolo';
-        const description = data.get('description') || '';
-        const fileNumber = data.get('fileNumber') || 'UNK';
-        const dateRaw = data.get('date');
-        
-        // Body (widget markdown)
-        const bodyWidget = props.widgetFor('body');
+        // Helper Formattazione Data
+        const formatDate = (dateRaw) => {
+            if (!dateRaw) return 'YYYY.MM.DD';
+            try {
+                const d = new Date(dateRaw);
+                if (isNaN(d.getTime())) return String(dateRaw);
+                return d.toISOString().split('T')[0].replace(/-/g, '.');
+            } catch (e) {
+                return String(dateRaw);
+            }
+        };
 
-        // Renderizza la struttura identica ad Astro
-        // Nota: React richiede un unico genitore, usiamo un div wrapper neutro
-        return h('div', {}, 
+        // Componente Preview Funzionale
+        const PostPreview = (props) => {
+            const entry = props.entry;
+            const data = entry.get('data');
             
-            // --- NAV ---
-            h('nav', {},
-                h('a', { href: '#', className: 'nav-btn' }, '← Taccuino'),
-                h('a', { href: '#', className: 'nav-btn' }, 'Home')
-            ),
+            // Fallbacks sicuri
+            const title = data.get('title') || 'Senza Titolo';
+            const description = data.get('description') || '';
+            const fileNumber = data.get('fileNumber') || 'UNK';
+            const dateRaw = data.get('date');
+            const bodyWidget = props.widgetFor('body');
 
-            // --- ARTICLE ---
-            h('article', { className: 'article-container' },
-                
-                // HEADER
-                h('header', { className: 'article-header' },
-                    h('span', { className: 'meta-data' }, 
-                        `FILE: ${fileNumber} // DATE: ${formatDate(dateRaw)}`
+            return h('div', {}, 
+                // NAV
+                h('nav', {},
+                    h('a', { href: '#', className: 'nav-btn' }, '← Taccuino'),
+                    h('a', { href: '#', className: 'nav-btn' }, 'Home')
+                ),
+                // ARTICLE
+                h('article', { className: 'article-container' },
+                    // HEADER
+                    h('header', { className: 'article-header' },
+                        h('span', { className: 'meta-data' }, `FILE: ${fileNumber} // DATE: ${formatDate(dateRaw)}`),
+                        h('h1', {}, title),
+                        h('p', { className: 'intro' }, description)
                     ),
-                    h('h1', {}, title),
-                    h('p', { className: 'intro' }, description)
-                ),
-
-                // CONTENT
-                h('div', { className: 'content' }, 
-                    bodyWidget,
-
-                    // "END OF TRANSMISSION"
-                    // Replichiamo gli stili inline del componente Astro originale
-                    h('p', { 
-                        style: {
-                            textAlign: 'center',
-                            marginTop: '50px',
-                            fontFamily: "'Press Start 2P'",
-                            color: '#FC60B7'
-                        }
-                    }, '*** END OF TRANSMISSION ***')
-                ),
-
-                // FOOTER
-                h('footer', { className: 'article-footer' },
-                    h('div', { className: 'prev-post' }), // Spacer vuoto
-                    
-                    // Mock del "Next Post" (Visualizzazione statica per preview)
-                    h('a', { href: '#', className: 'next-post' },
-                        h('span', { className: 'next-label' }, 'NEXT FILE →'),
-                        h('span', { className: 'next-title' }, '[ANTEPRIMA PROSSIMO POST]')
+                    // CONTENT
+                    h('div', { className: 'content' }, 
+                        bodyWidget,
+                        h('p', { 
+                            style: { textAlign: 'center', marginTop: '50px', fontFamily: "'Press Start 2P'", color: '#FC60B7' }
+                        }, '*** END OF TRANSMISSION ***')
+                    ),
+                    // FOOTER
+                    h('footer', { className: 'article-footer' },
+                        h('div', { className: 'prev-post' }),
+                        h('a', { href: '#', className: 'next-post' },
+                            h('span', { className: 'next-label' }, 'NEXT FILE →'),
+                            h('span', { className: 'next-title' }, '[ANTEPRIMA]')
+                        )
                     )
                 )
-            )
-        );
-    };
+            );
+        };
 
-    // 5. Registrazione Template
-    CMS.registerPreviewTemplate("taccuino", PostPreview);
+        // Registrazione Template
+        CMS.registerPreviewTemplate("taccuino", PostPreview);
+    }
   </script>
 
 </body>
