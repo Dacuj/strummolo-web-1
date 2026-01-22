@@ -4,25 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Content Manager</title>
-  <style>
-    /* Fix visivo per evitare glitch durante il caricamento */
-    html, body { height: 100%; margin: 0; background: #eff0f4; }
-    .loader { display: flex; height: 100vh; justify-content: center; align-items: center; font-family: sans-serif; color: #666; }
-  </style>
 </head>
 <body>
-  <script crossorigin src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
-
-  <script src="https://unpkg.com/netlify-cms-app@^2.15.7/dist/netlify-cms-app.js"></script>
-  
-  <script>
-    // Assicuriamoci che CMS sia definito
-    if (window.CMS) {
-      CMS.init();
-    } else {
-      console.error("Errore: Libreria CMS non caricata correttamente.");
-    }
-  </script>
+  <script src="https://unpkg.com/netlify-cms@^2.10.192/dist/netlify-cms.js"></script>
 </body>
 </html>
