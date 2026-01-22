@@ -9,7 +9,7 @@ tags:
 ---
 > Esplorazione visiva della degradazione digitale nel contesto urbano moderno. Quando i pixel muoiono, nascono nuove forme d'arte involontaria.
 
-Viviamo in un'epoca in cui la permanenza è un'illusione. I dati si corrompono, gli schermi si bruciano, e il codice decade. Questo fenomeno, che chiamo [Digital Decay](#), non è un errore del sistema, ma una sua caratteristica intrinseca.
+[Viviamo](/taccuino/digital-decay/) in un'epoca in cui la permanenza è un'illusione. I dati si corrompono, gli schermi si bruciano, e il codice decade. Questo fenomeno, che chiamo [Digital Decay](#), non è un errore del sistema, ma una sua caratteristica intrinseca.
 
 Come la ruggine sul metallo o il muschio sul cemento, i glitch digitali rappresentano il passare del tempo in un ambiente che è stato progettato per essere senza tempo.
 
