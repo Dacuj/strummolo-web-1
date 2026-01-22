@@ -1,4 +1,4 @@
-<!doctype html>
+<!-- <!doctype html>
 <html>
 <head>
   <meta charset="utf-8" />
@@ -48,6 +48,51 @@
     });
 
     // 3. COLLEGA L'ANTEPRIMA ALLA COLLEZIONE "TACCUINO"
+    CMS.registerPreviewTemplate("taccuino", PostPreview);
+  </script>
+</body>
+</html> -->
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strummolo Admin Panel</title>
+  <link rel="icon" href="https://cur.cursors-4u.net/nature/nat-10/nat926.cur">
+</head>
+<body>
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  
+  <script>
+    // 1. REGISTRA LO STILE CSS
+    CMS.registerPreviewStyle("/admin/preview.css");
+
+    // 2. CREA IL COMPONENTE REACT PER L'ANTEPRIMA
+    var PostPreview = createClass({
+      render: function() {
+        var entry = this.props.entry;
+        
+        var image = entry.getIn(['data', 'image']);
+        var title = entry.getIn(['data', 'title']);
+        var desc = entry.getIn(['data', 'description']);
+        var fileNum = entry.getIn(['data', 'fileNumber']) || 'FILE_XXX';
+        var date = entry.getIn(['data', 'date']);
+        
+        var dateStr = date ? date.toString().split(' ').slice(0, 4).join(' ') : 'OGGI';
+
+        return h('div', { className: 'article-container' },
+          h('header', { className: 'article-header' },
+            h('span', { className: 'meta-data' }, fileNum + ' // ' + dateStr),
+            h('h1', {}, title),
+            h('div', { className: 'intro' }, desc)
+          ),
+          h('div', { className: 'content' }, this.props.widgetFor('body'))
+        );
+      }
+    });
+
+    // 3. COLLEGA L'ANTEPRIMA
     CMS.registerPreviewTemplate("taccuino", PostPreview);
   </script>
 </body>
