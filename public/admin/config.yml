@@ -13,7 +13,7 @@ media_folder: "public/img"
 public_folder: "/img"
 
 # URL del tuo sito (opzionale, ma utile per le preview)
-site_url: https://iltuosito.netlify.app
+site_url: https://strummolo-web-1.pages.dev
 
 collections:
   - name: "taccuino" # Nome collezione
