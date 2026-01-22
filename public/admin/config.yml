@@ -5,7 +5,7 @@ backend:
   name: github
   repo: Dacuj/strummolo-web-1 # Es: mario/mio-blog-astro
   branch: main             # Il branch principale
-  bbase_url: https://quiet-pond-f51b.davidecucciardi.workers.dev
+  base_url: https://quiet-pond-f51b.davidecucciardi.workers.dev
   auth_endpoint: auth      # Lascia scritto solo "auth"
 
 # Dove salvare le immagini caricate dal CMS
