@@ -1,9 +1,8 @@
-/* --- 1. IMPORT FONTS (Essenziale per la preview) --- */
+/* --- 1. IMPORT FONTS --- */
+/* È fondamentale che questo stia alla riga 1 */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Arvo:wght@700&family=Permanent+Marker&family=Inter:wght@200;300;400;900&family=Courier+Prime&display=swap');
 
-/* --- 2. IL TUO CSS ASTRO ESATTO --- */
-
-/* --- RESET & BASIC --- */
+/* --- 2. RESET & SETUP IFRAME --- */
 * {
     margin: 0;
     padding: 0;
@@ -16,20 +15,30 @@
     color: #000;
 }
 
+/* Applicare lo sfondo anche a HTML previene flash bianchi nell'iframe */
+html {
+    background-color: #000;
+    height: 100%;
+    overflow-y: auto; /* Scorrimento fluido nell'iframe */
+}
+
 body {
     background-color: #000;
     color: #ccc; 
     min-height: 100vh;
-    width: 100%; /* Adattato per iframe */
-    overflow-x: hidden;
+    width: 100%;
+    overflow-x: hidden; /* Previene scroll orizzontale indesiderato */
     font-family: 'Courier Prime', monospace; 
     cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), auto;
     line-height: 1.6;
+    /* Opzionale: Smooth font rendering per Chrome/Mac */
+    -webkit-font-smoothing: antialiased; 
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* --- HEADER NAVIGAZIONE --- */
+/* --- 3. HEADER NAVIGAZIONE --- */
 nav {
-    position: fixed; /* Manteniamo fixed per realismo */
+    position: fixed; /* Funziona correttamente nell'iframe Decap */
     top: 0;
     left: 0;
     width: 100%;
@@ -38,11 +47,11 @@ nav {
     justify-content: space-between;
     z-index: 1000;
     background: linear-gradient(to bottom, #000 0%, rgba(0,0,0,0) 100%);
-    pointer-events: none;
+    pointer-events: none; /* Permette di cliccare attraverso la barra trasparente */
 }
 
 .nav-btn {
-    pointer-events: auto;
+    pointer-events: auto; /* Riabilita il click sui bottoni */
     text-decoration: none;
     font-family: 'Press Start 2P', cursive;
     font-size: 0.7rem;
@@ -52,6 +61,7 @@ nav {
     border: 1px solid #333;
     transition: all 0.2s;
     text-transform: uppercase;
+    display: inline-block;
 }
 
 .nav-btn:hover {
@@ -62,7 +72,7 @@ nav {
     transform: translate(-2px, -2px);
 }
 
-/* --- CONTAINER ARTICOLO --- */
+/* --- 4. CONTAINER ARTICOLO --- */
 .article-container {
     max-width: 800px;
     margin: 0 auto;
@@ -70,7 +80,7 @@ nav {
     position: relative;
 }
 
-/* --- HEADER ARTICOLO --- */
+/* --- 5. HEADER ARTICOLO --- */
 .article-header {
     margin-bottom: 60px;
     border-bottom: 1px solid #333;
@@ -107,7 +117,9 @@ h1 {
     padding-left: 20px;
 }
 
-/* --- CONTENUTO (Markdown Styles) --- */
+/* --- 6. CONTENUTO (Markdown Styles) --- */
+/* Targettiamo gli elementi generati da widgetFor('body') */
+
 .content p {
     margin-bottom: 30px;
     font-size: 1.1rem;
@@ -128,9 +140,10 @@ h1 {
 }
 
 /* Immagini nell'articolo */
+/* Importante per Decap: max-width 100% evita che immagini grandi rompano l'iframe */
 .content img {
     margin: 50px 0;
-    width: 100%;
+    max-width: 100%; 
     height: auto;
     border: 1px solid #fff; 
     filter: grayscale(100%) contrast(1.2); 
@@ -140,6 +153,17 @@ h1 {
 
 .content img:hover {
     filter: grayscale(0%) contrast(1);
+}
+
+/* Liste (Markdown standard) */
+.content ul, .content ol {
+    margin-bottom: 30px;
+    padding-left: 40px;
+    font-size: 1.1rem;
+}
+
+.content li {
+    margin-bottom: 10px;
 }
 
 /* Citazioni */
@@ -164,6 +188,7 @@ code {
     padding: 2px 5px;
     color: #FC60B7;
     font-size: 1.1em;
+    border-radius: 3px;
 }
 
 pre {
@@ -178,9 +203,10 @@ pre code {
     background: transparent;
     color: #ccc;
     padding: 0;
+    border-radius: 0;
 }
 
-/* --- FOOTER NAVIGAZIONE --- */
+/* --- 7. FOOTER NAVIGAZIONE --- */
 .article-footer {
     margin-top: 100px;
     padding-top: 50px;
@@ -193,6 +219,7 @@ pre code {
 .next-post {
     text-align: right;
     text-decoration: none;
+    display: block; /* Assicura area cliccabile */
 }
 
 .next-label {
@@ -217,10 +244,21 @@ pre code {
     text-decoration: underline;
 }
 
-/* Stile specifico inline che avevi nel footer HTML */
+/* Classe di supporto per End Of Transmission (se non si usano stili inline) */
 .end-transmission {
     text-align: center; 
     margin-top: 50px; 
     font-family: 'Press Start 2P'; 
     color: #FC60B7;
+}
+
+/* --- 8. RESPONSIVE PER IFRAME PICCOLI --- */
+@media (max-width: 768px) {
+    h1 { font-size: 2.5rem; }
+    .intro { font-size: 1.2rem; }
+    .article-container { padding: 100px 15px 50px 15px; }
+    blockquote { font-size: 1.5rem; }
+    
+    .article-footer { flex-direction: column; gap: 30px; align-items: flex-start; }
+    .next-post { text-align: left; }
 }
