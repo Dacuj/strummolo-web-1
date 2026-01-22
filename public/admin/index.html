@@ -1,12 +1,26 @@
 <!doctype html>
-<html>
+<html lang="it">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Strummolo Admin Panel</title>
-  <script src="https://unpkg.com/decap-cms@^3.1.2/dist/decap-cms.js"></script>
-  <link rel="icon" href="https://cur.cursors-4u.net/nature/nat-10/nat926.cur">
+  <title>Strummolo Admin</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/decap-cms@3.1.2/dist/decap-cms.min.js"></script>
+  
+  <style>
+    /* Un po' di stile per il messaggio di caricamento */
+    #loading-msg {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 50px;
+      color: #666;
+    }
+  </style>
 </head>
 <body>
-  </body>
+  <div id="loading-msg">
+    <h1>Caricamento CMS in corso...</h1>
+    <p>Se questo messaggio rimane fisso, apri la Console (F12) per vedere l'errore.</p>
+  </div>
+</body>
 </html>
