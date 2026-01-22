@@ -1,72 +1,3 @@
-<!-- <!doctype html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Strummolo Admin Panel</title>
-  <link rel="icon" href="https://cur.cursors-4u.net/nature/nat-10/nat926.cur">
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-</head>
-<body>
-
-  <script>
-    window.addEventListener("message", (event) => {
-      const data = event.data;
-      // Intercetta il token
-      if (typeof data === 'string' && data.startsWith("authorization:github:success:")) {
-        console.log("⚡ Token intercettato!");
-        const parts = data.split(":");
-        const token = parts[3]; 
-        if (token) {
-          const userObj = { backendName: "github", token: token };
-          localStorage.setItem("netlify-cms-user", JSON.stringify(userObj));
-          console.log("💾 Salvato. Reload...");
-          setTimeout(() => { window.location.reload(); }, 200);
-        }
-      }
-    });
-  </script>
-
-  <script src="https://unpkg.com/netlify-cms@^2.10.192/dist/netlify-cms.js"></script>
-  
-  <script>
-    // Questo script va eseguito dopo che netlify-cms è caricato
-    
-    // Registra CSS
-    CMS.registerPreviewStyle("/admin/preview.css");
-
-    // Definizioni per React vecchio stile (necessarie per createClass)
-    var createClass = React.createClass; 
-    var h = React.createElement;
-
-    // Il tuo componente Preview
-    var PostPreview = createClass({
-      render: function() {
-        var entry = this.props.entry;
-        var image = entry.getIn(['data', 'image']);
-        var title = entry.getIn(['data', 'title']);
-        var desc = entry.getIn(['data', 'description']);
-        var fileNum = entry.getIn(['data', 'fileNumber']) || 'FILE_XXX';
-        var date = entry.getIn(['data', 'date']);
-        var dateStr = date ? date.toString().split(' ').slice(0, 4).join(' ') : 'OGGI';
-
-        return h('div', { className: 'article-container' },
-          h('header', { className: 'article-header' },
-            h('span', { className: 'meta-data' }, fileNum + ' // ' + dateStr),
-            h('h1', {}, title),
-            h('div', { className: 'intro' }, desc)
-          ),
-          h('div', { className: 'content' }, this.props.widgetFor('body'))
-        );
-      }
-    });
-
-    CMS.registerPreviewTemplate("taccuino", PostPreview);
-  </script>
-
-</body>
-</html> -->
-
 <!doctype html>
 <html>
 <head>
@@ -98,28 +29,29 @@
   <script src="https://unpkg.com/netlify-cms@^2.10.192/dist/netlify-cms.js"></script>
   
   <script>
-    // Carica il CSS che abbiamo appena creato
+    // Carica il CSS
     CMS.registerPreviewStyle("/admin/preview.css");
 
+    // Alias per React
     var createClass = React.createClass; 
     var h = React.createElement;
 
+    // --- COMPONENTE PREVIEW ---
     var PostPreview = createClass({
       render: function() {
         var entry = this.props.entry;
         
         // Recupero Dati
-        var image = entry.getIn(['data', 'image']);
         var title = entry.getIn(['data', 'title']);
         var desc = entry.getIn(['data', 'description']);
         var fileNum = entry.getIn(['data', 'fileNumber']) || 'UNK';
         var date = entry.getIn(['data', 'date']);
         
-        // Formattazione Data stile YYYY.MM.DD
-        var dateStr = 'OGGI';
+        // Formattazione Data (Simulazione formatDate di Astro: YYYY.MM.DD)
+        var dateStr = 'YYYY.MM.DD';
         if (date) {
-            // Il CMS passa la data come oggetto o stringa, proviamo a formattarla
             try {
+                // Se è una stringa, convertila, se è oggetto data, usa toISOString
                 var d = new Date(date);
                 dateStr = d.toISOString().split('T')[0].replace(/-/g, '.');
             } catch(e) {
@@ -127,31 +59,44 @@
             }
         }
 
-        // COSTRUZIONE STRUTTURA HTML UGUALE AD ASTRO
+        // --- RENDER DOM ---
+        // Usiamo un <div> wrapper perché React < 16 vuole un solo elemento radice
         return h('div', {}, 
             
-            // 1. NAV BAR (Finta)
+            // 1. NAV (<nav> fuori dall'article)
             h('nav', {},
                 h('span', { className: 'nav-btn' }, '← Taccuino'),
                 h('span', { className: 'nav-btn' }, 'Home')
             ),
 
-            // 2. ARTICLE CONTAINER
+            // 2. ARTICLE (<article class="article-container">)
             h('article', { className: 'article-container' },
                 
-                // HEADER
+                // HEADER (<header class="article-header">)
                 h('header', { className: 'article-header' },
                     h('span', { className: 'meta-data' }, 'FILE: ' + fileNum + ' // DATE: ' + dateStr),
                     h('h1', {}, title),
-                    h('div', { className: 'intro' }, desc)
+                    h('p', { className: 'intro' }, desc) // Nota: Astro usa <p class="intro">
                 ),
 
-                // CONTENT BODY
+                // CONTENT (<div class="content">)
                 h('div', { className: 'content' }, 
-                    this.props.widgetFor('body'),
+                    this.props.widgetFor('body'), // Il contenuto Markdown
                     
-                    // Footer "End Transmission"
+                    // END TRANSMISSION (<p style="...">)
+                    // Uso una classe definita nel CSS per pulizia
                     h('p', { className: 'end-transmission' }, '*** END OF TRANSMISSION ***')
+                ),
+
+                // FOOTER (<footer class="article-footer">)
+                h('footer', { className: 'article-footer' },
+                    h('div', { className: 'prev-post' }), // Div vuoto come in Astro
+                    
+                    // Next Post (Finto per preview grafica)
+                    h('a', { className: 'next-post', href: '#' },
+                        h('span', { className: 'next-label' }, 'NEXT FILE →'),
+                        h('span', { className: 'next-title' }, '[PROSSIMO ARTICOLO]')
+                    )
                 )
             )
         );
