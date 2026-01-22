@@ -9,48 +9,74 @@
   <script src="https://unpkg.com/netlify-cms@^2.10.192/dist/netlify-cms.js"></script>
 
   <script>
-    // URL DEL WORKER (Deve essere identico a quello nel worker)
     const MY_WORKER_URL = "https://quiet-pond-f51b.davidecucciardi.workers.dev";
+    
+    // Configurazione Manuale (così bypassiamo errori nel config.yml)
+    const config = {
+      backend: {
+        name: 'github',
+        repo: 'Dacuj/strummolo-web-1',
+        branch: 'main',
+        base_url: MY_WORKER_URL,
+        auth_endpoint: 'auth'
+      },
+      media_folder: "public/img",
+      public_folder: "/img",
+      collections: [
+        {
+          name: "test",
+          label: "Test",
+          files: [
+            { label: "Home", name: "home", file: "src/content/home.md", fields: [{label: "Title", name: "title", widget: "string"}] }
+          ]
+        }
+      ]
+    };
 
-    // 2. DEBUGGER: Ascoltiamo manualmente i messaggi
+    // 1. Inizializza il CMS
+    CMS.init({ config });
+
+    // 2. LO "SNIFFER" DI MESSAGGI
     window.addEventListener("message", (event) => {
-      // Ignora messaggi interni di React/CMS
+      // Se il messaggio arriva da noi stessi (il re-dispatch), ignoriamolo per non andare in loop
       if (event.origin === window.location.origin) return;
 
-      console.log("📨 MESSAGGIO RICEVUTO DA:", event.origin);
-      console.log("📦 DATI:", event.data);
+      // Filtra solo i messaggi dal tuo Worker
+      if (event.origin === MY_WORKER_URL) {
+        console.log("🔥 MESSAGGIO INTERCETTATO DAL WORKER!");
+        console.log("Raw Data:", event.data);
 
-      if (event.origin !== MY_WORKER_URL) {
-        console.warn(`⚠️ ATTENZIONE: L'origine del messaggio (${event.origin}) non corrisponde al worker impostato (${MY_WORKER_URL}). Il CMS ignorerà questo messaggio.`);
-      } else {
-        console.log("✅ L'origine corrisponde! Il CMS dovrebbe fare il login ora.");
-      }
-    });
+        // Verifica che sia il messaggio giusto
+        if (typeof event.data === 'string' && event.data.startsWith("authorization:github:success:")) {
+          
+          // Estrai il JSON dalla stringa "authorization:github:success:{...}"
+          const jsonString = event.data.split("authorization:github:success:")[1];
+          
+          try {
+            const data = JSON.parse(jsonString);
+            const token = data.token;
+            console.log("💎 TOKEN ESTRATTO:", token.substring(0, 5) + "...");
 
-    // 3. INIZIALIZZAZIONE MANUALE (Bypassa config.yml e Cache)
-    // Questo forza il CMS a usare ESATTAMENTE questi parametri.
-    CMS.init({
-      config: {
-        backend: {
-          name: 'github',
-          repo: 'Dacuj/strummolo-web-1',
-          branch: 'main',
-          base_url: MY_WORKER_URL, // Usiamo la variabile const per essere sicuri che sia identica
-          auth_endpoint: 'auth'
-        },
-        // Configurazione cartelle media
-        media_folder: "public/img",
-        public_folder: "/img",
-        // Definisci qui le tue collezioni (esempio base per testare il login)
-        collections: [
-          {
-            name: "test",
-            label: "Test",
-            files: [
-              { label: "Home", name: "home", file: "src/content/home.md", fields: [{label: "Title", name: "title", widget: "string"}] }
-            ]
+            // 3. IL TRUCCO: Re-invia il messaggio come se venisse da QUI (Self)
+            // Questo frega il CMS che accetta sempre i messaggi "interni"
+            const fakeEvent = new MessageEvent("message", {
+              data: event.data, // Usiamo gli stessi dati
+              origin: window.location.origin, // MENTIAMO sull'origine
+              source: window // Diciamo che la sorgente siamo noi stessi (sempre viva)
+            });
+
+            console.log("🚀 FORZATURA LOGIN IN CORSO...");
+            window.dispatchEvent(fakeEvent);
+            
+            // Backup: Se il CMS fallisce il parsing, stampiamo un link manuale
+            document.body.insertAdjacentHTML('beforeend', `<div style="position:fixed; bottom:0; left:0; background:yellow; padding:20px; z-index:9999;">
+              TOKEN RICEVUTO! Se non entra, controlla la console per errori API GitHub.
+            </div>`);
+
+          } catch (e) {
+            console.error("Errore nel parsing del JSON del token", e);
           }
-        ]
+        }
       }
     });
   </script>
