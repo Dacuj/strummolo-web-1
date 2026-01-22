@@ -3,9 +3,9 @@
 #   branch: main # Assicurati che il tuo branch principale su GitHub si chiami 'main' o 'master'
 backend:
   name: github
-  repo: TUO_USER/TUA_REPO  # Es: mario/mio-blog-astro
+  repo: Dacuj/strummolo-web-1 # Es: mario/mio-blog-astro
   branch: main             # Il branch principale
-  base_url: https://strummolo-web-1.pages.dev # L'URL del worker (SENZA /callback e SENZA slash finale)
+  base_url: https://quiet-pond-f51b.davidecucciardi.workers.dev # L'URL del worker (SENZA /callback e SENZA slash finale)
   auth_endpoint: auth      # Lascia scritto solo "auth"
 
 # Dove salvare le immagini caricate dal CMS
