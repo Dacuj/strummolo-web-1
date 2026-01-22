@@ -3,54 +3,6 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Content Manager</title>
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-</head>
-<body>
-  <script>
-    window.addEventListener("message", (event) => {
-      const data = event.data;
-      
-      // Controllo se è il messaggio giusto (Stringa, non JSON)
-      if (typeof data === 'string' && data.startsWith("authorization:github:success:")) {
-        console.log("⚡ Token ricevuto dal Worker!");
-
-        // 1. Estrai il token grezzo (rimuovi il prefisso)
-        // La stringa è: authorization:github:success:gho_XXXXX...
-        const parts = data.split(":");
-        const token = parts[3]; // Prende la parte dopo il terzo ":"
-
-        if (token) {
-          // 2. Costruisci l'oggetto utente per Decap CMS
-          // NON fare JSON.parse(token) qui, il token è già una stringa!
-          const userObj = {
-            backendName: "github",
-            token: token
-          };
-
-          // 3. Salva nel LocalStorage
-          localStorage.setItem("netlify-cms-user", JSON.stringify(userObj));
-          
-          console.log("💾 Utente salvato. Ricarico...");
-
-          // 4. Ricarica la pagina per entrare
-          setTimeout(() => {
-             window.location.reload();
-          }, 500);
-        }
-      }
-    });
-  </script>
-
-  <script src="https://unpkg.com/netlify-cms@^2.10.192/dist/netlify-cms.js"></script>
-</body>
-</html> -->
-
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Strummolo Admin Panel</title>
   <link rel="icon" href="https://cur.cursors-4u.net/nature/nat-10/nat926.cur">
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
@@ -105,6 +57,103 @@
             h('div', { className: 'intro' }, desc)
           ),
           h('div', { className: 'content' }, this.props.widgetFor('body'))
+        );
+      }
+    });
+
+    CMS.registerPreviewTemplate("taccuino", PostPreview);
+  </script>
+
+</body>
+</html> -->
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strummolo Admin Panel</title>
+  <link rel="icon" href="https://cur.cursors-4u.net/nature/nat-10/nat926.cur">
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+<body>
+
+  <script>
+    window.addEventListener("message", (event) => {
+      const data = event.data;
+      if (typeof data === 'string' && data.startsWith("authorization:github:success:")) {
+        console.log("⚡ Token intercettato!");
+        const parts = data.split(":");
+        const token = parts[3]; 
+        if (token) {
+          const userObj = { backendName: "github", token: token };
+          localStorage.setItem("netlify-cms-user", JSON.stringify(userObj));
+          console.log("💾 Salvato. Reload...");
+          setTimeout(() => { window.location.reload(); }, 200);
+        }
+      }
+    });
+  </script>
+
+  <script src="https://unpkg.com/netlify-cms@^2.10.192/dist/netlify-cms.js"></script>
+  
+  <script>
+    // Carica il CSS che abbiamo appena creato
+    CMS.registerPreviewStyle("/admin/preview.css");
+
+    var createClass = React.createClass; 
+    var h = React.createElement;
+
+    var PostPreview = createClass({
+      render: function() {
+        var entry = this.props.entry;
+        
+        // Recupero Dati
+        var image = entry.getIn(['data', 'image']);
+        var title = entry.getIn(['data', 'title']);
+        var desc = entry.getIn(['data', 'description']);
+        var fileNum = entry.getIn(['data', 'fileNumber']) || 'UNK';
+        var date = entry.getIn(['data', 'date']);
+        
+        // Formattazione Data stile YYYY.MM.DD
+        var dateStr = 'OGGI';
+        if (date) {
+            // Il CMS passa la data come oggetto o stringa, proviamo a formattarla
+            try {
+                var d = new Date(date);
+                dateStr = d.toISOString().split('T')[0].replace(/-/g, '.');
+            } catch(e) {
+                dateStr = date.toString();
+            }
+        }
+
+        // COSTRUZIONE STRUTTURA HTML UGUALE AD ASTRO
+        return h('div', {}, 
+            
+            // 1. NAV BAR (Finta)
+            h('nav', {},
+                h('span', { className: 'nav-btn' }, '← Taccuino'),
+                h('span', { className: 'nav-btn' }, 'Home')
+            ),
+
+            // 2. ARTICLE CONTAINER
+            h('article', { className: 'article-container' },
+                
+                // HEADER
+                h('header', { className: 'article-header' },
+                    h('span', { className: 'meta-data' }, 'FILE: ' + fileNum + ' // DATE: ' + dateStr),
+                    h('h1', {}, title),
+                    h('div', { className: 'intro' }, desc)
+                ),
+
+                // CONTENT BODY
+                h('div', { className: 'content' }, 
+                    this.props.widgetFor('body'),
+                    
+                    // Footer "End Transmission"
+                    h('p', { className: 'end-transmission' }, '*** END OF TRANSMISSION ***')
+                )
+            )
         );
       }
     });
