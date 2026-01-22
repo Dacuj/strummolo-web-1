@@ -3,10 +3,10 @@
 #   branch: main # Assicurati che il tuo branch principale su GitHub si chiami 'main' o 'master'
 backend:
   name: github
-  repo: Dacuj/strummolo-web-1 # Es: mario/mio-blog-astro
-  branch: main             # Il branch principale
+  repo: Dacuj/strummolo-web-1 
+  branch: main             
   base_url: https://quiet-pond-f51b.davidecucciardi.workers.dev
-  auth_endpoint: auth      # Lascia scritto solo "auth"
+  auth_endpoint: auth      
 
 # Dove salvare le immagini caricate dal CMS
 media_folder: "public/img"

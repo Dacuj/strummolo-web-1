@@ -4,81 +4,44 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Content Manager</title>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
-  <script src="https://unpkg.com/netlify-cms@^2.10.192/dist/netlify-cms.js"></script>
-
   <script>
-    const MY_WORKER_URL = "https://quiet-pond-f51b.davidecucciardi.workers.dev";
-    
-    // Configurazione Manuale (così bypassiamo errori nel config.yml)
-    const config = {
-      backend: {
-        name: 'github',
-        repo: 'Dacuj/strummolo-web-1',
-        branch: 'main',
-        base_url: MY_WORKER_URL,
-        auth_endpoint: 'auth'
-      },
-      media_folder: "public/img",
-      public_folder: "/img",
-      collections: [
-        {
-          name: "test",
-          label: "Test",
-          files: [
-            { label: "Home", name: "home", file: "src/content/home.md", fields: [{label: "Title", name: "title", widget: "string"}] }
-          ]
-        }
-      ]
-    };
-
-    // 1. Inizializza il CMS
-    CMS.init({ config });
-
-    // 2. LO "SNIFFER" DI MESSAGGI
     window.addEventListener("message", (event) => {
-      // Se il messaggio arriva da noi stessi (il re-dispatch), ignoriamolo per non andare in loop
-      if (event.origin === window.location.origin) return;
+      const data = event.data;
+      
+      // Controllo se è il messaggio giusto (Stringa, non JSON)
+      if (typeof data === 'string' && data.startsWith("authorization:github:success:")) {
+        console.log("⚡ Token ricevuto dal Worker!");
 
-      // Filtra solo i messaggi dal tuo Worker
-      if (event.origin === MY_WORKER_URL) {
-        console.log("🔥 MESSAGGIO INTERCETTATO DAL WORKER!");
-        console.log("Raw Data:", event.data);
+        // 1. Estrai il token grezzo (rimuovi il prefisso)
+        // La stringa è: authorization:github:success:gho_XXXXX...
+        const parts = data.split(":");
+        const token = parts[3]; // Prende la parte dopo il terzo ":"
 
-        // Verifica che sia il messaggio giusto
-        if (typeof event.data === 'string' && event.data.startsWith("authorization:github:success:")) {
+        if (token) {
+          // 2. Costruisci l'oggetto utente per Decap CMS
+          // NON fare JSON.parse(token) qui, il token è già una stringa!
+          const userObj = {
+            backendName: "github",
+            token: token
+          };
+
+          // 3. Salva nel LocalStorage
+          localStorage.setItem("netlify-cms-user", JSON.stringify(userObj));
           
-          // Estrai il JSON dalla stringa "authorization:github:success:{...}"
-          const jsonString = event.data.split("authorization:github:success:")[1];
-          
-          try {
-            const data = JSON.parse(jsonString);
-            const token = data.token;
-            console.log("💎 TOKEN ESTRATTO:", token.substring(0, 5) + "...");
+          console.log("💾 Utente salvato. Ricarico...");
 
-            // 3. IL TRUCCO: Re-invia il messaggio come se venisse da QUI (Self)
-            // Questo frega il CMS che accetta sempre i messaggi "interni"
-            const fakeEvent = new MessageEvent("message", {
-              data: event.data, // Usiamo gli stessi dati
-              origin: window.location.origin, // MENTIAMO sull'origine
-              source: window // Diciamo che la sorgente siamo noi stessi (sempre viva)
-            });
-
-            console.log("🚀 FORZATURA LOGIN IN CORSO...");
-            window.dispatchEvent(fakeEvent);
-            
-            // Backup: Se il CMS fallisce il parsing, stampiamo un link manuale
-            document.body.insertAdjacentHTML('beforeend', `<div style="position:fixed; bottom:0; left:0; background:yellow; padding:20px; z-index:9999;">
-              TOKEN RICEVUTO! Se non entra, controlla la console per errori API GitHub.
-            </div>`);
-
-          } catch (e) {
-            console.error("Errore nel parsing del JSON del token", e);
-          }
+          // 4. Ricarica la pagina per entrare
+          setTimeout(() => {
+             window.location.reload();
+          }, 500);
         }
       }
     });
   </script>
+
+  <script src="https://unpkg.com/netlify-cms@^2.10.192/dist/netlify-cms.js"></script>
 </body>
 </html>
