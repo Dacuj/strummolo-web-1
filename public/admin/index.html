@@ -52,9 +52,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Strummolo Admin Panel</title>
-  
   <link rel="icon" href="https://cur.cursors-4u.net/nature/nat-10/nat926.cur">
-  
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
@@ -62,71 +60,55 @@
   <script>
     window.addEventListener("message", (event) => {
       const data = event.data;
-      
-      // Intercetta il messaggio del Worker
+      // Intercetta il token
       if (typeof data === 'string' && data.startsWith("authorization:github:success:")) {
-        console.log("⚡ Token ricevuto! Elaborazione preview...");
-
+        console.log("⚡ Token intercettato!");
         const parts = data.split(":");
         const token = parts[3]; 
-
         if (token) {
-          const userObj = {
-            backendName: "github",
-            token: token
-          };
-
+          const userObj = { backendName: "github", token: token };
           localStorage.setItem("netlify-cms-user", JSON.stringify(userObj));
-          
-          console.log("💾 Login salvato. Ricarico la pagina...");
+          console.log("💾 Salvato. Reload...");
           setTimeout(() => { window.location.reload(); }, 200);
         }
       }
     });
   </script>
 
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script src="https://unpkg.com/netlify-cms@^2.10.192/dist/netlify-cms.js"></script>
   
   <script>
-    // Assicuriamoci che 'h' e 'createClass' siano disponibili globalmente
-    // Decap CMS li espone, ma per sicurezza li definiamo se mancano
-    var CMS = window.CMS;
-    var h = CMS.h || window.h || window.React.createElement;
-    var createClass = CMS.createClass || window.createClass || window.React.createClass;
-
-    // A. REGISTRA LO STILE CSS
-    // Assicurati che il file esista in: public/admin/preview.css
+    // Questo script va eseguito dopo che netlify-cms è caricato
+    
+    // Registra CSS
     CMS.registerPreviewStyle("/admin/preview.css");
 
-    // B. CREA IL COMPONENTE REACT PER L'ANTEPRIMA
+    // Definizioni per React vecchio stile (necessarie per createClass)
+    var createClass = React.createClass; 
+    var h = React.createElement;
+
+    // Il tuo componente Preview
     var PostPreview = createClass({
       render: function() {
         var entry = this.props.entry;
-        
         var image = entry.getIn(['data', 'image']);
         var title = entry.getIn(['data', 'title']);
         var desc = entry.getIn(['data', 'description']);
         var fileNum = entry.getIn(['data', 'fileNumber']) || 'FILE_XXX';
         var date = entry.getIn(['data', 'date']);
-        
         var dateStr = date ? date.toString().split(' ').slice(0, 4).join(' ') : 'OGGI';
 
         return h('div', { className: 'article-container' },
-          
-          // Header
           h('header', { className: 'article-header' },
             h('span', { className: 'meta-data' }, fileNum + ' // ' + dateStr),
             h('h1', {}, title),
             h('div', { className: 'intro' }, desc)
           ),
-
-          // Corpo dell'articolo
           h('div', { className: 'content' }, this.props.widgetFor('body'))
         );
       }
     });
 
-    // C. COLLEGA L'ANTEPRIMA ALLA COLLEZIONE "TACCUINO"
     CMS.registerPreviewTemplate("taccuino", PostPreview);
   </script>
 
