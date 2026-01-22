@@ -7,5 +7,52 @@
 </head>
 <body>
   <script src="https://unpkg.com/netlify-cms@^2.10.192/dist/netlify-cms.js"></script>
+
+  <script>
+    // URL DEL WORKER (Deve essere identico a quello nel worker)
+    const MY_WORKER_URL = "https://quiet-pond-f51b.davidecucciardi.workers.dev";
+
+    // 2. DEBUGGER: Ascoltiamo manualmente i messaggi
+    window.addEventListener("message", (event) => {
+      // Ignora messaggi interni di React/CMS
+      if (event.origin === window.location.origin) return;
+
+      console.log("📨 MESSAGGIO RICEVUTO DA:", event.origin);
+      console.log("📦 DATI:", event.data);
+
+      if (event.origin !== MY_WORKER_URL) {
+        console.warn(`⚠️ ATTENZIONE: L'origine del messaggio (${event.origin}) non corrisponde al worker impostato (${MY_WORKER_URL}). Il CMS ignorerà questo messaggio.`);
+      } else {
+        console.log("✅ L'origine corrisponde! Il CMS dovrebbe fare il login ora.");
+      }
+    });
+
+    // 3. INIZIALIZZAZIONE MANUALE (Bypassa config.yml e Cache)
+    // Questo forza il CMS a usare ESATTAMENTE questi parametri.
+    CMS.init({
+      config: {
+        backend: {
+          name: 'github',
+          repo: 'Dacuj/strummolo-web-1',
+          branch: 'main',
+          base_url: MY_WORKER_URL, // Usiamo la variabile const per essere sicuri che sia identica
+          auth_endpoint: 'auth'
+        },
+        // Configurazione cartelle media
+        media_folder: "public/img",
+        public_folder: "/img",
+        // Definisci qui le tue collezioni (esempio base per testare il login)
+        collections: [
+          {
+            name: "test",
+            label: "Test",
+            files: [
+              { label: "Home", name: "home", file: "src/content/home.md", fields: [{label: "Title", name: "title", widget: "string"}] }
+            ]
+          }
+        ]
+      }
+    });
+  </script>
 </body>
 </html>
