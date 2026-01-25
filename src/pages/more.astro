@@ -1,0 +1,346 @@
+---
+/* src/pages/more.astro 
+  Sturmmolo Museum Exhibition
+*/
+
+// Dati Esposizione (Solo immagini e nomi, niente prezzi)
+const exhibits = [
+  {
+    id: 1,
+    name: "T-SHIRT 'HATE NAPOLI'",
+    collection: "ARCHIVE 01",
+    image: "/img/HAVEANEROTIC.png", 
+  },
+  {
+    id: 2,
+    name: "DENIM PUNK JEANS",
+    collection: "ARCHIVE 01",
+    image: "/img/3.png",
+  },
+  {
+    id: 3,
+    name: "ADESIVI PACK",
+    collection: "EXTRAS",
+    image: "/img/HAVEANEROTIC.png",
+  },
+  {
+    id: 4,
+    name: "FELPA OVERSIZE",
+    collection: "WINTER 24",
+    image: "/images/merch/hoodie.png",
+  }
+];
+---
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sturmmolo | MUSEUM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Inter:wght@900&family=Courier+Prime&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav>
+        <a href="/" class="nav-btn">← Home</a>
+        <div class="nav-brand">MUSEUM</div>
+    </nav>
+
+    <main class="museum-container">
+        
+        <header class="museum-header">
+            <h1>OGGETTI<br><span style="color: #FC60B7;">SMARRITI</span></h1>
+            <p class="intro">
+                Frammenti fisici del progetto Sturmmolo. <br>
+                Esposizione permanente.
+            </p>
+        </header>
+
+        <!-- GRIGLIA ESPOSITIVA -->
+        <div class="exhibition-grid">
+            {exhibits.map((item) => (
+                <div class="exhibit-item">
+                    <div class="image-wrapper">
+                        {/* NOTA: Assicurati che le immagini in /public/images/merch/ siano PNG trasparenti.
+                           L'onerror serve solo se l'immagine non viene trovata.
+                        */}
+                        <img 
+                            src={item.image} 
+                            alt={item.name} 
+                            loading="lazy"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
+                        />
+                        <div class="placeholder-img" style="display:none;">[MISSING ARTIFACT]</div>
+                    </div>
+                    
+                    <div class="placard">
+                        <span class="item-collection">{item.collection}</span>
+                        <span class="item-name">{item.name}</span>
+                    </div>
+                </div>
+            ))}
+        </div>
+
+        <div class="end-transmission">
+            *** END OF EXHIBITION ***
+        </div>
+
+    </main>
+
+</body>
+</html>
+
+<style is:global>
+    /* --- RESET & BASIC STYLES --- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    ::selection { background: #FC60B7; color: #000; }
+
+    body, html {
+        background-color: #000;
+        color: #ccc; 
+        min-height: 100vh;
+        width: 100vw;
+        overflow-x: hidden;
+        font-family: 'Courier Prime', monospace; 
+        /* Cursore personalizzato come da tua richiesta */
+        cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), auto;
+    }
+
+    /* --- NAVIGAZIONE --- */
+    nav {
+        position: fixed;
+        top: 0; left: 0; width: 100%;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1000;
+        background: linear-gradient(to bottom, #000 0%, rgba(0,0,0,0) 100%);
+        pointer-events: none;
+    }
+
+    .nav-btn {
+        pointer-events: auto;
+        text-decoration: none;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.7rem;
+        color: #fff;
+        background: #000;
+        padding: 10px 15px;
+        border: 1px solid #333;
+        transition: all 0.2s;
+        text-transform: uppercase;
+    }
+
+    .nav-btn:hover {
+        background: #fff; color: #000; border-color: #fff;
+        box-shadow: 4px 4px 0px #FC60B7;
+        transform: translate(-2px, -2px);
+    }
+
+    .nav-brand {
+        font-family: 'VT323', monospace;
+        font-size: 1.5rem;
+        color: #333;
+        letter-spacing: 2px;
+    }
+
+    /* --- LAYOUT MUSEO --- */
+    .museum-container {
+        max-width: 900px; 
+        margin: 0 auto;
+        padding: 120px 20px 100px 20px;
+    }
+
+    .museum-header {
+        text-align: center;
+        margin-bottom: 100px;
+        border-bottom: 1px solid #111;
+        padding-bottom: 40px;
+    }
+
+    h1 {
+        font-family: 'Inter', sans-serif;
+        font-weight: 900;
+        font-size: 3.5rem;
+        line-height: 0.9;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: -2px;
+        margin-bottom: 20px;
+    }
+
+    .intro {
+        font-family: 'VT323', monospace;
+        font-size: 1.2rem;
+        color: #666;
+        text-transform: uppercase;
+    }
+
+    /* --- GRIGLIA ESPOSITIVA (2 PER RIGA) --- */
+    .exhibition-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Due colonne esatte */
+        gap: 100px 40px; /* Molto spazio verticale tra le righe */
+        align-items: end; 
+    }
+
+    .exhibit-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
+
+    /* Contenitore Immagine */
+    .image-wrapper {
+        width: 100%;
+        min-height: 300px; /* Spazio riservato anche se manca img */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        transition: transform 0.3s ease;
+        position: relative;
+    }
+
+    /* Linee guida "Museo" agli angoli dell'immagine (opzionale, stile tecnico) */
+    .image-wrapper::before, .image-wrapper::after {
+        content: '';
+        position: absolute;
+        width: 20px; height: 20px;
+        border-color: #333;
+        border-style: solid;
+        transition: all 0.3s;
+        opacity: 0;
+    }
+    .image-wrapper::before { top: 0; left: 0; border-width: 1px 0 0 1px; }
+    .image-wrapper::after { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
+
+    .exhibit-item:hover .image-wrapper::before, 
+    .exhibit-item:hover .image-wrapper::after {
+        opacity: 1;
+        width: 100%; height: 100%; /* Si espandono a formare un box */
+    }
+
+    .exhibit-item img {
+        max-width: 100%;
+        max-height: 350px;
+        object-fit: contain;
+        /* Default: Bianco e Nero sporco */
+        filter: grayscale(100%) contrast(1.2) brightness(0.9); 
+        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        z-index: 2;
+    }
+
+    .placeholder-img {
+        color: #333;
+        font-family: 'VT323', monospace;
+        border: 1px dashed #333;
+        padding: 20px;
+    }
+
+    /* --- EFFETTI HOVER --- */
+    .exhibit-item:hover img {
+        filter: grayscale(0%) contrast(1) brightness(1);
+        transform: scale(1.05);
+        /* Effetto "Glow" punk dietro l'immagine */
+        drop-shadow: 0 0 30px rgba(252, 96, 183, 0.15); 
+    }
+
+    /* --- DIDASCALIA (PLACARD) --- */
+    .placard {
+        margin-top: 25px;
+        text-align: center;
+        border-top: 1px solid #222;
+        padding-top: 10px;
+        width: 60%;
+    }
+
+    .item-collection {
+        display: block;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.5rem;
+        color: #444;
+        margin-bottom: 5px;
+        letter-spacing: 1px;
+    }
+
+    .item-name {
+        display: block;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 0.8rem;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Colore accento sull'hover */
+    .exhibit-item:hover .item-name {
+        color: #FC60B7;
+    }
+    .exhibit-item:hover .placard {
+        border-top-color: #FC60B7;
+    }
+
+    .end-transmission {
+        text-align: center; 
+        margin-top: 150px; 
+        font-family: 'Press Start 2P'; 
+        color: #FC60B7; 
+        font-size: 0.8rem;
+        opacity: 0.7;
+        animation: blink 2s infinite;
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 0.2; }
+    }
+
+    /* --- MOBILE --- */
+    @media (max-width: 768px) {
+        .museum-container {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .exhibition-grid {
+            /* MANTENIAMO 2 COLONNE SU MOBILE */
+            grid-template-columns: 1fr 1fr; 
+            /* Riduciamo il gap per farci stare tutto */
+            gap: 50px 10px; 
+        }
+        
+        h1 { font-size: 2.2rem; }
+        
+        .image-wrapper {
+            /* Riduciamo min-height su mobile per non avere troppo spazio vuoto */
+            min-height: 180px; 
+            padding: 10px;
+        }
+
+        .exhibit-item img {
+            max-height: 200px; /* Immagini più piccole */
+            filter: grayscale(0%); /* Colore sempre attivo su mobile */
+        }
+
+        .placard {
+            width: 95%; /* Allarghiamo la didascalia visto che la colonna è stretta */
+            margin-top: 15px;
+        }
+
+        .item-name {
+            font-size: 0.65rem; /* Testo leggermente più piccolo per evitare a capo eccessivi */
+        }
+
+        .image-wrapper::before, .image-wrapper::after {
+            display: none; /* Rimuovi bordi animati su mobile */
+        }
+    }
+</style>
