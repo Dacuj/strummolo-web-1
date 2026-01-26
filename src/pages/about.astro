@@ -435,7 +435,6 @@
             font-family: 'Courier Prime', 'Courier New', monospace;
             overflow-x: hidden;
             overflow-y: auto; /* Assicura che lo scroll verticale sia attivo */
-            /* RIMOSSO: height: 100vh; -> Questo bloccava lo scroll */
             min-height: 100%;
         }
 
@@ -541,7 +540,7 @@
         /* --- SCROLL SPACER --- */
         /* Questo div invisibile dà al browser lo spazio fisico per scorrere */
         #scroll-spacer {
-            height: 8000px; /* Molto lungo per accomodare intro + loop */
+            height: 15000px; /* AUMENTATO: Molto più lungo per accomodare l'intro più lenta */
             width: 1px;
             pointer-events: none;
             visibility: hidden;
@@ -581,7 +580,8 @@
         /**
          * CONFIGURAZIONE
          */
-        const INTRO_HEIGHT = 2500; // Pixel di scroll dedicati all'intro dello strummolo
+        // AUMENTATO: Da 2500 a 6000 per rendere l'intro molto più lenta e leggibile
+        const INTRO_HEIGHT = 6000; 
         const LOOP_BUFFER = 100;   // Buffer per l'infinite scroll
         
         const canvas = document.getElementById('mainCanvas');
@@ -616,8 +616,8 @@
             const currentX = width / 2;
 
             // Oscillazione (Wobble)
-            // Aumenta la frequenza con lo scroll
-            const wobbleTime = Date.now() * 0.005 + (scrollProgress * 0.05); 
+            // Aumenta la frequenza con lo scroll (RIDOTTO il moltiplicatore per compensare l'altezza maggiore)
+            const wobbleTime = Date.now() * 0.005 + (scrollProgress * 0.02); 
             const wobbleX = Math.sin(wobbleTime) * (10 + progress01 * 20);
             
             // Disegno Corpo Strummolo (Stile Sketchy)
@@ -625,7 +625,8 @@
             ctx.translate(currentX + wobbleX, currentY);
             
             // Rotazione basata sullo scroll (gira mentre scende)
-            const rotation = scrollProgress * 0.1; 
+            // RIDOTTO: 0.05 invece di 0.1 per evitare che giri troppo veloce ora che lo scroll è più lungo
+            const rotation = scrollProgress * 0.05; 
             ctx.rotate(rotation * Math.PI / 180);
 
             ctx.strokeStyle = `rgba(240, 240, 240, ${1 - progress01})`; // Fade out alla fine
@@ -663,24 +664,25 @@
 
         function updateNarrativeOpacity(progress) {
             // Definiamo i tempi di apparizione del testo (in percentuale 0.0 - 1.0)
-            // Text 1: 0.05 -> 0.25
-            // Text 2: 0.30 -> 0.60
-            // Text 3: 0.65 -> 0.85
+            // Essendo l'altezza totale maggiore, queste percentuali durano molto di più in termini di pixel
             
             const fadeInOut = (el, start, end, curr) => {
                 const middle = (start + end) / 2;
                 const range = (end - start) / 2;
                 // Calcola opacità basata sulla distanza dal centro dell'intervallo
                 let opacity = 1 - Math.abs(curr - middle) / range;
-                opacity = Math.max(0, Math.min(1, opacity * 3)); // *3 rende la transizione più netta (sharp)
+                // Modificato: uso un plateaux (trapezio) invece di un triangolo per tenerlo leggibile più a lungo
+                // Se opacity > 0.8, forziamo a 1 per un momento
+                
+                opacity = Math.max(0, Math.min(1, opacity * 4)); // Moltiplicatore più alto per fade in/out più rapidi ai bordi
                 
                 el.style.opacity = opacity;
                 el.style.transform = `translateY(${mapRange(opacity, 0, 1, 20, 0)}px)`;
             };
 
-            fadeInOut(textElements[0], 0.0, 0.3, progress);
-            fadeInOut(textElements[1], 0.3, 0.65, progress);
-            fadeInOut(textElements[2], 0.65, 0.95, progress);
+            fadeInOut(textElements[0], 0.05, 0.35, progress); // Allargato leggermente il range
+            fadeInOut(textElements[1], 0.35, 0.70, progress);
+            fadeInOut(textElements[2], 0.70, 0.95, progress);
         }
 
         // --- DISEGNO CHEST (DOPO INTRO) ---
