@@ -1,4 +1,4 @@
----
+<!-- ---
 /* ABOUT.ASTRO
   Page: Punk Chest / Infinite Scroll
 */
@@ -412,4 +412,518 @@
         color: #000;
         border-color: #fff;
     }
-</style>
+</style> -->
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Strummolo | Punk Narrative</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Courier+Prime:ital@0;1&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- GLOBAL STYLES --- */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            background-color: #050505;
+            color: #fff;
+            font-family: 'Courier Prime', 'Courier New', monospace;
+            overflow-x: hidden;
+            overflow-y: auto; /* Assicura che lo scroll verticale sia attivo */
+            /* RIMOSSO: height: 100vh; -> Questo bloccava lo scroll */
+            min-height: 100%;
+        }
+
+        /* Nascondi scrollbar ma permetti scroll */
+        body::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Cursore */
+        body, a, button {
+            cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), auto;
+        }
+
+        /* --- LAYOUT --- */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh; /* Il canvas deve essere alto come la viewport */
+            z-index: 1;
+            /* Filtro per look "consumato" */
+            filter: contrast(130%) brightness(110%);
+        }
+
+        /* Overlay Rumore TV */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0.12;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4' fill='white'/%3E%3C/svg%3E");
+        }
+
+        /* HEADER */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .back-btn {
+            pointer-events: auto;
+            text-decoration: none;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            color: #fff;
+            background: #000;
+            padding: 10px;
+            border: 1px solid #333;
+            text-transform: uppercase;
+            transition: 0.2s;
+        }
+        .back-btn:hover { background: #fff; color: #000; }
+
+        /* --- NARRATIVE TEXT (Overlay HTML) --- */
+        .narrative-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .story-text {
+            position: absolute;
+            width: 80%;
+            max-width: 600px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            text-shadow: 0 0 10px rgba(0,0,0,0.8);
+        }
+        
+        .highlight {
+            color: #ccc;
+            font-style: italic;
+            border-bottom: 1px dashed #555;
+        }
+
+        @media (max-width: 600px) {
+            .story-text { font-size: 1rem; }
+        }
+
+        /* --- SCROLL SPACER --- */
+        /* Questo div invisibile dà al browser lo spazio fisico per scorrere */
+        #scroll-spacer {
+            height: 8000px; /* Molto lungo per accomodare intro + loop */
+            width: 1px;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="noise-overlay"></div>
+
+    <div id="canvas-container">
+        <canvas id="mainCanvas"></canvas>
+    </div>
+
+    <div class="narrative-layer">
+        <div id="text-1" class="story-text">
+            Lo strummolo gira...
+        </div>
+        <div id="text-2" class="story-text">
+            ...imperfetto, come la nostra gioventù<br>
+            <span class="highlight">che non ha appigli</span>
+        </div>
+        <div id="text-3" class="story-text">
+            né al passato,<br>né al futuro.
+        </div>
+    </div>
+
+    <header>
+        <a href="/" class="back-btn">← Home</a>
+    </header>
+
+    <!-- Elemento fittizio per guidare lo scroll -->
+    <div id="scroll-spacer"></div>
+
+    <script>
+        /**
+         * CONFIGURAZIONE
+         */
+        const INTRO_HEIGHT = 2500; // Pixel di scroll dedicati all'intro dello strummolo
+        const LOOP_BUFFER = 100;   // Buffer per l'infinite scroll
+        
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const textElements = [
+            document.getElementById('text-1'),
+            document.getElementById('text-2'),
+            document.getElementById('text-3')
+        ];
+
+        let width, height;
+        let scrollY = 0;
+        let ticking = false;
+
+        // --- UTILITIES ---
+        function random(min, max) { return Math.random() * (max - min) + min; }
+        
+        // Mappa un valore da un range all'altro
+        function mapRange(value, inMin, inMax, outMin, outMax) {
+            return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+        }
+
+        // --- DISEGNO STRUMMOLO (INTRO) ---
+        function drawStrummolo(scrollProgress) {
+            // scrollProgress va da 0 a INTRO_HEIGHT
+            const progress01 = Math.min(scrollProgress / INTRO_HEIGHT, 1);
+            
+            // Posizione verticale: scende man mano che scrolli
+            const startY = height * 0.3;
+            const endY = height * 0.8;
+            const currentY = startY + (endY - startY) * progress01;
+            const currentX = width / 2;
+
+            // Oscillazione (Wobble)
+            // Aumenta la frequenza con lo scroll
+            const wobbleTime = Date.now() * 0.005 + (scrollProgress * 0.05); 
+            const wobbleX = Math.sin(wobbleTime) * (10 + progress01 * 20);
+            
+            // Disegno Corpo Strummolo (Stile Sketchy)
+            ctx.save();
+            ctx.translate(currentX + wobbleX, currentY);
+            
+            // Rotazione basata sullo scroll (gira mentre scende)
+            const rotation = scrollProgress * 0.1; 
+            ctx.rotate(rotation * Math.PI / 180);
+
+            ctx.strokeStyle = `rgba(240, 240, 240, ${1 - progress01})`; // Fade out alla fine
+            ctx.lineWidth = 2;
+            
+            // Disegna il cono (corpo) con linee tremolanti
+            const size = Math.min(width * 0.15, 80);
+            const steps = 15;
+            
+            for (let i = 0; i < steps; i++) {
+                const layerY = mapRange(i, 0, steps, -size, size * 1.5);
+                const layerW = mapRange(i, 0, steps, size, 2); // Da largo a stretto (punta)
+                
+                ctx.beginPath();
+                // Ellisse tremolante
+                const deform = random(-2, 2);
+                ctx.ellipse(deform, layerY, layerW, layerW * 0.4, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Corda (Stringa) che vola via all'inizio
+            if (progress01 < 0.3) {
+                ctx.beginPath();
+                ctx.moveTo(0, -size);
+                ctx.bezierCurveTo(50, -100 - scrollProgress, -50, -150 - scrollProgress, 20, -250 - scrollProgress);
+                ctx.strokeStyle = `rgba(255,255,255, ${0.5 - progress01})`;
+                ctx.stroke();
+            }
+
+            ctx.restore();
+
+            // Gestione Testo HTML
+            updateNarrativeOpacity(progress01);
+        }
+
+        function updateNarrativeOpacity(progress) {
+            // Definiamo i tempi di apparizione del testo (in percentuale 0.0 - 1.0)
+            // Text 1: 0.05 -> 0.25
+            // Text 2: 0.30 -> 0.60
+            // Text 3: 0.65 -> 0.85
+            
+            const fadeInOut = (el, start, end, curr) => {
+                const middle = (start + end) / 2;
+                const range = (end - start) / 2;
+                // Calcola opacità basata sulla distanza dal centro dell'intervallo
+                let opacity = 1 - Math.abs(curr - middle) / range;
+                opacity = Math.max(0, Math.min(1, opacity * 3)); // *3 rende la transizione più netta (sharp)
+                
+                el.style.opacity = opacity;
+                el.style.transform = `translateY(${mapRange(opacity, 0, 1, 20, 0)}px)`;
+            };
+
+            fadeInOut(textElements[0], 0.0, 0.3, progress);
+            fadeInOut(textElements[1], 0.3, 0.65, progress);
+            fadeInOut(textElements[2], 0.65, 0.95, progress);
+        }
+
+        // --- DISEGNO CHEST (DOPO INTRO) ---
+        function drawChest() {
+            // Pulisce il canvas (ma con fade se siamo in transizione? No, clear netto va bene qui)
+            // Ma per non cancellare lo strummolo se facessimo overlap, gestiamo il clear nel main loop
+            
+            // Parametri del petto originale
+            const screenArea = width * height;
+            const hairCount = Math.floor(screenArea * 0.0025); 
+            const centerX = width / 2;
+            const chestLevel = height * 0.35;
+            const navelY = height * 0.75;
+            
+            const maxSpacing = 180;
+            const nippleSpacing = Math.min(width * 0.22, maxSpacing);
+            const nippleSize = Math.max(15, Math.min(width * 0.06, 30));
+
+            // Zona Rasata
+            const abdomenTopLimit = chestLevel + nippleSize + 20;
+            const abdomenBottomLimit = navelY - 30;
+            const abdomenCenterY = (abdomenTopLimit + abdomenBottomLimit) / 2;
+
+            let boxWidth, boxHeight;
+            if (width < 400) {
+                boxWidth = Math.min(width * 0.8, 160);
+                boxHeight = 70;
+            } else {
+                boxWidth = 300;
+                boxHeight = 50;
+            }
+            const shavedTop = abdomenCenterY - (boxHeight / 2);
+            const shavedBottom = abdomenCenterY + (boxHeight / 2);
+            const shavedLeft = centerX - (boxWidth / 2);
+            const shavedRight = centerX + (boxWidth / 2);
+
+            // Disegno Peli
+            ctx.beginPath(); 
+            // Ottimizzazione: Usiamo un seed pseudo-random basato sull'indice per coerenza visiva durante scroll veloce
+            // Ma qui manteniamo random puro per l'effetto "elettrico" originale
+            
+            for (let i = 0; i < hairCount; i++) {
+                let x = random(0, width);
+                let y = random(0, height);
+                
+                if (x > shavedLeft && x < shavedRight && y > shavedTop && y < shavedBottom) continue;
+
+                const distFromCenter = Math.abs(x - centerX);
+                const safeZone = width < 600 ? width * 0.45 : width * 0.35;
+                let drawProbability = 1;
+
+                if (distFromCenter > safeZone) drawProbability = 0.6;
+                if (y > chestLevel && y < navelY + 50) {
+                     if (distFromCenter < width * 0.08) drawProbability = 1.8; 
+                     else if (distFromCenter < width * 0.15) drawProbability = 0.9;
+                } 
+
+                if (Math.random() < drawProbability) {
+                    const lenScale = width < 600 ? 0.8 : 1;
+                    const length = random(8, 28) * lenScale;
+                    let angle = Math.PI / 2; 
+                    
+                    if (x < centerX) angle += random(0.1, 0.5); 
+                    if (x > centerX) angle -= random(0.1, 0.5);
+                    
+                    const distToNavel = Math.sqrt(Math.pow(x-centerX, 2) + Math.pow(y-navelY, 2));
+                    if (distToNavel < 40) angle += random(-1, 1);
+
+                    // Distortion basata sullo scroll relativo alla fase chest
+                    const activeScroll = scrollY - INTRO_HEIGHT;
+                    const distortion = (activeScroll % 40) * 0.2; 
+                    
+                    const startX = x + random(-1,1);
+                    const startY = y + random(-1,1);
+                    
+                    ctx.moveTo(startX, startY);
+                    const cpX = startX + Math.cos(angle + random(-0.5, 0.5)) * (length/2) + distortion;
+                    const cpY = startY + Math.sin(angle + random(-0.5, 0.5)) * (length/2);
+                    const endX = startX + Math.cos(angle) * length;
+                    const endY = startY + Math.sin(angle) * length;
+                    
+                    ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+                }
+            }
+            ctx.lineWidth = 1.5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = `rgba(230, 230, 230, 0.7)`; 
+            ctx.stroke();
+
+            // Scritta "I HATE NAPOLI"
+            ctx.save();
+            ctx.translate(centerX, abdomenCenterY);
+            
+            const brutalFonts = ['"Press Start 2P"', '"VT323"', '"Courier New"', '"Arial Black"', 'monospace'];
+            // Cambia font velocemente
+            const scrollIndex = Math.floor(scrollY / 50); 
+            const currentFontFamily = brutalFonts[scrollIndex % brutalFonts.length];
+
+            ctx.fillStyle = "#fff";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            
+            if (width < 400) {
+                 ctx.font = `16px ${currentFontFamily}`; 
+                 ctx.fillText("I HATE", 0, -15);
+                 ctx.fillText("NAPOLI", 0, 15);
+            } else {
+                 ctx.font = `24px ${currentFontFamily}`; 
+                 ctx.fillText("I HATE NAPOLI", 0, 0);
+            }
+            ctx.restore();
+
+            // Anatomia
+            drawNipple(centerX - nippleSpacing, chestLevel, nippleSize);
+            drawNipple(centerX + nippleSpacing, chestLevel, nippleSize);
+            drawNavel(centerX, navelY, nippleSize * 0.9);
+            
+            // Sporcizia
+            drawDirt(shavedLeft, shavedRight, shavedTop, shavedBottom);
+        }
+
+        function drawNipple(cx, cy, size) {
+            const numRings = 12;
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.9)"; 
+            for(let i=0; i<numRings; i++) {
+                ctx.beginPath();
+                const r = (size * 0.3) + (i * (size/numRings)) + random(-2, 2);
+                for (let a = 0; a <= Math.PI * 2; a += 0.3) { 
+                    const x = cx + Math.cos(a) * r + random(-2, 2);
+                    const y = cy + Math.sin(a) * r + random(-2, 2);
+                    if (a === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+        }
+
+        function drawNavel(cx, cy, size) {
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+            ctx.beginPath();
+            let angle = 0; let r = 1;
+            for (let i = 0; i < 30; i++) {
+                 const x = cx + Math.cos(angle) * r + random(-1,1);
+                 const y = cy + Math.sin(angle) * (r * 0.7) + random(-1,1);
+                 if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x, y);
+                 angle += 0.5; r += 0.3;
+            }
+            ctx.stroke();
+        }
+
+        function drawDirt(sl, sr, st, sb) {
+            for(let j=0; j<40; j++) {
+                ctx.beginPath();
+                let sx = random(0, width);
+                let sy = random(0, height);
+                if (sx > sl && sx < sr && sy > st && sy < sb) continue;
+                ctx.arc(sx, sy, random(1, 3), 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${random(0.1, 0.3)})`;
+                ctx.fill();
+            }
+        }
+
+        // --- MAIN RENDER LOOP ---
+        function render() {
+            if (!width || !height) return;
+
+            // Pulisce tutto
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, width, height);
+
+            if (scrollY < INTRO_HEIGHT) {
+                // FASE 1: Intro Strummolo
+                drawStrummolo(scrollY);
+                
+                // Se siamo molto vicini alla fine dell'intro, iniziamo a mostrare il petto in trasparenza?
+                // Oppure facciamo un taglio netto. Taglio netto è più "Punk".
+            } else {
+                // FASE 2: I HATE NAPOLI Chest
+                drawChest();
+            }
+        }
+
+        // --- LOGICA SCROLL E RESIZE ---
+        function handleScroll() {
+            scrollY = window.scrollY;
+
+            // Infinite Scroll Logic (Solo se abbiamo superato l'intro)
+            if (scrollY >= INTRO_HEIGHT) {
+                const docHeight = document.body.scrollHeight;
+                const winHeight = window.innerHeight;
+                
+                // Se l'utente arriva in fondo alla pagina, lo riportiamo all'inizio della FASE CHEST
+                // (Non all'inizio dell'intro, ovvero 0, ma a INTRO_HEIGHT)
+                if (scrollY + winHeight >= docHeight - LOOP_BUFFER) {
+                    // Salta indietro "silenziosamente"
+                    window.scrollTo(0, INTRO_HEIGHT + LOOP_BUFFER);
+                    scrollY = INTRO_HEIGHT + LOOP_BUFFER; // Update manuale per evitare glitch visivi
+                }
+            }
+            
+            // Richiedi render
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    render();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            
+            // Aggiorna anche scrollY in caso di resize
+            scrollY = window.scrollY;
+            render();
+        }
+
+        // Init
+        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('resize', resize);
+        
+        // Loop di animazione costante per lo Strummolo (deve girare anche se non scrolli)
+        function animateLoop() {
+            // Ridisegna solo se siamo nella fase intro per animare il wobble
+            if (scrollY < INTRO_HEIGHT) {
+                render();
+            }
+            requestAnimationFrame(animateLoop);
+        }
+
+        window.onload = () => {
+            resize();
+            animateLoop();
+        };
+
+    </script>
+</body>
+</html>
