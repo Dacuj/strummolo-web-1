@@ -436,11 +436,18 @@
             overflow-x: hidden;
             overflow-y: auto; /* Assicura che lo scroll verticale sia attivo */
             min-height: 100%;
+            
+            /* NASCONDE LA SCROLLBAR (Modifica 3) */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
         }
 
-        /* Nascondi scrollbar ma permetti scroll */
-        body::-webkit-scrollbar { display: none; }
-        body { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Nascondi scrollbar per Chrome, Safari e Opera (Modifica 3) */
+        body::-webkit-scrollbar, html::-webkit-scrollbar { 
+            display: none; 
+            width: 0;
+            background: transparent;
+        }
 
         /* Cursore */
         body, a, button {
@@ -453,7 +460,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100vh; /* Il canvas deve essere alto come la viewport */
+            height: 100vh;
             z-index: 1;
             /* Filtro per look "consumato" */
             filter: contrast(130%) brightness(110%);
@@ -499,6 +506,36 @@
         }
         .back-btn:hover { background: #fff; color: #000; }
 
+        /* --- SCROLL HINT (Modifica 2) --- */
+        .scroll-hint {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            color: #fff;
+            text-transform: uppercase;
+            z-index: 2000;
+            pointer-events: none;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+            
+            /* Animazione lampeggiante */
+            animation: blink 1.5s infinite;
+            transition: opacity 0.5s ease;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Classe per nascondere l'hint quando si scrolla */
+        .scroll-hint.hidden {
+            opacity: 0 !important;
+            animation: none;
+        }
+
         /* --- NARRATIVE TEXT (Overlay HTML) --- */
         .narrative-layer {
             position: fixed;
@@ -522,7 +559,7 @@
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.5s ease, transform 0.5s ease;
-            font-size: 1.2rem;
+            font-size: 1.4rem; /* Leggermente più grande per le frasi brevi */
             line-height: 1.6;
             text-shadow: 0 0 10px rgba(0,0,0,0.8);
         }
@@ -533,14 +570,19 @@
             border-bottom: 1px dashed #555;
         }
 
+        /* Stile specifico per la frase francese */
+        #text-2 {
+            font-style: italic;
+            font-family: 'Times New Roman', serif; /* Tocco più classico per il francese */
+        }
+
         @media (max-width: 600px) {
-            .story-text { font-size: 1rem; }
+            .story-text { font-size: 1.1rem; }
         }
 
         /* --- SCROLL SPACER --- */
-        /* Questo div invisibile dà al browser lo spazio fisico per scorrere */
         #scroll-spacer {
-            height: 15000px; /* AUMENTATO: Molto più lungo per accomodare l'intro più lenta */
+            height: 15000px; 
             width: 1px;
             pointer-events: none;
             visibility: hidden;
@@ -556,33 +598,36 @@
         <canvas id="mainCanvas"></canvas>
     </div>
 
+    <!-- Modifica 1: Nuovi testi -->
     <div class="narrative-layer">
         <div id="text-1" class="story-text">
-            Lo strummolo gira...
+            Lo strummolo gira sghembo.
         </div>
         <div id="text-2" class="story-text">
-            ...imperfetto, come la nostra gioventù<br>
-            <span class="highlight">che non ha appigli</span>
+            Comme une jeunesse qui vacille.
         </div>
         <div id="text-3" class="story-text">
-            né al passato,<br>né al futuro.
+            La nostra.
         </div>
+    </div>
+
+    <!-- Modifica 2: Indicatore Scroll -->
+    <div id="scroll-hint" class="scroll-hint">
+        SCROLL DOWN ↓
     </div>
 
     <header>
         <a href="/" class="back-btn">← Home</a>
     </header>
 
-    <!-- Elemento fittizio per guidare lo scroll -->
     <div id="scroll-spacer"></div>
 
     <script>
         /**
          * CONFIGURAZIONE
          */
-        // AUMENTATO: Da 2500 a 6000 per rendere l'intro molto più lenta e leggibile
         const INTRO_HEIGHT = 6000; 
-        const LOOP_BUFFER = 100;   // Buffer per l'infinite scroll
+        const LOOP_BUFFER = 100;   
         
         const canvas = document.getElementById('mainCanvas');
         const ctx = canvas.getContext('2d');
@@ -591,6 +636,7 @@
             document.getElementById('text-2'),
             document.getElementById('text-3')
         ];
+        const scrollHint = document.getElementById('scroll-hint'); // Riferimento all'hint
 
         let width, height;
         let scrollY = 0;
@@ -599,55 +645,44 @@
         // --- UTILITIES ---
         function random(min, max) { return Math.random() * (max - min) + min; }
         
-        // Mappa un valore da un range all'altro
         function mapRange(value, inMin, inMax, outMin, outMax) {
             return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
         }
 
         // --- DISEGNO STRUMMOLO (INTRO) ---
         function drawStrummolo(scrollProgress) {
-            // scrollProgress va da 0 a INTRO_HEIGHT
             const progress01 = Math.min(scrollProgress / INTRO_HEIGHT, 1);
             
-            // Posizione verticale: scende man mano che scrolli
             const startY = height * 0.3;
             const endY = height * 0.8;
             const currentY = startY + (endY - startY) * progress01;
             const currentX = width / 2;
 
-            // Oscillazione (Wobble)
-            // Aumenta la frequenza con lo scroll (RIDOTTO il moltiplicatore per compensare l'altezza maggiore)
             const wobbleTime = Date.now() * 0.005 + (scrollProgress * 0.02); 
             const wobbleX = Math.sin(wobbleTime) * (10 + progress01 * 20);
             
-            // Disegno Corpo Strummolo (Stile Sketchy)
             ctx.save();
             ctx.translate(currentX + wobbleX, currentY);
             
-            // Rotazione basata sullo scroll (gira mentre scende)
-            // RIDOTTO: 0.05 invece di 0.1 per evitare che giri troppo veloce ora che lo scroll è più lungo
             const rotation = scrollProgress * 0.05; 
             ctx.rotate(rotation * Math.PI / 180);
 
-            ctx.strokeStyle = `rgba(240, 240, 240, ${1 - progress01})`; // Fade out alla fine
+            ctx.strokeStyle = `rgba(240, 240, 240, ${1 - progress01})`; 
             ctx.lineWidth = 2;
             
-            // Disegna il cono (corpo) con linee tremolanti
             const size = Math.min(width * 0.15, 80);
             const steps = 15;
             
             for (let i = 0; i < steps; i++) {
                 const layerY = mapRange(i, 0, steps, -size, size * 1.5);
-                const layerW = mapRange(i, 0, steps, size, 2); // Da largo a stretto (punta)
+                const layerW = mapRange(i, 0, steps, size, 2); 
                 
                 ctx.beginPath();
-                // Ellisse tremolante
                 const deform = random(-2, 2);
                 ctx.ellipse(deform, layerY, layerW, layerW * 0.4, 0, 0, Math.PI * 2);
                 ctx.stroke();
             }
 
-            // Corda (Stringa) che vola via all'inizio
             if (progress01 < 0.3) {
                 ctx.beginPath();
                 ctx.moveTo(0, -size);
@@ -658,39 +693,29 @@
 
             ctx.restore();
 
-            // Gestione Testo HTML
             updateNarrativeOpacity(progress01);
         }
 
         function updateNarrativeOpacity(progress) {
-            // Definiamo i tempi di apparizione del testo (in percentuale 0.0 - 1.0)
-            // Essendo l'altezza totale maggiore, queste percentuali durano molto di più in termini di pixel
-            
             const fadeInOut = (el, start, end, curr) => {
                 const middle = (start + end) / 2;
                 const range = (end - start) / 2;
-                // Calcola opacità basata sulla distanza dal centro dell'intervallo
                 let opacity = 1 - Math.abs(curr - middle) / range;
-                // Modificato: uso un plateaux (trapezio) invece di un triangolo per tenerlo leggibile più a lungo
-                // Se opacity > 0.8, forziamo a 1 per un momento
                 
-                opacity = Math.max(0, Math.min(1, opacity * 4)); // Moltiplicatore più alto per fade in/out più rapidi ai bordi
+                opacity = Math.max(0, Math.min(1, opacity * 4)); 
                 
                 el.style.opacity = opacity;
                 el.style.transform = `translateY(${mapRange(opacity, 0, 1, 20, 0)}px)`;
             };
 
-            fadeInOut(textElements[0], 0.05, 0.35, progress); // Allargato leggermente il range
-            fadeInOut(textElements[1], 0.35, 0.70, progress);
-            fadeInOut(textElements[2], 0.70, 0.95, progress);
+            // Timing adattato per le 3 nuove frasi
+            fadeInOut(textElements[0], 0.05, 0.35, progress); // Lo strummolo gira sghembo.
+            fadeInOut(textElements[1], 0.35, 0.70, progress); // Comme une jeunesse...
+            fadeInOut(textElements[2], 0.70, 0.95, progress); // La nostra.
         }
 
         // --- DISEGNO CHEST (DOPO INTRO) ---
         function drawChest() {
-            // Pulisce il canvas (ma con fade se siamo in transizione? No, clear netto va bene qui)
-            // Ma per non cancellare lo strummolo se facessimo overlap, gestiamo il clear nel main loop
-            
-            // Parametri del petto originale
             const screenArea = width * height;
             const hairCount = Math.floor(screenArea * 0.0025); 
             const centerX = width / 2;
@@ -701,7 +726,6 @@
             const nippleSpacing = Math.min(width * 0.22, maxSpacing);
             const nippleSize = Math.max(15, Math.min(width * 0.06, 30));
 
-            // Zona Rasata
             const abdomenTopLimit = chestLevel + nippleSize + 20;
             const abdomenBottomLimit = navelY - 30;
             const abdomenCenterY = (abdomenTopLimit + abdomenBottomLimit) / 2;
@@ -719,10 +743,7 @@
             const shavedLeft = centerX - (boxWidth / 2);
             const shavedRight = centerX + (boxWidth / 2);
 
-            // Disegno Peli
             ctx.beginPath(); 
-            // Ottimizzazione: Usiamo un seed pseudo-random basato sull'indice per coerenza visiva durante scroll veloce
-            // Ma qui manteniamo random puro per l'effetto "elettrico" originale
             
             for (let i = 0; i < hairCount; i++) {
                 let x = random(0, width);
@@ -751,7 +772,6 @@
                     const distToNavel = Math.sqrt(Math.pow(x-centerX, 2) + Math.pow(y-navelY, 2));
                     if (distToNavel < 40) angle += random(-1, 1);
 
-                    // Distortion basata sullo scroll relativo alla fase chest
                     const activeScroll = scrollY - INTRO_HEIGHT;
                     const distortion = (activeScroll % 40) * 0.2; 
                     
@@ -772,12 +792,10 @@
             ctx.strokeStyle = `rgba(230, 230, 230, 0.7)`; 
             ctx.stroke();
 
-            // Scritta "I HATE NAPOLI"
             ctx.save();
             ctx.translate(centerX, abdomenCenterY);
             
             const brutalFonts = ['"Press Start 2P"', '"VT323"', '"Courier New"', '"Arial Black"', 'monospace'];
-            // Cambia font velocemente
             const scrollIndex = Math.floor(scrollY / 50); 
             const currentFontFamily = brutalFonts[scrollIndex % brutalFonts.length];
 
@@ -795,12 +813,10 @@
             }
             ctx.restore();
 
-            // Anatomia
             drawNipple(centerX - nippleSpacing, chestLevel, nippleSize);
             drawNipple(centerX + nippleSpacing, chestLevel, nippleSize);
             drawNavel(centerX, navelY, nippleSize * 0.9);
             
-            // Sporcizia
             drawDirt(shavedLeft, shavedRight, shavedTop, shavedBottom);
         }
 
@@ -848,18 +864,12 @@
         function render() {
             if (!width || !height) return;
 
-            // Pulisce tutto
             ctx.fillStyle = '#050505';
             ctx.fillRect(0, 0, width, height);
 
             if (scrollY < INTRO_HEIGHT) {
-                // FASE 1: Intro Strummolo
                 drawStrummolo(scrollY);
-                
-                // Se siamo molto vicini alla fine dell'intro, iniziamo a mostrare il petto in trasparenza?
-                // Oppure facciamo un taglio netto. Taglio netto è più "Punk".
             } else {
-                // FASE 2: I HATE NAPOLI Chest
                 drawChest();
             }
         }
@@ -868,21 +878,24 @@
         function handleScroll() {
             scrollY = window.scrollY;
 
-            // Infinite Scroll Logic (Solo se abbiamo superato l'intro)
+            // Modifica 2: Nascondi Hint se si scrolla
+            if (scrollY > 50) {
+                scrollHint.classList.add('hidden');
+            } else {
+                scrollHint.classList.remove('hidden');
+            }
+
+            // Infinite Scroll Logic
             if (scrollY >= INTRO_HEIGHT) {
                 const docHeight = document.body.scrollHeight;
                 const winHeight = window.innerHeight;
                 
-                // Se l'utente arriva in fondo alla pagina, lo riportiamo all'inizio della FASE CHEST
-                // (Non all'inizio dell'intro, ovvero 0, ma a INTRO_HEIGHT)
                 if (scrollY + winHeight >= docHeight - LOOP_BUFFER) {
-                    // Salta indietro "silenziosamente"
                     window.scrollTo(0, INTRO_HEIGHT + LOOP_BUFFER);
-                    scrollY = INTRO_HEIGHT + LOOP_BUFFER; // Update manuale per evitare glitch visivi
+                    scrollY = INTRO_HEIGHT + LOOP_BUFFER;
                 }
             }
             
-            // Richiedi render
             if (!ticking) {
                 window.requestAnimationFrame(() => {
                     render();
@@ -903,18 +916,14 @@
             canvas.style.width = width + 'px';
             canvas.style.height = height + 'px';
             
-            // Aggiorna anche scrollY in caso di resize
             scrollY = window.scrollY;
             render();
         }
 
-        // Init
         window.addEventListener('scroll', handleScroll);
         window.addEventListener('resize', resize);
         
-        // Loop di animazione costante per lo Strummolo (deve girare anche se non scrolli)
         function animateLoop() {
-            // Ridisegna solo se siamo nella fase intro per animare il wobble
             if (scrollY < INTRO_HEIGHT) {
                 render();
             }
