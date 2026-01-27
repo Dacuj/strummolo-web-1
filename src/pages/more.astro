@@ -9,13 +9,13 @@ const exhibits = [
     id: 1,
     name: "T-SHIRT 'HATE NAPOLI'",
     collection: "ARCHIVE 01",
-    image: "/img/HAVEANEROTIC.png", 
+    image: "/img/HATEJADORE.webp", 
   },
   {
     id: 2,
-    name: "DENIM PUNK JEANS",
+    name: "SPILLA PUNK HATE",
     collection: "ARCHIVE 01",
-    image: "/img/3.png",
+    image: "/img/SPILLAHATE.webp",
   },
   {
     id: 3,
@@ -25,9 +25,9 @@ const exhibits = [
   },
   {
     id: 4,
-    name: "FELPA OVERSIZE",
+    name: "ALTRO",
     collection: "WINTER 24",
-    image: "/images/merch/hoodie.png",
+    image: "/img/3.png",
   }
 ];
 ---
@@ -52,7 +52,7 @@ const exhibits = [
     <main class="museum-container">
         
         <header class="museum-header">
-            <h1>OGGETTI<br><span style="color: #FC60B7;">SMARRITI</span></h1>
+            <h1>MISSING<br><span style="color: #FC60B7;">ARTEFACTS</span></h1>
             <p class="intro">
                 Frammenti fisici del progetto Sturmmolo. <br>
                 Esposizione permanente.
@@ -70,6 +70,7 @@ const exhibits = [
                         <img 
                             src={item.image} 
                             alt={item.name} 
+                            draggable="false"
                             loading="lazy"
                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
                         />
