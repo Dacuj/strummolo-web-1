@@ -1,8 +1,9 @@
-<!-- 
-  INDEX.ASTRO / HTML
-  Web 1.0 Experience - Brutalist Style + Freak Out Mode (Full UI)
--->
-<!DOCTYPE html>
+---
+/* INDEX.ASTRO
+  Web 1.0 Experience - Brutalist Style
+*/
+---
+
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -30,69 +31,60 @@
 
         uniform vec2 u_resolution;
         uniform float u_time;
-        uniform float u_mode; // 0.0 = Brutalist, 1.0 = Freak Out
 
+        // Funzione di rotazione
         mat2 rotate(float angle) {
             float s = sin(angle);
             float c = cos(angle);
             return mat2(c, -s, s, c);
         }
 
-        // Palette psichedelica (Zappa Style: termico/solarizzato)
-        vec3 palette(float t) {
-            vec3 a = vec3(0.5, 0.5, 0.5);
-            vec3 b = vec3(0.5, 0.5, 0.5);
-            vec3 c = vec3(1.0, 1.0, 1.0);
-            vec3 d = vec3(0.00, 0.33, 0.67);
-            return a + b * cos(6.28318 * (c * t + d));
-        }
-
         void main() {
+            // --- 1. SETUP GRIGLIA ---
             float gridDensity = 80.0; 
-            vec2 st = gl_FragCoord.xy / u_resolution.y;
-            
-            if (u_mode > 0.5) {
-                st.x += sin(st.y * 10.0 + u_time) * 0.02;
-                st.y += cos(st.x * 10.0 + u_time) * 0.02;
-            }
 
+            vec2 st = gl_FragCoord.xy / u_resolution.y;
             vec2 gridUV = fract(st * gridDensity); 
             vec2 gridID = floor(st * gridDensity); 
+
+            // Posizione normalizzata per calcolare le forme grandi
             vec2 p = gridID / gridDensity;
             p -= vec2(0.5 * (u_resolution.x/u_resolution.y), 0.5);
 
+            // --- 2. MOVIMENTO LENTO E PESANTE ---
             float t = u_time * 0.2; 
-            if (u_mode > 0.5) t = u_time * 0.5; 
 
+            // --- 3. FORME GEOMETRICHE GIGANTI ---
+            
+            // Ruotiamo lo spazio molto lentamente
             vec2 pRot = rotate(t * 0.5) * p;
+
+            // Creiamo un grande quadrato centrale (Box Distance)
             float bigShape = max(abs(pRot.x), abs(pRot.y));
+
+            // --- 4. CREAZIONE DELLE FASCE (Predominanza Nera) ---
             float rings = sin(bigShape * 6.0 - t * 2.0);
+
+            // --- IL TRUCCO DEL NERO ---
             float shapeMask = step(0.90, rings);
 
+            // Aggiungiamo una seconda forma ancora più grande e lenta per variare (opzionale)
+            // Un incrocio diagonale gigante
             vec2 pRot2 = rotate(-t * 0.3) * p;
-            float crossShape = min(abs(pRot2.x), abs(pRot2.y)); 
+            float crossShape = min(abs(pRot2.x), abs(pRot2.y)); // Forma a croce infinita
+            // Una fascia solitaria che passa ogni tanto
             float crossMask = step(0.98, sin(crossShape * 4.0 + t)); 
 
+            // Uniamo le due forme (Logica OR: se c'è una o l'altra)
             float finalPattern = max(shapeMask, crossMask);
+
+            // --- 5. RIFINITURA PIXEL ---
+            // Bordo nero sottile tra i quadratini per mantenere l'effetto griglia
             float borderSize = 0.1; 
             float pixelBorder = step(borderSize, gridUV.x) * step(borderSize, gridUV.y) * step(gridUV.x, 1.0 - borderSize) * step(gridUV.y, 1.0 - borderSize);
 
-            if (u_mode < 0.5) {
-                gl_FragColor = vec4(vec3(finalPattern * pixelBorder), 1.0);
-            } else {
-                float intensity = finalPattern * pixelBorder;
-                float d = length(p);
-                vec3 col = palette(d + u_time * 0.4 + intensity);
-
-                if (intensity > 0.5) {
-                    col = 1.0 - col;
-                    col.r *= 1.5; 
-                }
-                if (intensity < 0.1) {
-                    col = vec3(0.1, 0.0, 0.2) + 0.1 * sin(u_time * 5.0 + st.x * 20.0);
-                }
-                gl_FragColor = vec4(col, 1.0);
-            }
+            // Colore finale
+            gl_FragColor = vec4(vec3(finalPattern * pixelBorder), 1.0);
         }
     </script>
 
@@ -126,9 +118,6 @@
             </div>
         </div>
     </main>
-
-    <!-- Bottone Freak Out (Basso a sinistra) -->
-    <button id="freak-btn" class="freak-button">FREAK OUT!</button>
 
     <div class="pin-container">
         <img src="/img/HAVEANEROTIC.png" draggable="false" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png'" alt="Spilla Vintage" class="pin-image">
@@ -167,7 +156,6 @@
 
         const resLoc = gl.getUniformLocation(program, "u_resolution");
         const timeLoc = gl.getUniformLocation(program, "u_time");
-        const modeLoc = gl.getUniformLocation(program, "u_mode"); 
 
         function resize() {
             canvas.width = window.innerWidth;
@@ -177,25 +165,6 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // LOGICA FREAK OUT
-        let freakMode = 0.0;
-        const freakBtn = document.getElementById('freak-btn');
-        
-        freakBtn.addEventListener('click', () => {
-            // Toggle della classe CSS sul body per cambiare l'UI
-            document.body.classList.toggle('freak-mode');
-            
-            if (freakMode === 0.0) {
-                freakMode = 1.0;
-                freakBtn.innerText = "BASTA";
-                freakBtn.classList.add('active');
-            } else {
-                freakMode = 0.0;
-                freakBtn.innerText = "FREAK OUT!";
-                freakBtn.classList.remove('active');
-            }
-        });
-
         function render(time) {
             gl.useProgram(program);
             gl.enableVertexAttribArray(posLoc);
@@ -203,14 +172,24 @@
             gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 
             gl.uniform2f(resLoc, canvas.width, canvas.height);
-            gl.uniform1f(timeLoc, time * 0.001); 
-            gl.uniform1f(modeLoc, freakMode); 
+            gl.uniform1f(timeLoc, time * 0.001); // Tempo in secondi
 
             gl.drawArrays(gl.TRIANGLES, 0, 6);
             requestAnimationFrame(render);
         }
         render(0);
     </script>
+	<script>
+		if (window.netlifyIdentity) {
+		  window.netlifyIdentity.on("init", user => {
+			if (!user) {
+			  window.netlifyIdentity.on("login", () => {
+				document.location.href = "/admin/";
+			  });
+			}
+		  });
+		}
+	  </script>
 </body>
 </html>
 
@@ -231,7 +210,6 @@
         font-family: 'Courier New', Courier, monospace;
         cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), auto;
         touch-action: none; 
-        transition: filter 0.3s ease; /* Transizione smooth per filtri globali */
     }
 
     /* Canvas Sfondo - WebGL */
@@ -283,10 +261,9 @@
         margin-top: 10px; 
         transform: rotate(-1deg); 
         flex-shrink: 0;
-        transition: all 0.3s ease;
     }
 
-    /* Colori Logo Standard */
+    /* Colori Logo */
     .logo span:nth-child(1) { color: #ea4335; } 
     .logo span:nth-child(2) { color: #fbbc05; } 
     .logo span:nth-child(3) { color: #4285f4; } 
@@ -317,9 +294,36 @@
         line-height: 0.75; 
         background: #fff; 
         border: none;
-        transition: transform 0.1s, background 0.1s, color 0.1s, box-shadow 0.3s;
+        transition: transform 0.1s, background 0.1s, color 0.1s;
         display: inline-block; 
         box-shadow: 2px 2px 0px rgba(0,0,0,0.5); 
+    }
+
+    /* --- STILE BOX FUCSIA "DREAM" --- */
+    .dream-text {
+        font-family: 'Inter', 'Helvetica Neue', 'Arial', sans-serif;
+        font-weight: 300;
+        font-size: 3.5rem; 
+        letter-spacing: -2px;
+        color: #000;
+        padding: 0px 4px;
+        line-height: 0.85;
+        background: #FC60B7; 
+        box-shadow: 4px 4px 0px rgba(0,0,0,0.5); 
+        display: inline-block;
+        transform: rotate(-1.5deg);
+    }
+
+    .dream-top {
+        margin-bottom: 5px;
+        margin-left: 25px; 
+        align-self: flex-start;
+    }
+
+    .dream-bottom {
+        margin-top: 15px; 
+        margin-left: 520px; 
+        transform: rotate(2deg); 
     }
 
     /* --- POSIZIONAMENTO DESKTOP (Split Layout) --- */
@@ -348,54 +352,6 @@
         color: #fff;
     }
 
-    /* --- FREAK MODE UI OVERRIDES --- */
-    /* Quando il body ha la classe .freak-mode, tutto cambia */
-
-    /* 1. Logo Impazzito */
-    body.freak-mode .logo {
-        background: #000;
-        border: 2px solid #ff00ff;
-        animation: shake 0.5s infinite;
-        box-shadow: 4px 4px 0px #00ffff;
-    }
-    body.freak-mode .logo span:nth-child(odd) { color: #ff00ff !important; text-shadow: 2px 2px 0px #00ff00; }
-    body.freak-mode .logo span:nth-child(even) { color: #00ffff !important; text-shadow: 2px 2px 0px #ff0000; }
-    body.freak-mode .logo .arrows { color: #ffff00 !important; }
-
-    @keyframes shake {
-        0% { transform: translate(1px, 1px) rotate(0deg); }
-        10% { transform: translate(-1px, -2px) rotate(-1deg); }
-        20% { transform: translate(-3px, 0px) rotate(1deg); }
-        30% { transform: translate(3px, 2px) rotate(0deg); }
-        40% { transform: translate(1px, -1px) rotate(1deg); }
-        50% { transform: translate(-1px, 2px) rotate(-1deg); }
-        60% { transform: translate(-3px, 1px) rotate(0deg); }
-        70% { transform: translate(3px, 1px) rotate(-1deg); }
-        80% { transform: translate(-1px, -1px) rotate(1deg); }
-        90% { transform: translate(1px, 2px) rotate(0deg); }
-        100% { transform: translate(1px, -2px) rotate(-1deg); }
-    }
-
-    /* 2. Navbar Acida */
-    body.freak-mode .nav-link {
-        background: #ff00ff; /* Magenta */
-        color: #ffff00; /* Giallo acido */
-        box-shadow: 4px 4px 0px #00ffff; /* Ciano */
-        font-family: 'VT323', monospace; /* Cambio font per glitch effect */
-        letter-spacing: 2px;
-    }
-
-    body.freak-mode .nav-link:hover {
-        background: #00ffff;
-        color: #000;
-        box-shadow: -4px -4px 0px #ff00ff;
-    }
-
-    /* 3. Ransom Note Invertita (Effetto Negativo) */
-    body.freak-mode .ransom-container {
-        filter: invert(1) hue-rotate(180deg);
-    }
-
     /* Main Content */
     .main-content {
         height: 100vh;
@@ -418,7 +374,6 @@
         transform: scale(0.9);
         transform-origin: left center;
         pointer-events: auto; 
-        transition: filter 0.1s;
     }
 
     .ransom-line {
@@ -478,50 +433,6 @@
     @keyframes rotatePin {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
-    }
-
-    /* --- FREAK OUT BUTTON STYLE --- */
-    .freak-button {
-        position: fixed;
-        bottom: 40px;
-        left: 40px;
-        z-index: 2000;
-        font-family: 'Press Start 2P', cursive;
-        font-size: 0.8rem;
-        background: #000;
-        color: #fff;
-        border: 2px solid #fff;
-        padding: 15px 20px;
-        text-transform: uppercase;
-        cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), pointer;
-        box-shadow: 4px 4px 0px rgba(255,255,255,0.5);
-        transition: all 0.2s;
-        pointer-events: auto;
-    }
-
-    .freak-button:hover {
-        transform: translate(-2px, -2px);
-        box-shadow: 6px 6px 0px #ff00ff; /* Magenta glow */
-        border-color: #ff00ff;
-    }
-
-    .freak-button:active {
-        transform: translate(2px, 2px);
-        box-shadow: 0px 0px 0px;
-    }
-
-    /* Stile attivo del bottone (quando la modalità è accesa) */
-    .freak-button.active {
-        background: #ff00ff;
-        color: #000;
-        border-color: #00ffff;
-        box-shadow: 4px 4px 0px #ffff00;
-        animation: pulseButton 0.5s infinite alternate;
-    }
-
-    @keyframes pulseButton {
-        from { transform: scale(1); }
-        to { transform: scale(1.05); }
     }
 
     /* --- MEDIA QUERIES (FIXED FOR MOBILE) --- */
@@ -589,12 +500,13 @@
         
         .pin-container { width: 100px; height: 100px; bottom: 15px; right: 15px; }
 
-        /* Bottone Freak Mobile */
-        .freak-button {
-            bottom: 15px;
-            left: 15px;
-            font-size: 0.6rem;
-            padding: 10px;
+        .dream-top {
+            margin-left: 0;
+        }
+        .dream-bottom {
+            margin-left: 0;
+            margin-top: 10px;
+            padding-right: 0;
         }
     }
 
@@ -621,6 +533,22 @@
         .letter {
             padding: 5px 5px !important; 
             filter: drop-shadow(4px 4px 0px #000); 
+        }
+
+        .dream-text {
+            font-size: 2.2rem; 
+        }
+        
+        .dream-top {
+            margin-left: 0;
+            align-self: center;
+        }
+
+        .dream-bottom {
+            margin-left: 0; 
+            margin-top: 5px;
+            align-self: flex-end; 
+            padding-right: 10px;
         }
     }
 </style>
