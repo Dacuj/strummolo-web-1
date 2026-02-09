@@ -7,9 +7,9 @@ fileNumber: FILE_001
 tags:
   - ESSAY
 ---
-Se fossimo una “[Blank Generation](https://it.wikipedia.org/wiki/Blank_Generation_(singolo))” come intona , o meglio, stona Richard Hell nel ‘77. Allora con cosa vorremmo riempire la nostra generazione vuota , con l’odio o con l’amore?
+Se fossimo una “[Blank Generation](https://it.wikipedia.org/wiki/Blank_Generation_(singolo))” come intona , o meglio, stona Richard Hell nel ‘77. `Allora con cosa vorremmo riempire la nostra generazione vuota , con l’odio o con l’amore?`
 
-La risposta cambia a seconda del soggetto. Potrete immaginare quella di Johnny Rotten e la sua celebre t-shirt “**I hate Pink Floyd**”, un capo appena uscito dal negozio poi strappato e ricomposto con spille da balia, poiché si sa che la distruzione non è altro che un atto creativo  \[che cosa creerà mai?] una nuova identità. Ed è proprio questa che ci interessa . 
+La risposta cambia a seconda del soggetto. Potrete immaginare quella di Johnny Rotten e la sua celebre t-shirt <u>“***I hate Pink Floyd***”</u>, un capo appena uscito dal negozio poi strappato e ricomposto con spille da balia, poiché si sa che la distruzione non è altro che un atto creativo  \[che cosa creerà mai?] una nuova identità. Ed è proprio questa che ci interessa . 
 
 ![](/img/img_5038.jpg)
 
