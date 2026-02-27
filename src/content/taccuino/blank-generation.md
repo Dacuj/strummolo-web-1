@@ -11,7 +11,7 @@ fileNumber: FILE_001
 tags:
   - ESSAY
 ---
-Se fossimo una “[Blank Generation](https://it.wikipedia.org/wiki/Blank_Generation_(singolo))” come intona , o meglio, stona Richard Hell nel ‘77. `Allora con cosa vorremmo riempire la nostra generazione vuota , con l’odio o con l’amore?`
+Se fossimo una “[Blank Generation](https://it.wikipedia.org/wiki/Blank_Generation_(singolo))” come intona , o meglio, stona Richard Hell nel ‘77, `con cosa vorremmo riempire la nostra generazione vuota , con l’odio o con l’amore?`
 
 La risposta cambia a seconda del soggetto. Potrete immaginare quella di Johnny Rotten e la sua celebre t-shirt <u>“***I hate Pink Floyd***”</u>, un capo appena uscito dal negozio poi strappato e ricomposto con spille da balia, poiché si sa che la distruzione non è altro che un atto creativo  \[che cosa creerà mai?] una nuova identità. Ed è proprio questa che ci interessa . 
 
@@ -37,8 +37,8 @@ Se invece volessimo essere romantici, dovremmo pensare a Milton Glaser e alla su
 
 [Napoli non è New York](https://genius.com/Drast-new-york-lyrics) , cita una struggente canzone degli anni recenti, eppure il mare, il sole, la pizza e il mandolino non sono le sue uniche realtà. Sicuramente rappresentano una delle tante narrazioni presenti, ma qui non siamo interessati all’idealizzazione di una cartolina che non parla dell’orrore, che attenzione, dentro se contiene comunque un’indicibile speranza. 
 
-Dunque in cosa speriamo odiando il luogo che ci ha dato i natali ? Forse nel miglioramento, forse in nulla come dei banali ribelli senza causa o magari solo nella possibilità di trovare qualcuno con cui stare contro il mondo assieme perché abbiamo smesso di adorare e feticcizzare il bello, e forse è il caso di odiare un po’ ciò che ci piace per salvarlo meglio. \[Si lo so, Simone Weil e la mia terribile e fastidiosa retorica del paradosso, ma come si può pretendere di capire la realtà senza indagarne l’assurdità?]
+Dunque in cosa speriamo odiando il luogo che ci ha dato i natali ? Forse nel miglioramento, forse in nulla come dei banali ribelli senza causa o magari solo nella possibilità di trovare qualcuno con cui stare contro il mondo assieme perché abbiamo smesso di adorare e feticcizzare il bello, e forse è il caso di odiare un po’ ciò che ci piace per salvarlo meglio. `[Si lo so, Simone Weil e la mia terribile e fastidiosa retorica del paradosso, ma come si può pretendere di capire la realtà senza indagarne l’assurdità?]`
 
-Napoli fatta di estremi apparentemente inconciliabili, è sempre in bilico fra la massima espressione della bellezza e l’apogeo della decadenza, non può solo piacerti, può stordirti col suo cattivo odore di piscio o con il profumo di un forno a legna. 
+***Napoli fatta di estremi apparentemente inconciliabili, è sempre in bilico fra la massima espressione della bellezza e l’apogeo della decadenza, non può solo piacerti, può stordirti col suo cattivo odore di piscio o con il profumo di un forno a legna.*** 
 
 Napoli frenetica, enigmatica, esoterica, imperterrita, coraggiosa, vigliacca, sporca, regale, frugale, ampollosa, esagerata, ammirata, degradata e tanti altri controsensi che sarei in grado di partorire perché sono di Napoli, e in caso non si fosse notato, sono paradossale anch’io.
