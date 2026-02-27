@@ -1,6 +1,10 @@
 ---
-title: Blank generation
-description: Blank Generation e Pink Floyd per una Napoli migliore
+title: Do you Adore your City?
+description: Mentre il marketing ri-brandizza Napoli come una rassicurante
+  cartolina, noi scegliamo la strada di Johnny Rotten. Tra la verità brutale di
+  Simone Weil e il nichilismo del '77, esploriamo perché "adorare" la propria
+  città sia l'inizio della sua fine, e perché un grido d'odio possa essere
+  l'unico atto d'amore capace di trasformare via Toledo in King’s Road.
 date: 2026-02-09
 style: editorial
 fileNumber: FILE_001
