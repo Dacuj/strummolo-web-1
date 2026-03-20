@@ -1,15 +1,51 @@
 ---
 import { getCollection } from 'astro:content';
 
-// Recuperiamo tutti gli articoli dalla cartella 'taccuino'
+// Recuperiamo tutti gli articoli reali dalla cartella 'taccuino'
 const posts = await getCollection('taccuino');
 
 // Ordiniamo per data (dal più recente)
 posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-// Funzione helper per formattare la data stile "24.10"
+// Funzione helper per formattare la data
 const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: '2-digit' }).format(date);
+    return new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
+};
+
+// Generatore di Immagini Sottoculture (Weirdcore / Vaporwave / Y2K / Punk)
+const getWeirdcoreImage = (style: string) => {
+    switch (style) {
+        case 'tech': return 'https://static.wikia.nocookie.net/aesthetics/images/4/44/Tumblr_b54a31622a1e8dfa780a25c1602aa6b7_8a43a60b_540.jpg/revision/latest?cb=20210505174957';
+        case 'editorial': return 'https://static.wikia.nocookie.net/aesthetics/images/d/d3/Smilewc.jpg/revision/latest?cb=20210524044251';
+        case 'brutal': return 'https://static.wikia.nocookie.net/aesthetics/images/1/18/34efa0d1f1ecc17c1f8b1f4f602589b5.png/revision/latest?cb=20210327012339';
+        case 'notebook': return 'https://static.wikia.nocookie.net/aesthetics/images/3/3b/OIP_%2821%29.webp/revision/latest?cb=20251009135123';
+        default: return 'https://static.wikia.nocookie.net/aesthetics/images/d/d3/Smilewc.jpg/revision/latest?cb=20210524044251';
+    }
+};
+
+// Generatore di stili caotici e font Web 1.0 per le etichette
+const weirdFonts = ['"Comic Sans MS", cursive', '"Courier New", Courier, monospace', '"Times New Roman", Times, serif', '"Pixelify Sans", sans-serif'];
+const weirdColors = ['#00FFFF', '#FF00FF', '#39FF14', '#FFFF00', '#FF3333', '#FFFFFF'];
+
+const getLabelStyle = (index: number) => {
+    const font = weirdFonts[index % weirdFonts.length];
+    const color = weirdColors[(index * 5) % weirdColors.length];
+    
+    // Simula l'effetto del testo "evidenziato" tipico dei vecchi siti
+    const isHighlighted = index % 3 === 0;
+    const bg = isHighlighted ? '#000080' : 'transparent';
+    const border = isHighlighted ? `1px dotted ${color}` : 'none';
+    
+    return `font-family: ${font}; color: ${color}; background-color: ${bg}; border: ${border};`;
+};
+
+// Spargimento caotico per le icone
+const getScatteredStyle = (index: number) => {
+    const offsetX = (index * 47) % 100 - 50; 
+    const offsetY = (index * 83) % 100 - 50;
+    const rotate = (index * 13) % 14 - 7; // Lieve rotazione tra -7 e +7 gradi per un effetto più crudo
+    // Generiamo variabili CSS per poter scalare l'effetto su mobile
+    return `--off-x: ${offsetX}px; --off-y: ${offsetY}px; --rot: ${rotate}deg;`;
 };
 ---
 
@@ -17,81 +53,38 @@ const formatDate = (date: Date) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>strummolo123 | ARCHIVE</title>
+    <title>strummolo | THE VOID ARCHIVE</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&family=Playfair+Display:ital,wght@1,400;1,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&family=Playfair+Display:ital,wght@1,400;1,700&family=Space+Mono:wght@400;700&family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="/favicon.png" />
 </head>
 <body>
 
-    <a href="/" class="home-badge">← HOME</a>
+    <!-- Controlli Fissi (Navigazione) -->
+    <div class="nav-controls">
+        <a href="/" class="action-badge">← HOME</a>
+    </div>
 
-    <div class="wall-grid">
-
-        {posts.map((post) => (
-            <a href={`/taccuino/${post.slug}`} class={`poster-item style-${post.data.style}`}>
+    <!-- ========================================== -->
+    <!-- VISTA UNICA: WEIRDCORE / VAPORWAVE         -->
+    <!-- ========================================== -->
+    <main class="weird-area">
+        {posts.map((post, index) => (
+            <a href={`/taccuino/${post.slug}`} class="weird-item" style={getScatteredStyle(index)}>
                 
-                {/* --- LOGICA STILE: TECH --- */}
-                {post.data.style === 'tech' && (
-                    <>
-                        <div class="item-header">
-                            <span>{post.data.fileNumber || 'FILE_ERR'}</span>
-                            <span>{formatDate(post.data.date)}</span>
-                        </div>
-                        <div class="item-line"></div>
-                        <h2 class="item-title">{post.data.title}</h2>
-                        <p class="item-desc">{post.data.description}</p>
-                        {post.data.tags && <span class="meta-tag">{post.data.tags[0]}</span>}
-                    </>
-                )}
-
-                {/* --- LOGICA STILE: EDITORIAL --- */}
-                {post.data.style === 'editorial' && (
-                    <>
-                        <div class="item-circle">{post.data.fileNumber || '00'}</div>
-                        <h2 class="item-title">{post.data.title}</h2>
-                        <div class="item-line"></div>
-                        <p class="item-desc">{post.data.description}</p>
-                        <span class="ascii-deco">
-                          .   .
-                           | |
-                         .-' '-.
-                        </span>
-                    </>
-                )}
-
-                {/* --- LOGICA STILE: BRUTAL --- */}
-                {post.data.style === 'brutal' && (
-                    <>
-                        <div class="item-header">
-                            <span>{post.data.fileNumber || 'RAW'}</span>
-                            <span>AI_ART</span>
-                        </div>
-                        <h2 class="item-title">{post.data.title}</h2>
-                        <p class="item-desc">{post.data.description}</p>
-                        <div class="item-line" style="width: 100%;"></div>
-                        {post.data.tags && <span class="meta-tag">{post.data.tags[0]}</span>}
-                    </>
-                )}
-
-                {/* --- LOGICA STILE: NOTEBOOK --- */}
-                {post.data.style === 'notebook' && (
-                    <>
-                        <span class="ascii-deco">
-                        ////////////
-                        ////////////
-                        </span>
-                        <h2 class="item-title">{post.data.title}</h2>
-                        <p class="item-desc">{post.data.description}</p>
-                        {post.data.tags && <span class="meta-tag">{post.data.tags[0]}</span>}
-                    </>
-                )}
-
+                <!-- Contenitore immagine reale -->
+                <div class={`weird-image-box img-filter-${index % 4}`}>
+                    <img src={getWeirdcoreImage(post.data.style)} alt={`Cover per ${post.data.title}`} class="weird-real-img" />
+                </div>
+                
+                <div class="weird-label" style={getLabelStyle(index)}>
+                    {post.data.title}
+                </div>
+                
             </a>
         ))}
-
-    </div>
+    </main>
 
 </body>
 </html>
@@ -107,21 +100,26 @@ const formatDate = (date: Date) => {
     body, html {
         background-color: #000;
         color: #fff;
-        font-family: 'Space Mono', monospace;
         overflow-x: hidden;
+        min-height: 100%;
         cursor: crosshair;
     }
 
-    /* --- TASTO HOME --- */
-    .home-badge {
+    /* --- BADGES (Home) --- */
+    .nav-controls {
         position: fixed;
         top: 30px;
         left: 30px;
-        z-index: 2000;
+        z-index: 9999;
+        pointer-events: none; 
+    }
+
+    .action-badge {
+        pointer-events: auto;
         background: #000;
         color: #fff;
-        font-family: 'Inter', sans-serif;
-        font-weight: 900;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
         text-decoration: none;
         padding: 10px 15px;
         text-transform: uppercase;
@@ -129,176 +127,137 @@ const formatDate = (date: Date) => {
         border: 2px solid #fff;
         box-shadow: 4px 4px 0px #fff;
         transition: transform 0.1s, box-shadow 0.1s;
+        cursor: pointer;
+        display: inline-block;
     }
 
-    .home-badge:hover {
+    .action-badge:hover {
         transform: translate(2px, 2px);
         box-shadow: 2px 2px 0px #fff;
         background: #fff;
         color: #000;
     }
 
-    /* --- MASONRY GRID CONTAINER --- */
-    .wall-grid {
-        column-count: 3; 
-        column-gap: 20px;
-        padding: 100px 20px 50px 20px;
-        max-width: 1600px;
+    /* ================================================== */
+    /* VISTA 1: WEIRDCORE / VAPORWAVE STYLES              */
+    /* ================================================== */
+
+    .weird-area {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        grid-auto-rows: 200px;
+        gap: 50px;
+        padding: 150px 40px 100px 40px;
+        max-width: 1400px;
         margin: 0 auto;
-    }
-
-    /* --- CARD / POSTER --- */
-    .poster-item {
-        position: relative;
-        background: #000;
-        border: 1px solid #333;
-        margin-bottom: 20px; 
-        padding: 30px;
-        display: inline-block; 
-        width: 100%;
-        text-decoration: none;
-        color: #fff;
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        break-inside: avoid; 
-    }
-
-    /* --- VARIAZIONI DI STILE (Creatività) --- */
-    
-    /* Stile 1: Minimal Tech */
-    .style-tech {
-        border-left: 5px solid #fff;
-    }
-
-    /* Stile 2: Editoriale (Serif) */
-    .style-editorial {
-        border: 1px solid #fff;
-        padding: 40px 20px;
-        text-align: center;
-    }
-
-    /* Stile 3: Brutal (Invertito) */
-    .style-brutal {
-        background: #111;
-        border: 2px solid #fff;
-    }
-
-    /* Stile 4: Dotted (Taccuino) */
-    .style-notebook {
-        border: 2px dashed #555;
-    }
-
-    /* --- HOVER EFFECTS --- */
-    .poster-item:hover {
-        background: #fff;
-        color: #000;
-        border-color: #000;
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(255,255,255,0.1);
-        z-index: 10;
-    }
-
-    .poster-item:hover .item-line { background: #000; }
-    .poster-item:hover .item-circle { border-color: #000; }
-    .poster-item:hover .meta-tag { border-color: #000; color: #000; }
-
-    /* --- TYPOGRAPHY & DETAILS --- */
-    .item-header {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        margin-bottom: 20px;
-        opacity: 0.6;
-    }
-
-    .item-title {
-        font-family: 'Inter', sans-serif;
-        font-weight: 900;
-        font-size: 2.5rem;
-        line-height: 0.9;
-        text-transform: uppercase;
-        letter-spacing: -1px;
-        margin-bottom: 15px;
-        word-wrap: break-word;
-    }
-
-    /* Titolo Serif */
-    .style-editorial .item-title {
-        font-family: 'Playfair Display', serif;
-        font-style: italic;
-        font-size: 3rem;
-        font-weight: 400;
-    }
-
-    .item-desc {
-        font-size: 0.9rem;
-        line-height: 1.4;
-        opacity: 0.8;
-    }
-
-    /* --- ELEMENTI GRAFICI --- */
-    .item-line {
-        width: 50px;
-        height: 2px;
-        background: #fff;
-        margin: 20px 0;
-    }
-
-    .style-editorial .item-line {
-        margin: 20px auto; 
-    }
-
-    .item-circle {
-        width: 40px;
-        height: 40px;
-        border: 1px solid #fff;
-        border-radius: 50%;
-        display: flex;
+        justify-items: center;
         align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
+    }
+
+    .weird-item {
+        position: relative;
+        z-index: 10;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 160px;
+        transition: z-index 0.1s;
+        /* Applica lo scatter tramite le variabili CSS impostate in JS */
+        transform: translate(var(--off-x), var(--off-y)) rotate(var(--rot));
+    }
+
+    .weird-item:hover {
+        z-index: 100;
+    }
+
+    /* Stile Contenitore Immagini e Immagini stesse */
+    .weird-image-box {
+        width: 120px;
+        height: 120px;
         margin-bottom: 15px;
+        border: 2px solid #333; /* Bordo grezzo default */
+        background: #111;
+        overflow: hidden;
+        transition: border-color 0.1s;
     }
 
-    .meta-tag {
-        display: inline-block;
-        border: 1px solid #fff;
-        padding: 2px 8px;
+    .weird-real-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        /* Fa in modo che il placeholder testuale alternativo (alt) sia stilizzato se l'immagine non carica */
+        color: #fff;
+        font-family: 'Courier New', Courier, monospace;
         font-size: 0.7rem;
-        text-transform: uppercase;
-        margin-top: 15px;
-    }
-
-    /* --- ASCII ART DECORATIONS --- */
-    .ascii-deco {
-        font-family: monospace;
-        font-size: 0.6rem;
-        opacity: 0.5;
-        white-space: pre;
-        margin-bottom: 10px;
         display: block;
+        text-align: center;
+        line-height: 1.2;
     }
 
-    /* --- MOBILE --- */
+    /* Variazioni di filtri sulle immagini per l'effetto weirdcore/glitch */
+    .img-filter-0 .weird-real-img { filter: contrast(150%) saturate(200%) hue-rotate(90deg); }
+    .img-filter-1 .weird-real-img { filter: grayscale(100%) contrast(200%); }
+    .img-filter-2 .weird-real-img { filter: sepia(100%) hue-rotate(-50deg) saturate(300%); }
+    .img-filter-3 .weird-real-img { filter: invert(100%) hue-rotate(180deg); }
+
+    .weird-item:hover .weird-image-box {
+        border-color: #fff;
+    }
+
+    /* Testo con i font grezzi Web 1.0 */
+    .weird-label {
+        font-size: 1rem;
+        font-weight: bold;
+        text-align: center;
+        padding: 4px 8px;
+        line-height: 1.2;
+        text-shadow: 2px 2px 0px #000; /* Leggibilità sul nero */
+        word-wrap: break-word;
+        max-width: 100%;
+        transition: all 0.1s;
+    }
+
+    .weird-item:hover .weird-label {
+        background-color: #fff !important;
+        color: #000 !important;
+        text-shadow: none;
+        border: 1px solid #000 !important;
+    }
+
+    /* --- MOBILE RESPONSIVE --- */
     @media (max-width: 768px) {
-        .wall-grid {
-            column-count: 1; 
-            padding: 100px 15px 50px 15px;
+        .nav-controls {
+            top: 15px;
+            left: 15px;
         }
 
-        .item-title {
-            font-size: 2.2rem;
-        }
-
-        .style-editorial .item-title {
-            font-size: 2.5rem;
-        }
-        
-        .home-badge {
-            top: 20px;
-            left: 20px;
+        .action-badge {
             padding: 8px 12px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        /* Weirdcore view mobile */
+        .weird-area {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 140px 15px 50px 15px; 
+            justify-items: center;
+        }
+
+        .weird-item {
+            width: 120px;
+            /* Su mobile riduciamo matematicamente lo spargimento del 50% per evitare overflow estremo ma mantenere il caos intatto */
+            transform: translate(calc(var(--off-x) * 0.5), calc(var(--off-y) * 0.5)) rotate(var(--rot));
+        }
+
+        .weird-image-box {
+            width: 90px;
+            height: 90px;
+        }
+
+        .weird-label {
+            font-size: 0.85rem;
         }
     }
 </style>
