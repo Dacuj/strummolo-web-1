@@ -1,0 +1,204 @@
+---
+/* 404.ASTRO
+  Pagina di errore in stile Brutalist/Ransom Note
+*/
+---
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>strummolo123 | ERRORE 404</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Arvo:wght@700&family=Permanent+Marker&family=Special+Elite&family=Bebas+Neue&family=Courier+Prime&family=Inter:wght@200;300;400;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav>
+        <a href="/" class="nav-btn">← TORNA ALLA BASE</a>
+    </nav>
+
+    <main class="error-container">
+        
+        <div class="ransom-container">
+            <div class="ransom-line">
+                <span class="letter lt-4a">4</span>
+                <span class="letter lt-0">0</span>
+                <span class="letter lt-4b">4</span>
+            </div>
+        </div>
+
+        <h1 class="error-message">QUESTO SPAZIO È VUOTO.</h1>
+        <p class="error-sub">Il file che cerchi non esiste o è stato bruciato.</p>
+
+        <a href="/archive" class="taccuino-link">APRI IL TACCUINO INVECE</a>
+        
+    </main>
+
+</body>
+</html>
+
+<style is:global>
+    /* --- RESET & BASIC --- */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    ::selection {
+        background: #FC60B7;
+        color: #000;
+    }
+
+    body, html {
+        background-color: #000;
+        color: #fff;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden; 
+        font-family: 'Courier Prime', monospace;
+        cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* --- NAVIGAZIONE --- */
+    nav {
+        width: 100%;
+        padding: 20px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
+    .nav-btn {
+        text-decoration: none;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.7rem;
+        color: #fff;
+        background: #000;
+        padding: 10px 15px;
+        border: 1px solid #333;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        display: inline-block;
+        cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), pointer;
+    }
+
+    .nav-btn:hover {
+        background: #fff;
+        color: #000;
+        border-color: #fff;
+        box-shadow: 4px 4px 0px #FC60B7; 
+        transform: translate(-2px, -2px);
+    }
+
+    /* --- CONTENITORE PRINCIPALE --- */
+    .error-container {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+    }
+
+    /* --- RANSOM NOTE 404 --- */
+    .ransom-container {
+        margin-bottom: 40px;
+        transform: scale(1.2);
+    }
+
+    .ransom-line {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .letter {
+        display: inline-block;
+        padding: 15px 25px;
+        text-transform: uppercase;
+        font-weight: 900;
+        line-height: 0.85;
+        filter: drop-shadow(8px 8px 0px rgba(252, 96, 183, 0.5)); /* Ombra fucsia */
+        user-select: none;
+        transition: transform 0.1s;
+    }
+    
+    .letter:hover {
+        transform: translate(2px, 2px) scale(1.05);
+    }
+
+    /* Stili specifici per i numeri */
+    .lt-4a { 
+        background: #fff; color: #000; font-family: 'Impact', sans-serif;
+        font-size: 8rem; transform: rotate(-6deg); 
+        clip-path: polygon(2% 0%, 98% 5%, 95% 95%, 5% 100%);
+    }
+    .lt-0 { 
+        background: #000; color: #fff; font-family: 'Special Elite', serif; 
+        font-size: 7rem; transform: rotate(4deg) translateY(10px);
+        border: 4px dashed #FC60B7;
+    }
+    .lt-4b { 
+        background: #FC60B7; color: #000; font-family: 'Permanent Marker', cursive; 
+        font-size: 8rem; transform: rotate(-3deg) translateY(-5px); 
+        clip-path: polygon(0 5%, 100% 15%, 85% 95%, 5% 85%);
+        border-left: 5px solid #000; 
+    }
+
+    /* --- TESTI --- */
+    .error-message {
+        font-family: 'Inter', sans-serif;
+        font-weight: 900;
+        font-size: 3rem;
+        letter-spacing: -2px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .error-sub {
+        font-family: 'Courier Prime', monospace;
+        font-size: 1.2rem;
+        color: #888;
+        margin-bottom: 50px;
+    }
+
+    /* --- LINK AL TACCUINO --- */
+    .taccuino-link {
+        font-family: 'Inter', sans-serif;
+        font-weight: 900;
+        font-size: 1.5rem;
+        color: #000;
+        background: #FC60B7;
+        text-decoration: none;
+        padding: 15px 30px;
+        text-transform: uppercase;
+        transform: rotate(-2deg);
+        box-shadow: 6px 6px 0px #fff;
+        transition: all 0.2s;
+        cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), pointer;
+    }
+
+    .taccuino-link:hover {
+        transform: rotate(0deg) scale(1.05);
+        background: #fff;
+        box-shadow: 6px 6px 0px #FC60B7;
+    }
+
+    /* --- MOBILE --- */
+    @media (max-width: 768px) {
+        .ransom-container { transform: scale(0.8); }
+        .error-message { font-size: 2rem; }
+        .error-sub { font-size: 1rem; padding: 0 20px; }
+        .taccuino-link { font-size: 1.2rem; }
+    }
+</style>
