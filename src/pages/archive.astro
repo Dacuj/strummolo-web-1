@@ -7,45 +7,14 @@ const posts = await getCollection('taccuino');
 // Ordiniamo per data (dal più recente)
 posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-// Funzione helper per formattare la data
-const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
-};
-
-// Generatore di Immagini Sottoculture (Weirdcore / Vaporwave / Y2K / Punk)
-const getWeirdcoreImage = (style: string) => {
+// Funzione helper per le immagini (mantenuta nel caso in cui i tuoi post non abbiano ancora una 'cover' definita)
+const getPostImage = (style: string) => {
     switch (style) {
         case 'tech': return 'https://static.wikia.nocookie.net/aesthetics/images/4/44/Tumblr_b54a31622a1e8dfa780a25c1602aa6b7_8a43a60b_540.jpg/revision/latest?cb=20210505174957';
         case 'editorial': return 'https://static.wikia.nocookie.net/aesthetics/images/d/d3/Smilewc.jpg/revision/latest?cb=20210524044251';
         case 'brutal': return 'https://static.wikia.nocookie.net/aesthetics/images/1/18/34efa0d1f1ecc17c1f8b1f4f602589b5.png/revision/latest?cb=20210327012339';
-        case 'notebook': return 'https://static.wikia.nocookie.net/aesthetics/images/3/3b/OIP_%2821%29.webp/revision/latest?cb=20251009135123';
-        default: return 'https://static.wikia.nocookie.net/aesthetics/images/d/d3/Smilewc.jpg/revision/latest?cb=20210524044251';
+        default: return 'https://static.wikia.nocookie.net/aesthetics/images/3/3b/OIP_%2821%29.webp/revision/latest?cb=20251009135123';
     }
-};
-
-// Generatore di stili caotici e font Web 1.0 per le etichette
-const weirdFonts = ['"Comic Sans MS", cursive', '"Courier New", Courier, monospace', '"Times New Roman", Times, serif', '"Pixelify Sans", sans-serif'];
-const weirdColors = ['#00FFFF', '#FF00FF', '#39FF14', '#FFFF00', '#FF3333', '#FFFFFF'];
-
-const getLabelStyle = (index: number) => {
-    const font = weirdFonts[index % weirdFonts.length];
-    const color = weirdColors[(index * 5) % weirdColors.length];
-    
-    // Simula l'effetto del testo "evidenziato" tipico dei vecchi siti
-    const isHighlighted = index % 3 === 0;
-    const bg = isHighlighted ? '#000080' : 'transparent';
-    const border = isHighlighted ? `1px dotted ${color}` : 'none';
-    
-    return `font-family: ${font}; color: ${color}; background-color: ${bg}; border: ${border};`;
-};
-
-// Spargimento caotico per le icone
-const getScatteredStyle = (index: number) => {
-    const offsetX = (index * 47) % 100 - 50; 
-    const offsetY = (index * 83) % 100 - 50;
-    const rotate = (index * 13) % 14 - 7; // Lieve rotazione tra -7 e +7 gradi per un effetto più crudo
-    // Generiamo variabili CSS per poter scalare l'effetto su mobile
-    return `--off-x: ${offsetX}px; --off-y: ${offsetY}px; --rot: ${rotate}deg;`;
 };
 ---
 
@@ -53,44 +22,82 @@ const getScatteredStyle = (index: number) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>strummolo | THE VOID ARCHIVE</title>
+    <title>Sturmmolo | I HATE NAPOLI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&family=Playfair+Display:ital,wght@1,400;1,700&family=Space+Mono:wght@400;700&family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Aggiunto font Inter per i titoli -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="/favicon.png" />
 </head>
 <body>
 
-    <!-- Controlli Fissi (Navigazione) -->
-    <nav>
-        <a href="/" class="nav-btn">← Home</a>
-    </nav>
+    <!-- BANNER SUPERIORE FISSO (Nero) -->
+    <div class="retro-banner top-banner">
+        <a href="/" class="home-btn">← HOME</a>
+    </div>
 
-    <!-- ========================================== -->
-    <!-- VISTA UNICA: WEIRDCORE / VAPORWAVE         -->
-    <!-- ========================================== -->
-    <main class="weird-area">
-        {posts.map((post, index) => (
-            <a href={`/taccuino/${post.slug}`} class="weird-item" style={getScatteredStyle(index)}>
-                
-                <!-- Contenitore immagine reale -->
-                <div class={`weird-image-box img-filter-${index % 4}`}>
-                    <img src={getWeirdcoreImage(post.data.style)} alt={`Cover per ${post.data.title}`} class="weird-real-img" />
-                </div>
-                
-                <div class="weird-label" style={getLabelStyle(index)}>
+    <!-- VISTA PRINCIPALE (Centrata in orizzontale e verticale) -->
+    <main class="content-row">
+        {posts.map((post) => (
+            /* Passiamo la descrizione a data-description per leggerla con JS */
+            <a href={`/taccuino/${post.slug}`} class="post-item" data-description={post.data.description || 'Nessuna descrizione disponibile.'}>
+                <!-- Titolo in alto (Rosso, Bold, Italic) -->
+                <div class="post-label">
                     {post.data.title}
                 </div>
                 
+                <!-- Immagine quadrata sotto -->
+                <div class="post-image-box">
+                    <!-- Se hai un'immagine frontmatter usa {post.data.cover}, altrimenti usiamo la funzione di fallback -->
+                    <img src={post.data.cover || getPostImage(post.data.style)} alt={`Cover per ${post.data.title}`} class="post-real-img" />
+                </div>
             </a>
         ))}
     </main>
+
+    <!-- BANNER INFERIORE FISSO (Nero) - Mostrerà la descrizione al passaggio del mouse -->
+    <div class="retro-banner bottom-banner">
+        <span id="hover-description"></span>
+    </div>
+
+    <!-- SCRIPT PER EFFETTO HOVER -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const posts = document.querySelectorAll('.post-item');
+            const descriptionBox = document.getElementById('hover-description');
+
+            posts.forEach(post => {
+                // Quando il mouse entra sul post, scrivi la descrizione nel banner
+                post.addEventListener('mouseenter', () => {
+                    const desc = post.getAttribute('data-description');
+                    if (desc) {
+                        descriptionBox.textContent = desc;
+                    }
+                });
+
+                // Quando il mouse esce, svuota il banner
+                post.addEventListener('mouseleave', () => {
+                    descriptionBox.textContent = '';
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>
 
 <style is:global>
-    /* --- RESET --- */
+    /* --- RESET & BACKGROUND ANIMATO --- */
+    :root {
+        /* Percorso dell'immagine locale inserita in public/img/ */
+        --pattern-url: url('/img/nanananna.png');
+        
+        /* Uso i pixel fissi al posto di vw/vh per evitare qualsiasi deformazione dell'immagine.
+           Se la tua immagine non è perfettamente quadrata, adatta questi valori (es. 160px e 120px) */
+        --pattern-width: 160px;
+        --pattern-height: 160px;
+    }
+
     * {
         margin: 0;
         padding: 0;
@@ -98,201 +105,181 @@ const getScatteredStyle = (index: number) => {
     }
 
     body, html {
-        background-color: #000;
-        color: #fff;
-        overflow-x: hidden;
+        background-color: #e8efb6; /* Un colore di fallback nel caso l'immagine sia trasparente */
+        color: #ff0000;
         min-height: 100%;
+        overflow-x: hidden;
         cursor: crosshair;
+        font-family: 'Inter', Arial, sans-serif;
+        
+        /* Logica del background animato */
+        background-image: var(--pattern-url);
+        background-size: var(--pattern-width) var(--pattern-height);
+        background-repeat: repeat;
+        animation: scrollPattern 4s linear infinite;
     }
 
-      /* --- HEADER NAVIGAZIONE --- */
-    nav {
+    @keyframes scrollPattern {
+        0% { background-position: 0px 0px; }
+        100% { background-position: var(--pattern-width) var(--pattern-height); }
+    }
+
+    /* --- BANNER (TOP & BOTTOM) - ORA NERI --- */
+    .retro-banner {
         position: fixed;
-        top: 0;
         left: 0;
         width: 100%;
-        padding: 20px;
-        display: flex;
-        justify-content: space-between;
+        background-color: #000000; /* Modificato da rosso a nero */
         z-index: 1000;
-        background: linear-gradient(to bottom, #000 0%, rgba(0,0,0,0) 100%);
-        pointer-events: none;
+        display: flex;
+        justify-content: center; /* Centra il contenuto orizzontalmente */
     }
 
-    .nav-btn {
-        pointer-events: auto;
-        text-decoration: none;
-        font-family: 'Press Start 2P', cursive;
-        font-size: 0.7rem;
-        color: #fff;
-        background: #000;
-        padding: 10px 15px;
-        border: 1px solid #333;
-        transition: all 0.2s;
-        text-transform: uppercase;
-    }
-
-    .nav-btn:hover {
-        background: #fff;
-        color: #000;
-        border-color: #fff;
-        box-shadow: 4px 4px 0px #FC60B7; /* Ombra fucsia */
-        transform: translate(-2px, -2px);
-    }
-
-    /* --- BADGES (Home) --- */
-    .nav-controls {
-        position: fixed;
-        top: 30px;
-        left: 30px;
-        z-index: 9999;
-        pointer-events: none; 
-    }
-
-    .action-badge {
-        pointer-events: auto;
-        background: #000;
-        color: #fff;
-        font-family: 'Space Mono', monospace;
-        font-weight: 700;
-        text-decoration: none;
-        padding: 10px 15px;
-        text-transform: uppercase;
-        font-size: 1rem;
-        border: 2px solid #fff;
-        box-shadow: 4px 4px 0px #fff;
-        transition: transform 0.1s, box-shadow 0.1s;
-        cursor: pointer;
-        display: inline-block;
-    }
-
-    .action-badge:hover {
-        transform: translate(2px, 2px);
-        box-shadow: 2px 2px 0px #fff;
-        background: #fff;
-        color: #000;
-    }
-
-    /* ================================================== */
-    /* VISTA 1: WEIRDCORE / VAPORWAVE STYLES              */
-    /* ================================================== */
-
-    .weird-area {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        grid-auto-rows: 200px;
-        gap: 50px;
-        padding: 150px 40px 100px 40px;
-        max-width: 1400px;
-        margin: 0 auto;
-        justify-items: center;
+    /* Stile specifico per il banner top fisso */
+    .top-banner {
+        top: 0;
+        height: 35px; /* Altezza fissa solo per quello in alto */
         align-items: center;
     }
 
-    .weird-item {
-        position: relative;
-        z-index: 10;
+    .home-btn {
+        color: #ffffff;
         text-decoration: none;
+        font-weight: 700;
+        font-family: Arial, Helvetica, sans-serif; /* Adattato allo screen */
+        font-size: 1.1rem; /* Leggermente più grande */
+        transition: color 0.2s, transform 0.2s;
+    }
+
+    .home-btn:hover {
+        color: #ff0000; /* Hover rosso per contrastare col banner nero */
+        transform: scale(1.05);
+    }
+
+    /* Banner inferiore per la descrizione (ora supporta altezze maggiori) */
+    .bottom-banner {
+        bottom: 0;
+        min-height: 80px; /* Abbastanza spazio per contenere circa 3 righe */
+        align-items: center; /* Centra il testo verticalmente */
+    }
+
+    #hover-description {
+        color: #ffffff;
+        font-family: Arial, Helvetica, sans-serif; /* Adattato allo screen per un look più pulito */
+        font-size: 1.25rem; /* Font aumentato su desktop */
+        font-weight: 700;
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 3; /* Blocca il testo alla terza riga */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 10px 20px;
+        max-width: 100%;
+        text-align: center;
+        line-height: 1.4;
+    }
+
+    /* --- LAYOUT CONTENUTI (Orizzontale & Centrato) --- */
+    .content-row {
+        display: flex;
+        flex-wrap: wrap; 
+        justify-content: center; /* Centra orizzontalmente */
+        align-content: center;   /* Centra il blocco di post verticalmente */
+        align-items: center;     /* Centra i singoli elementi verticalmente */
+        gap: 30px;
+        min-height: 100vh;
+        /* Padding modificato per lasciare più spazio al banner inferiore */
+        padding: 60px 40px 100px 40px; 
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .post-item {
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 160px;
-        transition: z-index 0.1s;
-        /* Applica lo scatter tramite le variabili CSS impostate in JS */
-        transform: translate(var(--off-x), var(--off-y)) rotate(var(--rot));
+        text-decoration: none;
+        width: 160px; /* Larghezza fissa della colonna desktop */
+        transition: transform 0.2s;
     }
 
-    .weird-item:hover {
-        z-index: 100;
+    .post-item:hover {
+        transform: scale(1.05); /* Effetto hover semplice */
     }
 
-    /* Stile Contenitore Immagini e Immagini stesse */
-    .weird-image-box {
-        width: 120px;
-        height: 120px;
+    /* Etichetta Titolo (rossa, bold, italic) */
+    .post-label {
+        color: #ff0000;
+        font-weight: 700;
+        font-style: italic;
+        text-align: center;
+        font-size: 0.95rem;
+        line-height: 1.2;
         margin-bottom: 15px;
-        border: 2px solid #333; /* Bordo grezzo default */
-        background: #111;
-        overflow: hidden;
-        transition: border-color 0.1s;
+        text-transform: uppercase;
+        background-color: rgba(255,255,255,0.7); /* Per leggibilità sul pattern */
+        padding: 2px 4px;
     }
 
-    .weird-real-img {
+    /* Immagine quadrata */
+    .post-image-box {
+        width: 140px;
+        height: 140px;
+        background: #fff;
+    }
+
+    .post-real-img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
-        /* Fa in modo che il placeholder testuale alternativo (alt) sia stilizzato se l'immagine non carica */
-        color: #fff;
-        font-family: 'Courier New', Courier, monospace;
-        font-size: 0.7rem;
-        display: block;
-        text-align: center;
-        line-height: 1.2;
+        object-fit: cover; /* Assicura che l'immagine riempia il quadrato senza deformarsi */
     }
 
-    /* Variazioni di filtri sulle immagini per l'effetto weirdcore/glitch */
-    .img-filter-0 .weird-real-img { filter: contrast(150%) saturate(200%) hue-rotate(90deg); }
-    .img-filter-1 .weird-real-img { filter: grayscale(100%) contrast(200%); }
-    .img-filter-2 .weird-real-img { filter: sepia(100%) hue-rotate(-50deg) saturate(300%); }
-    .img-filter-3 .weird-real-img { filter: invert(100%) hue-rotate(180deg); }
-
-    .weird-item:hover .weird-image-box {
-        border-color: #fff;
-    }
-
-    /* Testo con i font grezzi Web 1.0 */
-    .weird-label {
-        font-size: 1rem;
-        font-weight: bold;
-        text-align: center;
-        padding: 4px 8px;
-        line-height: 1.2;
-        text-shadow: 2px 2px 0px #000; /* Leggibilità sul nero */
-        word-wrap: break-word;
-        max-width: 100%;
-        transition: all 0.1s;
-    }
-
-    .weird-item:hover .weird-label {
-        background-color: #fff !important;
-        color: #000 !important;
-        text-shadow: none;
-        border: 1px solid #000 !important;
-    }
-
-    /* --- MOBILE RESPONSIVE --- */
+    /* --- RESPONSIVE MOBILE AMICHEVOLE --- */
     @media (max-width: 768px) {
-        .nav-controls {
-            top: 15px;
-            left: 15px;
+        :root {
+            /* Dimensioni del pattern ridotte per mobile per non invadere troppo,
+               sempre in pixel fissi per azzerare le deformazioni */
+            --pattern-width: 100px;
+            --pattern-height: 100px;
         }
 
-        .action-badge {
-            padding: 8px 12px;
-            font-size: 0.85rem;
+        .content-row {
+            padding: 60px 15px 140px 15px; /* Aumentato ulteriormente il padding inferiore per il banner nero fisso più alto */
+            gap: 40px; /* Spazio verticale netto tra i post in colonna */
+            /* Su mobile passiamo a una visualizzazione a singola colonna */
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        
+        .post-item {
+            width: 90%; /* Occupa gran parte della larghezza dello schermo */
+            max-width: 400px; /* Limite massimo per dispositivi grandi */
+        }
+        
+        /* Adeguiamo il testo alla nuova larghezza */
+        .post-label {
+            font-size: 1.1rem; 
+            margin-bottom: 10px;
         }
 
-        /* Weirdcore view mobile */
-        .weird-area {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            padding: 140px 15px 50px 15px; 
-            justify-items: center;
+        /* Rendiamo l'immagine fluida e proporzionata rispetto alla larghezza dello schermo */
+        .post-image-box {
+            width: 100%; 
+            height: auto;
+            aspect-ratio: 1 / 1; /* Mantiene sempre il quadrato perfetto */
+        }
+        
+        .bottom-banner {
+            min-height: 110px; /* Aumentiamo l'altezza del banner su mobile per ospitare testo più grande */
         }
 
-        .weird-item {
-            width: 120px;
-            /* Su mobile riduciamo matematicamente lo spargimento del 50% per evitare overflow estremo ma mantenere il caos intatto */
-            transform: translate(calc(var(--off-x) * 0.5), calc(var(--off-y) * 0.5)) rotate(var(--rot));
-        }
-
-        .weird-image-box {
-            width: 90px;
-            height: 90px;
-        }
-
-        .weird-label {
-            font-size: 0.85rem;
+        #hover-description {
+            font-size: 1.15rem; /* Font più grande e molto più leggibile su mobile */
+            padding: 10px 8px; /* Padding laterale ridotto in modo da sfruttare tutto lo spazio disponibile */
         }
     }
 </style>
