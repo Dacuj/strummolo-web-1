@@ -25,49 +25,39 @@ const getPostImage = (style: string) => {
     <title>Sturmmolo | I HATE NAPOLI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Aggiunto font Inter per i titoli -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="/favicon.png" />
 </head>
 <body>
 
-    <!-- BANNER SUPERIORE FISSO (Nero) -->
     <div class="retro-banner top-banner">
         <a href="/" class="home-btn">← HOME</a>
     </div>
 
-    <!-- VISTA PRINCIPALE (Centrata in orizzontale e verticale) -->
     <main class="content-row">
         {posts.map((post) => (
-            /* Passiamo la descrizione a data-description per leggerla con JS */
             <a href={`/taccuino/${post.slug}`} class="post-item" data-description={post.data.description || 'Nessuna descrizione disponibile.'}>
-                <!-- Titolo in alto (Rosso, Bold, Italic) -->
                 <div class="post-label">
                     {post.data.title}
                 </div>
                 
-                <!-- Immagine quadrata sotto -->
                 <div class="post-image-box">
-                    <!-- Se hai un'immagine frontmatter usa {post.data.cover}, altrimenti usiamo la funzione di fallback -->
                     <img src={post.data.cover || getPostImage(post.data.style)} alt={`Cover per ${post.data.title}`} class="post-real-img" />
                 </div>
             </a>
         ))}
     </main>
 
-    <!-- BANNER INFERIORE FISSO (Nero) - Mostrerà la descrizione al passaggio del mouse -->
     <div class="retro-banner bottom-banner">
         <span id="hover-description"></span>
     </div>
 
-    <!-- SCRIPT PER EFFETTO HOVER -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const posts = document.querySelectorAll('.post-item');
             const descriptionBox = document.getElementById('hover-description');
 
             posts.forEach(post => {
-                // Quando il mouse entra sul post, scrivi la descrizione nel banner
                 post.addEventListener('mouseenter', () => {
                     const desc = post.getAttribute('data-description');
                     if (desc) {
@@ -75,7 +65,6 @@ const getPostImage = (style: string) => {
                     }
                 });
 
-                // Quando il mouse esce, svuota il banner
                 post.addEventListener('mouseleave', () => {
                     descriptionBox.textContent = '';
                 });
@@ -89,11 +78,7 @@ const getPostImage = (style: string) => {
 <style is:global>
     /* --- RESET & BACKGROUND ANIMATO --- */
     :root {
-        /* Percorso dell'immagine locale inserita in public/img/ */
         --pattern-url: url('/img/nanananna.png');
-        
-        /* Uso i pixel fissi al posto di vw/vh per evitare qualsiasi deformazione dell'immagine.
-           Se la tua immagine non è perfettamente quadrata, adatta questi valori (es. 160px e 120px) */
         --pattern-width: 160px;
         --pattern-height: 160px;
     }
@@ -105,14 +90,13 @@ const getPostImage = (style: string) => {
     }
 
     body, html {
-        background-color: #e8efb6; /* Un colore di fallback nel caso l'immagine sia trasparente */
+        background-color: #e8efb6;
         color: #ff0000;
         min-height: 100%;
         overflow-x: hidden;
         cursor: crosshair;
         font-family: 'Inter', Arial, sans-serif;
         
-        /* Logica del background animato */
         background-image: var(--pattern-url);
         background-size: var(--pattern-width) var(--pattern-height);
         background-repeat: repeat;
@@ -124,53 +108,55 @@ const getPostImage = (style: string) => {
         100% { background-position: var(--pattern-width) var(--pattern-height); }
     }
 
-    /* --- BANNER (TOP & BOTTOM) - ORA NERI --- */
+    /* --- BANNER (TOP & BOTTOM) --- */
     .retro-banner {
         position: fixed;
         left: 0;
         width: 100%;
-        background-color: #000000; /* Modificato da rosso a nero */
+        background-color: #000000;
         z-index: 1000;
         display: flex;
-        justify-content: center; /* Centra il contenuto orizzontalmente */
     }
 
-    /* Stile specifico per il banner top fisso */
+    /* Top banner: allineato a sinistra */
     .top-banner {
         top: 0;
-        height: 35px; /* Altezza fissa solo per quello in alto */
+        height: 35px;
         align-items: center;
+        justify-content: flex-start; /* Sposta il bottone a sinistra */
+        padding-left: 20px; /* Dà respiro dal bordo sinistro */
     }
 
     .home-btn {
         color: #ffffff;
         text-decoration: none;
         font-weight: 700;
-        font-family: Arial, Helvetica, sans-serif; /* Adattato allo screen */
-        font-size: 1.1rem; /* Leggermente più grande */
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 1.1rem;
         transition: color 0.2s, transform 0.2s;
     }
 
     .home-btn:hover {
-        color: #ff0000; /* Hover rosso per contrastare col banner nero */
+        color: #ff0000;
         transform: scale(1.05);
     }
 
-    /* Banner inferiore per la descrizione (ora supporta altezze maggiori) */
+    /* Bottom banner: centrato */
     .bottom-banner {
         bottom: 0;
-        min-height: 80px; /* Abbastanza spazio per contenere circa 3 righe */
-        align-items: center; /* Centra il testo verticalmente */
+        min-height: 80px;
+        align-items: center;
+        justify-content: center; /* Centra il testo della descrizione */
     }
 
     #hover-description {
         color: #ffffff;
-        font-family: Arial, Helvetica, sans-serif; /* Adattato allo screen per un look più pulito */
-        font-size: 1.25rem; /* Font aumentato su desktop */
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 1.25rem;
         font-weight: 700;
         white-space: normal;
         display: -webkit-box;
-        -webkit-line-clamp: 3; /* Blocca il testo alla terza riga */
+        -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -180,16 +166,15 @@ const getPostImage = (style: string) => {
         line-height: 1.4;
     }
 
-    /* --- LAYOUT CONTENUTI (Orizzontale & Centrato) --- */
+    /* --- LAYOUT CONTENUTI --- */
     .content-row {
         display: flex;
         flex-wrap: wrap; 
-        justify-content: center; /* Centra orizzontalmente */
-        align-content: center;   /* Centra il blocco di post verticalmente */
-        align-items: center;     /* Centra i singoli elementi verticalmente */
+        justify-content: center;
+        align-content: center;   
+        align-items: center;     
         gap: 30px;
         min-height: 100vh;
-        /* Padding modificato per lasciare più spazio al banner inferiore */
         padding: 60px 40px 100px 40px; 
         max-width: 1400px;
         margin: 0 auto;
@@ -200,15 +185,14 @@ const getPostImage = (style: string) => {
         flex-direction: column;
         align-items: center;
         text-decoration: none;
-        width: 160px; /* Larghezza fissa della colonna desktop */
+        width: 160px;
         transition: transform 0.2s;
     }
 
     .post-item:hover {
-        transform: scale(1.05); /* Effetto hover semplice */
+        transform: scale(1.05);
     }
 
-    /* Etichetta Titolo (rossa, bold, italic) */
     .post-label {
         color: #ff0000;
         font-weight: 700;
@@ -218,11 +202,10 @@ const getPostImage = (style: string) => {
         line-height: 1.2;
         margin-bottom: 15px;
         text-transform: uppercase;
-        background-color: rgba(255,255,255,0.7); /* Per leggibilità sul pattern */
+        background-color: rgba(255,255,255,0.7);
         padding: 2px 4px;
     }
 
-    /* Immagine quadrata */
     .post-image-box {
         width: 140px;
         height: 140px;
@@ -232,22 +215,20 @@ const getPostImage = (style: string) => {
     .post-real-img {
         width: 100%;
         height: 100%;
-        object-fit: cover; /* Assicura che l'immagine riempia il quadrato senza deformarsi */
+        object-fit: cover;
     }
 
     /* --- RESPONSIVE MOBILE AMICHEVOLE --- */
     @media (max-width: 768px) {
         :root {
-            /* Dimensioni del pattern ridotte per mobile per non invadere troppo,
-               sempre in pixel fissi per azzerare le deformazioni */
             --pattern-width: 100px;
             --pattern-height: 100px;
         }
 
         .content-row {
-            padding: 60px 15px 140px 15px; /* Aumentato ulteriormente il padding inferiore per il banner nero fisso più alto */
-            gap: 40px; /* Spazio verticale netto tra i post in colonna */
-            /* Su mobile passiamo a una visualizzazione a singola colonna */
+            /* Ridotto il padding inferiore visto che il banner nero sotto non c'è più */
+            padding: 60px 15px 40px 15px; 
+            gap: 40px;
             display: flex;
             flex-direction: column;
             flex-wrap: nowrap;
@@ -256,30 +237,24 @@ const getPostImage = (style: string) => {
         }
         
         .post-item {
-            width: 90%; /* Occupa gran parte della larghezza dello schermo */
-            max-width: 400px; /* Limite massimo per dispositivi grandi */
+            width: 100%; 
+            max-width: 400px;
         }
         
-        /* Adeguiamo il testo alla nuova larghezza */
         .post-label {
             font-size: 1.1rem; 
             margin-bottom: 10px;
         }
 
-        /* Rendiamo l'immagine fluida e proporzionata rispetto alla larghezza dello schermo */
+        /* Dimensioni fisse ridotte per l'immagine invece del 100% */
         .post-image-box {
-            width: 100%; 
-            height: auto;
-            aspect-ratio: 1 / 1; /* Mantiene sempre il quadrato perfetto */
+            width: 220px; 
+            height: 220px;
         }
         
+        /* Nascondiamo completamente il banner inferiore su mobile */
         .bottom-banner {
-            min-height: 110px; /* Aumentiamo l'altezza del banner su mobile per ospitare testo più grande */
-        }
-
-        #hover-description {
-            font-size: 1.15rem; /* Font più grande e molto più leggibile su mobile */
-            padding: 10px 8px; /* Padding laterale ridotto in modo da sfruttare tutto lo spazio disponibile */
+            display: none;
         }
     }
 </style>
