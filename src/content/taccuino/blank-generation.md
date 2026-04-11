@@ -41,4 +41,6 @@ Dunque in cosa speriamo odiando il luogo che ci ha dato i natali ? Forse nel mig
 
 ***Napoli fatta di estremi apparentemente inconciliabili, è sempre in bilico fra la massima espressione della bellezza e l’apogeo della decadenza, non può solo piacerti, può stordirti col suo cattivo odore di piscio o con il profumo di un forno a legna.*** 
 
+![](/img/046813d3-5fab-4125-990d-9e8da96e31df.jpg)
+
 Napoli frenetica, enigmatica, esoterica, imperterrita, coraggiosa, vigliacca, sporca, regale, frugale, ampollosa, esagerata, ammirata, degradata e tanti altri controsensi che sarei in grado di partorire perché sono di Napoli, e in caso non si fosse notato, sono paradossale anch’io.
