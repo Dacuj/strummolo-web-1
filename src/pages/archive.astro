@@ -7,7 +7,7 @@ const posts = await getCollection('taccuino');
 // Ordiniamo per data (dal più recente)
 posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-// Funzione helper per le immagini (mantenuta nel caso in cui i tuoi post non abbiano ancora una 'cover' definita)
+// Funzione helper per le immagini
 const getPostImage = (style: string) => {
     switch (style) {
         case 'tech': return 'https://static.wikia.nocookie.net/aesthetics/images/4/44/Tumblr_b54a31622a1e8dfa780a25c1602aa6b7_8a43a60b_540.jpg/revision/latest?cb=20210505174957';
@@ -36,7 +36,7 @@ const getPostImage = (style: string) => {
 
     <main class="content-row">
         {posts.map((post) => (
-            <a href={`/taccuino/${post.slug}`} class="post-item" data-description={post.data.description || 'Nessuna descrizione disponibile.'}>
+            <a href={`/taccuino/${post.slug}`} class="post-item">
                 <div class="post-label">
                     {post.data.title}
                 </div>
@@ -47,30 +47,6 @@ const getPostImage = (style: string) => {
             </a>
         ))}
     </main>
-
-    <div class="retro-banner bottom-banner">
-        <span id="hover-description"></span>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const posts = document.querySelectorAll('.post-item');
-            const descriptionBox = document.getElementById('hover-description');
-
-            posts.forEach(post => {
-                post.addEventListener('mouseenter', () => {
-                    const desc = post.getAttribute('data-description');
-                    if (desc) {
-                        descriptionBox.textContent = desc;
-                    }
-                });
-
-                post.addEventListener('mouseleave', () => {
-                    descriptionBox.textContent = '';
-                });
-            });
-        });
-    </script>
 
 </body>
 </html>
@@ -90,16 +66,34 @@ const getPostImage = (style: string) => {
     }
 
     body, html {
-        background-color: #e8efb6;
         color: #ff0000;
         min-height: 100%;
         overflow-x: hidden;
         cursor: crosshair;
         font-family: 'Inter', Arial, sans-serif;
+    }
+
+    /* 1. Sfondo pattern obliquo anni 90 */
+    body::before {
+        content: "";
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        z-index: -1; 
+        pointer-events: none; 
         
+        background-color: #e8efb6;
         background-image: var(--pattern-url);
         background-size: var(--pattern-width) var(--pattern-height);
         background-repeat: repeat;
+        
+        transform: rotate(45deg);
+        
+        image-rendering: -moz-crisp-edges;
+        image-rendering: pixelated; 
+        
         animation: scrollPattern 4s linear infinite;
     }
 
@@ -108,7 +102,35 @@ const getPostImage = (style: string) => {
         100% { background-position: var(--pattern-width) var(--pattern-height); }
     }
 
-    /* --- BANNER (TOP & BOTTOM) --- */
+    /* 2. OVERLAY EFFETTO MONITOR CRT */
+    body::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999; /* Sta sopra a tutto, persino al banner */
+        pointer-events: none; /* FONDAMENTALE: permette di cliccare i link sottostanti */
+        
+        background: 
+            /* Scanlines orizzontali */
+            linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
+            /* Vignettatura (angoli scuri tipici dei tubi catodici) */
+            radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.4) 100%);
+        background-size: 100% 4px, 100% 100%; /* I 4px definiscono lo spessore delle righe */
+        
+        /* Leggero sfarfallio per realismo */
+        animation: crtFlicker 0.15s infinite;
+    }
+
+    @keyframes crtFlicker {
+        0% { opacity: 0.95; }
+        50% { opacity: 1; }
+        100% { opacity: 0.95; }
+    }
+
+    /* --- BANNER (SOLO TOP) --- */
     .retro-banner {
         position: fixed;
         left: 0;
@@ -118,13 +140,12 @@ const getPostImage = (style: string) => {
         display: flex;
     }
 
-    /* Top banner: allineato a sinistra */
     .top-banner {
         top: 0;
         height: 35px;
         align-items: center;
-        justify-content: flex-start; /* Sposta il bottone a sinistra */
-        padding-left: 20px; /* Dà respiro dal bordo sinistro */
+        justify-content: flex-start;
+        padding-left: 20px;
     }
 
     .home-btn {
@@ -141,31 +162,6 @@ const getPostImage = (style: string) => {
         transform: scale(1.05);
     }
 
-    /* Bottom banner: centrato */
-    .bottom-banner {
-        bottom: 0;
-        min-height: 80px;
-        align-items: center;
-        justify-content: center; /* Centra il testo della descrizione */
-    }
-
-    #hover-description {
-        color: #ffffff;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 1.25rem;
-        font-weight: 700;
-        white-space: normal;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        padding: 10px 20px;
-        max-width: 100%;
-        text-align: center;
-        line-height: 1.4;
-    }
-
     /* --- LAYOUT CONTENUTI --- */
     .content-row {
         display: flex;
@@ -175,7 +171,7 @@ const getPostImage = (style: string) => {
         align-items: center;     
         gap: 30px;
         min-height: 100vh;
-        padding: 60px 40px 100px 40px; 
+        padding: 60px 40px 40px 40px; 
         max-width: 1400px;
         margin: 0 auto;
     }
@@ -216,6 +212,7 @@ const getPostImage = (style: string) => {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        image-rendering: pixelated; /* Dà alle immagini l'effetto sgranato */
     }
 
     /* --- RESPONSIVE MOBILE AMICHEVOLE --- */
@@ -226,9 +223,8 @@ const getPostImage = (style: string) => {
         }
 
         .content-row {
-            /* Ridotto il padding inferiore visto che il banner nero sotto non c'è più */
             padding: 60px 15px 40px 15px; 
-            gap: 40px;
+            gap: 30px;
             display: flex;
             flex-direction: column;
             flex-wrap: nowrap;
@@ -238,23 +234,18 @@ const getPostImage = (style: string) => {
         
         .post-item {
             width: 100%; 
-            max-width: 400px;
+            max-width: 300px;
         }
         
         .post-label {
-            font-size: 1.1rem; 
+            font-size: 1rem; 
             margin-bottom: 10px;
         }
 
-        /* Dimensioni fisse ridotte per l'immagine invece del 100% */
+        /* Dimensioni notevolmente ridotte su mobile (prima era 220px) */
         .post-image-box {
-            width: 220px; 
-            height: 220px;
-        }
-        
-        /* Nascondiamo completamente il banner inferiore su mobile */
-        .bottom-banner {
-            display: none;
+            width: 150px; 
+            height: 150px;
         }
     }
 </style>
