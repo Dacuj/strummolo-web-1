@@ -1,64 +1,155 @@
 ---
 import { getCollection } from 'astro:content';
 
-// Recuperiamo tutti gli articoli reali dalla cartella 'taccuino'
+// 1. Recupero degli articoli
 const posts = await getCollection('taccuino');
 
-// Ordiniamo per data (dal più recente)
-posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-
-// Funzione helper per le immagini
-const getPostImage = (style: string) => {
-    switch (style) {
-        case 'tech': return 'https://static.wikia.nocookie.net/aesthetics/images/4/44/Tumblr_b54a31622a1e8dfa780a25c1602aa6b7_8a43a60b_540.jpg/revision/latest?cb=20210505174957';
-        case 'editorial': return 'https://static.wikia.nocookie.net/aesthetics/images/d/d3/Smilewc.jpg/revision/latest?cb=20210524044251';
-        case 'brutal': return 'https://static.wikia.nocookie.net/aesthetics/images/1/18/34efa0d1f1ecc17c1f8b1f4f602589b5.png/revision/latest?cb=20210327012339';
-        default: return 'https://static.wikia.nocookie.net/aesthetics/images/3/3b/OIP_%2821%29.webp/revision/latest?cb=20251009135123';
+// 2. FUNZIONI GENERATIVE PER L'ARTWORK SVG
+// Generiamo linee azzurre "spezzate" simili a confini radar/fiumi
+const generateCyanLines = () => {
+    let paths = [];
+    for (let i = 0; i < 8; i++) {
+        let path = `M ${Math.random() * 100} ${Math.random() * 10}`;
+        for (let j = 0; j < 5; j++) {
+            path += ` L ${Math.random() * 100} ${Math.random() * 100}`;
+        }
+        paths.push(path);
     }
+    return paths;
 };
+
+// Generiamo linee topografiche gialle (cerchi concentrici distorti)
+const generateTopoLines = () => {
+    let paths = [];
+    const peaks = [
+        { cx: 20, cy: 80, layers: 15, radius: 25 }, // Picco in basso a sx
+        { cx: 60, cy: 40, layers: 20, radius: 35 }, // Picco centrale
+        { cx: 85, cy: 30, layers: 10, radius: 15 }  // Picco in alto a dx
+    ];
+
+    peaks.forEach(peak => {
+        for (let l = 1; l <= peak.layers; l++) {
+            let points = [];
+            let currentRadius = (l / peak.layers) * peak.radius;
+            for (let angle = 0; angle < 360; angle += 20) {
+                // Distorsione matematica (rumore casuale)
+                let jitter = (Math.random() - 0.5) * 4; 
+                let r = currentRadius + jitter;
+                let x = peak.cx + r * Math.cos((angle * Math.PI) / 180);
+                let y = peak.cy + r * Math.sin((angle * Math.PI) / 180);
+                points.push(`${x},${y}`);
+            }
+            paths.push(`M ${points.join(' L ')} Z`);
+        }
+    });
+    return paths;
+};
+
+// Generiamo i numeretti sparsi (es. 64, 56, 90)
+const generateNumbers = () => {
+    let numbers = [];
+    for (let i = 0; i < 30; i++) {
+        numbers.push({
+            x: Math.random() * 95,
+            y: Math.random() * 95,
+            val: Math.floor(Math.random() * 40 + 50) 
+        });
+    }
+    return numbers;
+};
+
+// Eseguiamo i calcoli per il background
+const cyanPaths = generateCyanLines();
+const topoPaths = generateTopoLines();
+const mapNumbers = generateNumbers();
+
+// 3. LOGICA PER GLI ARTICOLI (Scritte Rosse)
+const getRandomPos = () => ({
+    // Range tra 15% e 80% per lasciare libero l'angolo in alto a sinistra per la HOME
+    top: Math.floor(Math.random() * 65 + 15) + '%',
+    left: Math.floor(Math.random() * 65 + 15) + '%'
+});
+
+const nonsenseSubtexts = ["message.hqx", "131.24.167", "Reflector", "SYS.ERR", "BINHEX"];
+const glitchSymbols = ['†', 'º', '‡', '±'];
 ---
 
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sturmmolo | I HATE NAPOLI</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>BETALAB // I HATE NAPOLI</title>
 </head>
 <body>
 
-    <div class="retro-banner top-banner">
-        <a href="/" class="home-btn">← HOME</a>
-    </div>
-
-    <main class="content-row">
-        {posts.map((post) => (
-            <a href={`/taccuino/${post.slug}`} class="post-item">
-                <div class="post-label">
-                    {post.data.title}
-                </div>
-                
-                <div class="post-image-box">
-                    <img src={post.data.cover || getPostImage(post.data.style)} alt={`Cover per ${post.data.title}`} class="post-real-img" />
-                </div>
-            </a>
+    <!-- ARTWORK GENERATO VIA CODICE (SVG) -->
+    <svg class="jodi-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
+        
+        <!-- Confini azzurri -->
+        {cyanPaths.map(path => (
+            <path d={path} fill="none" stroke="#00ffff" stroke-width="0.3" vector-effect="non-scaling-stroke" class="cyan-line" />
         ))}
+
+        <!-- Topografia gialla -->
+        {topoPaths.map(path => (
+            <path d={path} fill="none" stroke="#ffff00" stroke-width="0.2" vector-effect="non-scaling-stroke" />
+        ))}
+
+        <!-- Numeri gialli sparsi -->
+        {mapNumbers.map(num => (
+            <text x={num.x} y={num.y} fill="#ffff00" font-size="2" font-family="monospace">
+                {num.val}
+            </text>
+        ))}
+
+        <!-- Bersagli topografici Rossi in SVG -->
+        <circle cx="20" cy="80" r="1.5" fill="none" stroke="#ff0000" stroke-width="0.5" vector-effect="non-scaling-stroke" />
+        <circle cx="20" cy="80" r="0.4" fill="#ff0000" />
+        
+        <circle cx="60" cy="40" r="1.5" fill="none" stroke="#ff0000" stroke-width="0.5" vector-effect="non-scaling-stroke" />
+        <circle cx="60" cy="40" r="0.4" fill="#ff0000" />
+
+    </svg>
+
+    <!-- LIVELLO SUPERIORE HTML: UI e ARTICOLI -->
+    <main class="ui-layer">
+
+        <!-- IL LINK HOME IN ALTO A SINISTRA -->
+        <a href="/" class="home-link">
+            "HOME=
+        </a>
+
+        <!-- GLI ARTICOLI SPARSI -->
+        {posts.map((post) => {
+            const pos = getRandomPos();
+            const symbol = glitchSymbols[Math.floor(Math.random() * glitchSymbols.length)];
+            const subtext = nonsenseSubtexts[Math.floor(Math.random() * nonsenseSubtexts.length)];
+
+            return (
+                <div class="article-node" style={`top: ${pos.top}; left: ${pos.left};`}>
+                    <a href={`/taccuino/${post.slug}`} class="main-title">
+                        {post.data.title.toUpperCase()}{symbol}
+                    </a>
+                    <div class="sub-title">{subtext}</div>
+                </div>
+            );
+        })}
+
+        <!-- TORRETTA FINTA DECORATIVA -->
+        <div class="fake-target" style="bottom: 15%; right: 25%;">
+            "target=
+            <div class="beacon-tower">
+                <div class="beacon-light"></div>
+                <div class="beacon-base"></div>
+            </div>
+        </div>
     </main>
 
 </body>
 </html>
 
 <style is:global>
-    /* --- RESET & BACKGROUND ANIMATO --- */
-    :root {
-        --pattern-url: url('/img/nanananna.png');
-        --pattern-width: 160px;
-        --pattern-height: 160px;
-    }
-
+    /* --- RESET & SETUP --- */
     * {
         margin: 0;
         padding: 0;
@@ -66,186 +157,146 @@ const getPostImage = (style: string) => {
     }
 
     body, html {
-        color: #ff0000;
-        min-height: 100%;
-        overflow-x: hidden;
+        background-color: #000000;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden; 
+        font-family: Arial, Helvetica, sans-serif; 
         cursor: crosshair;
-        font-family: 'Inter', Arial, sans-serif;
     }
 
-    /* 1. Sfondo pattern obliquo anni 90 */
-    body::before {
-        content: "";
-        position: fixed;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        z-index: -1; 
-        pointer-events: none; 
-        
-        background-color: #e8efb6;
-        background-image: var(--pattern-url);
-        background-size: var(--pattern-width) var(--pattern-height);
-        background-repeat: repeat;
-        
-        transform: rotate(45deg);
-        
-        image-rendering: -moz-crisp-edges;
-        image-rendering: pixelated; 
-        
-        animation: scrollPattern 4s linear infinite;
-    }
-
-    @keyframes scrollPattern {
-        0% { background-position: 0px 0px; }
-        100% { background-position: var(--pattern-width) var(--pattern-height); }
-    }
-
-    /* 2. OVERLAY EFFETTO MONITOR CRT */
-    body::after {
-        content: "";
+    /* --- BACKGROUND SVG --- */
+    .jodi-bg {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        z-index: 9999; /* Sta sopra a tutto, persino al banner */
-        pointer-events: none; /* FONDAMENTALE: permette di cliccare i link sottostanti */
-        
-        background: 
-            /* Scanlines orizzontali */
-            linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
-            /* Vignettatura (angoli scuri tipici dei tubi catodici) */
-            radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.4) 100%);
-        background-size: 100% 4px, 100% 100%; /* I 4px definiscono lo spessore delle righe */
-        
-        /* Leggero sfarfallio per realismo */
-        animation: crtFlicker 0.15s infinite;
+        z-index: 1;
+        pointer-events: none; 
     }
 
-    @keyframes crtFlicker {
-        0% { opacity: 0.95; }
-        50% { opacity: 1; }
-        100% { opacity: 0.95; }
+    .cyan-line {
+        animation: glitchPath 4s infinite step-end;
     }
 
-    /* --- BANNER (SOLO TOP) --- */
-    .retro-banner {
-        position: fixed;
-        left: 0;
+    @keyframes glitchPath {
+        90% { stroke-opacity: 1; }
+        95% { stroke-opacity: 0.2; }
+        100% { stroke-opacity: 1; }
+    }
+
+    /* --- LAYER UI HTML --- */
+    .ui-layer {
+        position: relative;
         width: 100%;
-        background-color: #000000;
-        z-index: 1000;
-        display: flex;
+        height: 100%;
+        z-index: 10;
     }
 
-    .top-banner {
-        top: 0;
-        height: 35px;
-        align-items: center;
-        justify-content: flex-start;
-        padding-left: 20px;
-    }
-
-    .home-btn {
-        color: #ffffff;
-        text-decoration: none;
-        font-weight: 700;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 1.1rem;
-        transition: color 0.2s, transform 0.2s;
-    }
-
-    .home-btn:hover {
+    /* --- HOME LINK --- */
+    .home-link {
+        position: absolute;
+        top: 5%;
+        left: 5%;
         color: #ff0000;
-        transform: scale(1.05);
+        text-decoration: underline;
+        text-decoration-thickness: 3px;
+        font-size: 26px;
+        font-weight: 900;
+        letter-spacing: 1px;
+        background-color: rgba(0, 0, 0, 0.6); 
+        padding: 2px 6px;
+        z-index: 100; /* Assicuriamoci che stia sempre sopra a tutto */
     }
 
-    /* --- LAYOUT CONTENUTI --- */
-    .content-row {
+    .home-link:hover {
+        background-color: #ff0000;
+        color: #000000;
+        text-decoration: none;
+    }
+
+    /* --- ARTICOLI --- */
+    .article-node {
+        position: absolute;
         display: flex;
-        flex-wrap: wrap; 
-        justify-content: center;
-        align-content: center;   
-        align-items: center;     
-        gap: 30px;
-        min-height: 100vh;
-        padding: 60px 40px 40px 40px; 
-        max-width: 1400px;
-        margin: 0 auto;
+        flex-direction: column;
+        align-items: flex-start;
+        background-color: rgba(0, 0, 0, 0.6); 
+        padding: 2px 6px;
     }
 
-    .post-item {
+    .main-title {
+        color: #ff0000;
+        text-decoration: underline;
+        text-decoration-thickness: 3px;
+        font-size: 28px;
+        font-weight: 900;
+        letter-spacing: 1px;
+    }
+
+    .main-title:hover {
+        background-color: #ff0000;
+        color: #000000;
+        text-decoration: none;
+    }
+
+    .sub-title {
+        color: #ff0000;
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+        font-size: 22px;
+        font-weight: 700;
+        margin-top: -2px;
+        pointer-events: none; /* Rende la sottoscritta non cliccabile per non infastidire */
+    }
+
+    /* --- DECORAZIONE TORRETTA RADAR ("target=") --- */
+    .fake-target {
+        position: absolute;
+        color: #ff0000;
+        text-decoration: underline;
+        font-size: 24px;
+        font-weight: bold;
         display: flex;
         flex-direction: column;
         align-items: center;
-        text-decoration: none;
-        width: 160px;
-        transition: transform 0.2s;
+        pointer-events: none;
     }
 
-    .post-item:hover {
-        transform: scale(1.05);
+    .beacon-tower {
+        margin-top: 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
-    .post-label {
-        color: #ff0000;
-        font-weight: 700;
-        font-style: italic;
-        text-align: center;
-        font-size: 0.95rem;
-        line-height: 1.2;
-        margin-bottom: 15px;
-        text-transform: uppercase;
-        background-color: rgba(255,255,255,0.7);
-        padding: 2px 4px;
+    .beacon-base {
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 20px solid #ff0000;
     }
 
-    .post-image-box {
-        width: 140px;
-        height: 140px;
-        background: #fff;
+    .beacon-light {
+        width: 6px;
+        height: 6px;
+        background-color: #ff0000;
+        margin-bottom: 2px;
+        animation: beaconBlink 0.8s infinite step-end;
     }
 
-    .post-real-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        image-rendering: pixelated; /* Dà alle immagini l'effetto sgranato */
+    @keyframes beaconBlink {
+        50% { opacity: 0; }
     }
 
-    /* --- RESPONSIVE MOBILE AMICHEVOLE --- */
+    /* --- MOBILE --- */
     @media (max-width: 768px) {
-        :root {
-            --pattern-width: 100px;
-            --pattern-height: 100px;
-        }
-
-        .content-row {
-            padding: 60px 15px 40px 15px; 
-            gap: 30px;
-            display: flex;
-            flex-direction: column;
-            flex-wrap: nowrap;
-            justify-content: flex-start;
-            align-items: center;
-        }
-        
-        .post-item {
-            width: 100%; 
-            max-width: 300px;
-        }
-        
-        .post-label {
-            font-size: 1rem; 
-            margin-bottom: 10px;
-        }
-
-        /* Dimensioni notevolmente ridotte su mobile (prima era 220px) */
-        .post-image-box {
-            width: 150px; 
-            height: 150px;
-        }
+        .main-title { font-size: 20px; text-decoration-thickness: 2px; }
+        .sub-title { font-size: 16px; }
+        .home-link { font-size: 20px; top: 3%; left: 3%; }
+        .fake-target { font-size: 18px; }
+        body, html { overflow: auto; } 
     }
 </style>

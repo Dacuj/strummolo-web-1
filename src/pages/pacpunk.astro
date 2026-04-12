@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>%_SYS.ERR // NULL_POINTER_%</title>
+    <style>
+        /* --- RESET BRUTALE --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: crosshair;
+        }
+
+        body, html {
+            background-color: #000000;
+            color: #ff0000;
+            font-family: "Courier New", Courier, monospace;
+            overflow-x: hidden;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* --- UI DI SISTEMA --- */
+        .sys-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #ff0000;
+            text-decoration: underline;
+            text-decoration-thickness: 2px;
+            font-weight: bold;
+            font-size: 18px;
+            z-index: 999;
+            background: #000;
+        }
+
+        .sys-link:hover {
+            background-color: #ff0000;
+            color: #000000;
+            text-decoration: none;
+        }
+
+        /* --- LAYOUT PRINCIPALE --- */
+        .mainframe {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 40px;
+        }
+
+        .header-glitch {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .hud-line {
+            width: 456px;
+            max-width: 100%;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #0000ff; /* Blu elettrico terminale */
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* --- AREA DI GIOCO --- */
+        .canvas-container {
+            position: relative;
+            border: 4px solid #ff0000; /* Bordo rosso crudo */
+            background: #000000;
+        }
+
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        /* --- SCHERMATA DI ERRORE (EX MENU) --- */
+        .kernel-panic {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            border: 4px solid #00ff00; /* Verde acido per l'errore */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            z-index: 100;
+            color: #00ff00;
+        }
+
+        .kernel-panic.hidden {
+            display: none;
+        }
+
+        .panic-title {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            animation: blink 0.5s step-end infinite;
+        }
+
+        .panic-dump {
+            font-size: 12px;
+            line-height: 1.2;
+            margin-bottom: 30px;
+            word-break: break-all;
+        }
+
+        .execute-btn {
+            background: transparent;
+            color: #ff0000;
+            border: 2px solid #ff0000;
+            padding: 5px 15px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 20px;
+            text-transform: uppercase;
+        }
+
+        .execute-btn:active {
+            background: #ff0000;
+            color: #000;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* --- CONTROLLI MOBILE (DPAD RAW) --- */
+        .dpad-raw {
+            display: grid;
+            grid-template-columns: repeat(3, 50px);
+            gap: 5px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .d-key {
+            width: 50px;
+            height: 50px;
+            background: #000;
+            border: 2px solid #0000ff;
+            color: #0000ff;
+            font-family: inherit;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .d-key:active {
+            background: #0000ff;
+            color: #000;
+        }
+
+        @media (min-width: 640px) {
+            .dpad-raw { display: none; }
+        }
+
+        /* Testo decorativo sul fondo */
+        .sys-marquee {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #0000ff;
+            color: #fff;
+            font-weight: bold;
+            padding: 2px 0;
+            font-size: 14px;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Link ritorno Home coerente -->
+    <a href="/" class="sys-link">"HOME=</a>
+
+    <div class="mainframe">
+        
+        <div class="header-glitch">0xDEADBEEF // MEM_LEAK</div>
+
+        <!-- HUD stravolto -->
+        <div class="hud-line">
+            <span>0xALLOC: <span id="scoreDisplay">0000</span></span>
+            <span>0xCYCLES: <span id="livesDisplay">3</span></span>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="456" height="456"></canvas>
+
+            <!-- Menu diventato un Kernel Panic -->
+            <div id="overlay" class="kernel-panic">
+                <div id="overlayTitle" class="panic-title">SYS.HALTED</div>
+                <div id="overlayDesc" class="panic-dump">
+                    FATAL_EXCEPTION_IN_0x0000<br>
+                    TARGET_NOT_FOUND.<br><br>
+                    PRESS_EXECUTE_TO_DUMP_CORE<br>
+                    > OVERRIDE_PROTOCOL_24<br>
+                    > ENGAGE_ROOT_ACCESS
+                </div>
+                <button id="startBtn" class="execute-btn">[ EXECUTE ]</button>
+            </div>
+        </div>
+
+        <!-- D-Pad minimalista text-based -->
+        <div class="dpad-raw">
+            <div></div>
+            <div id="btn-up" class="d-key">[^]</div>
+            <div></div>
+            <div id="btn-left" class="d-key">[&lt;]</div>
+            <div id="btn-down" class="d-key">[v]</div>
+            <div id="btn-right" class="d-key">[&gt;]</div>
+        </div>
+
+    </div>
+
+    <!-- Rumore testuale -->
+    <marquee class="sys-marquee" scrollamount="12">
+        I HATE NAPOLI // 131.24.167 // I HATE NAPOLI // 131.24.167 // SYS.ERR // NO_SIGNAL // I HATE NAPOLI // 131.24.167 // 
+    </marquee>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const overlay = document.getElementById('overlay');
+    const overlayTitle = document.getElementById('overlayTitle');
+    const overlayDesc = document.getElementById('overlayDesc');
+    const startBtn = document.getElementById('startBtn');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const livesDisplay = document.getElementById('livesDisplay');
+
+    const TILE_SIZE = 24;
+    const SPEED = 1.5; 
+    const ROWS = 19;
+    const COLS = 19;
+
+    const initialMap = [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
+        [1,3,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,3,1],
+        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+        [1,2,1,1,2,1,2,1,1,1,1,1,2,1,2,1,1,2,1],
+        [1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1],
+        [1,1,1,1,2,1,1,1,0,1,0,1,1,1,2,1,1,1,1],
+        [0,0,0,1,2,1,0,0,0,0,0,0,0,1,2,1,0,0,0],
+        [1,1,1,1,2,1,0,1,1,4,1,1,0,1,2,1,1,1,1],
+        [0,0,0,0,2,0,0,1,0,0,0,1,0,0,2,0,0,0,0], 
+        [1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1],
+        [0,0,0,1,2,1,0,0,0,0,0,0,0,1,2,1,0,0,0],
+        [1,1,1,1,2,1,2,1,1,1,1,1,2,1,2,1,1,1,1],
+        [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
+        [1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1],
+        [1,3,2,1,2,2,2,2,2,0,2,2,2,2,2,1,2,3,1],
+        [1,1,2,1,2,1,2,1,1,1,1,1,2,1,2,1,2,1,1],
+        [1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
+
+    let map = [];
+    let score = 0;
+    let lives = 3;
+    let gameState = 'MENU';
+    let powerMode = false;
+    let powerTimer = 0;
+    let animationId;
+    let dotsRemaining = 0;
+    let frameCount = 0;
+
+    // SOSTITUITE LE EMOJI CON CARATTERI ASCII
+    let player = { x: 9 * TILE_SIZE, y: 15 * TILE_SIZE, currDir: null, nextDir: null, symbol: '@' };
+    const ghostSymbols = ['&', '%', '$', '#']; 
+    let ghosts = [];
+
+    const dirs = {
+        'UP': { dx: 0, dy: -1 },
+        'DOWN': { dx: 0, dy: 1 },
+        'LEFT': { dx: -1, dy: 0 },
+        'RIGHT': { dx: 1, dy: 0 }
+    };
+
+    function setDirection(d) { if (gameState === 'PLAYING') player.nextDir = d; }
+
+    document.addEventListener('keydown', (e) => {
+        const k = e.key.toLowerCase();
+        if (k === 'arrowup' || k === 'w') setDirection('UP');
+        if (k === 'arrowdown' || k === 's') setDirection('DOWN');
+        if (k === 'arrowleft' || k === 'a') setDirection('LEFT');
+        if (k === 'arrowright' || k === 'd') setDirection('RIGHT');
+    });
+
+    ['up', 'down', 'left', 'right'].forEach(d => {
+        const b = document.getElementById('btn-' + d);
+        b.addEventListener('mousedown', () => setDirection(d.toUpperCase()));
+        b.addEventListener('touchstart', (e) => { e.preventDefault(); setDirection(d.toUpperCase()); });
+    });
+
+    startBtn.addEventListener('click', startGame);
+
+    function initMap() {
+        map = initialMap.map(row => [...row]);
+        dotsRemaining = 0;
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) if (map[r][c] === 2 || map[r][c] === 3) dotsRemaining++;
+        }
+    }
+
+    function initEntities() {
+        player.x = 9 * TILE_SIZE; player.y = 15 * TILE_SIZE; player.currDir = null; player.nextDir = null;
+        ghosts = [];
+        for (let i = 0; i < 4; i++) ghosts.push({ x: (8 + (i % 3)) * TILE_SIZE, y: 9 * TILE_SIZE, dir: 'UP', symbol: ghostSymbols[i], isEaten: false });
+    }
+
+    function startGame() {
+        score = 0; lives = 3; frameCount = 0;
+        updateHUD(); initMap(); initEntities();
+        gameState = 'PLAYING'; overlay.classList.add('hidden');
+        if (animationId) cancelAnimationFrame(animationId);
+        gameLoop();
+    }
+
+    function updateHUD() { 
+        // Aggiunge zeri per sembrare roba di sistema
+        scoreDisplay.innerText = score.toString().padStart(4, '0'); 
+        livesDisplay.innerText = lives; 
+    }
+
+    function showOverlay(t, d) {
+        gameState = 'MENU'; overlayTitle.innerText = t; overlayDesc.innerHTML = d; overlay.classList.remove('hidden');
+    }
+
+    function isAtIntersection(x, y) { return x % TILE_SIZE === 0 && y % TILE_SIZE === 0; }
+
+    function canMove(e, d) {
+        if (!d) return false;
+        let gx = Math.floor(e.x / TILE_SIZE); let gy = Math.floor(e.y / TILE_SIZE);
+        if (gx <= 0 && d === 'LEFT') return true; if (gx >= COLS - 1 && d === 'RIGHT') return true;
+        let nx = gx + dirs[d].dx; let ny = gy + dirs[d].dy;
+        if (ny >= 0 && ny < ROWS && nx >= 0 && nx < COLS) {
+            let t = map[ny][nx]; if (t === 1) return false; if (t === 4 && e === player) return false;
+            return true;
+        }
+        return false;
+    }
+
+    function moveEntity(e) {
+        if (isAtIntersection(e.x, e.y)) {
+            if (e.nextDir && canMove(e, e.nextDir)) e.currDir = e.nextDir;
+            else if (!canMove(e, e.currDir)) e.currDir = null;
+        }
+        if (e.currDir) { e.x += dirs[e.currDir].dx * SPEED; e.y += dirs[e.currDir].dy * SPEED; }
+        if (e.x < -TILE_SIZE/2) e.x = COLS * TILE_SIZE; if (e.x > COLS * TILE_SIZE) e.x = -TILE_SIZE/2;
+    }
+
+    function updateGhosts() {
+        ghosts.forEach(g => {
+            if (g.isEaten) { g.x = 9 * TILE_SIZE; g.y = 9 * TILE_SIZE; g.isEaten = false; return; }
+            if (powerMode && frameCount % 2 !== 0) return;
+            if (isAtIntersection(g.x, g.y)) {
+                let p = ['UP', 'DOWN', 'LEFT', 'RIGHT'].filter(d => canMove(g, d));
+                if (p.length > 0) g.currDir = p[Math.floor(Math.random() * p.length)];
+            }
+            if (g.currDir) { g.x += dirs[g.currDir].dx * SPEED; g.y += dirs[g.currDir].dy * SPEED; }
+        });
+    }
+
+    function checkCollisions() {
+        if (isAtIntersection(player.x, player.y)) {
+            let gx = player.x / TILE_SIZE; let gy = player.y / TILE_SIZE;
+            if (gx >= 0 && gx < COLS && gy >= 0 && gy < ROWS) {
+                let t = map[gy][gx];
+                if (t === 2) { map[gy][gx] = 0; score += 10; dotsRemaining--; }
+                else if (t === 3) { map[gy][gx] = 0; score += 50; dotsRemaining--; powerMode = true; powerTimer = 500; }
+                updateHUD();
+                if (dotsRemaining <= 0) showOverlay("DATA_CLEARED", "ALL_SECTORS_WIPED.<br>REBOOT_SYSTEM?");
+            }
+        }
+        const hit = TILE_SIZE * 0.7;
+        ghosts.forEach(g => {
+            let d = Math.sqrt((player.x - g.x)**2 + (player.y - g.y)**2);
+            if (d < hit) {
+                if (powerMode) { g.isEaten = true; score += 200; updateHUD(); }
+                else { 
+                    lives--; 
+                    updateHUD(); 
+                    if (lives <= 0) showOverlay("SYS.CORRUPT", "0x000F: MEMORY_DUMP_FAILED.<br>PROCESS_KILLED."); 
+                    else initEntities(); 
+                }
+            }
+        });
+    }
+
+    function drawMap() {
+        ctx.fillStyle = '#000'; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                let x = c * TILE_SIZE; let y = r * TILE_SIZE;
+                
+                // Muri spessi blu elettrico
+                if (map[r][c] === 1) { 
+                    ctx.strokeStyle = '#0000ff'; 
+                    ctx.lineWidth = 3; 
+                    ctx.strokeRect(x+2, y+2, TILE_SIZE-4, TILE_SIZE-4); 
+                }
+                // Puntini normali
+                else if (map[r][c] === 2) { 
+                    ctx.fillStyle = '#ff0000'; 
+                    ctx.fillRect(x+10, y+10, 4, 4); 
+                }
+                // Asterisco ASCII per l'invincibilità (anziché la birra)
+                else if (map[r][c] === 3) { 
+                    ctx.fillStyle = '#ffff00'; // Giallo
+                    ctx.font = '20px "Courier New"'; 
+                    ctx.fillText('*', x+12, y+15); 
+                }
+                // Cancello dei fantasmi
+                else if (map[r][c] === 4) { 
+                    ctx.fillStyle = '#00ff00'; 
+                    ctx.fillRect(x, y+11, TILE_SIZE, 2); 
+                }
+            }
+        }
+    }
+
+    function drawEntities() {
+        ctx.textAlign = 'center'; 
+        ctx.textBaseline = 'middle';
+        ctx.font = 'bold 22px "Courier New"'; 
+        
+        // Disegna il player (Il simbolo @) in Rosso
+        ctx.fillStyle = '#ff0000';
+        ctx.fillText(player.symbol, player.x + 12, player.y + 12);
+        
+        // Disegna i nemici (simboli &, %, $, #) in Azzurro
+        ghosts.forEach(g => {
+            // Se powerMode è attivo, i nemici diventano punti esclamativi gialli lampeggianti
+            let sym = (powerMode && !(powerTimer < 100 && frameCount % 20 < 10)) ? '!' : g.symbol;
+            ctx.fillStyle = (sym === '!') ? '#ffff00' : '#00ffff';
+            ctx.fillText(sym, g.x + 12, g.y + 12);
+        });
+    }
+
+    function gameLoop() {
+        if (gameState !== 'PLAYING') return;
+        frameCount++; if (powerMode) { powerTimer--; if (powerTimer <= 0) powerMode = false; }
+        moveEntity(player); updateGhosts(); checkCollisions(); drawMap(); drawEntities();
+        animationId = requestAnimationFrame(gameLoop);
+    }
+
+    initMap(); drawMap();
+</script>
+</body>
+</html>
