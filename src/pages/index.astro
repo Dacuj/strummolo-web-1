@@ -1,12 +1,13 @@
 ---
 /* INDEX.ASTRO
 Web 1.0 Brutalism - JODI.org Wireframe + Original Header
+Mobile View Optimized & Locked (Fixed Background Math)
 */
 ---
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>strummolo123 | Home</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,21 +68,27 @@ Web 1.0 Brutalism - JODI.org Wireframe + Original Header
 
         ctx.strokeStyle = "#FFFF00";
         ctx.lineWidth = 1;
-        // Disabilita l'anti-aliasing per linee crude e pixellate
         ctx.imageSmoothingEnabled = false; 
 
         const cols = 45;
         const rows = 30;
+        
+        // Check per applicare la prospettiva adattiva
+        const isMobile = window.innerWidth <= 768;
+        
+        // Calcoli proporzionali per evitare che il wireframe "scappi" dallo schermo mobile
+        // La larghezza scala con lo schermo, l'altezza scala in base alla viewport
+        const spreadX = isMobile ? canvas.width * 1.4 : 800;
+        const stepY = isMobile ? (canvas.height / 30) : 15; 
+        const zMult = isMobile ? 50 : 40; 
 
-        // Funzione per disegnare un singolo blocco di montagna
         function drawMesh(offsetY) {
             ctx.beginPath();
             for (let y = 0; y < rows - 1; y++) {
                 for (let x = 0; x < cols - 1; x++) {
                     
-                    // Funzione matematica per calcolare l'altezza (z) e la prospettiva
                     let getPoint = (ix, iy) => {
-                        let nx = (ix / cols) * 2 - 1; // da -1 a 1
+                        let nx = (ix / cols) * 2 - 1; 
                         
                         let z = 0;
                         if (nx < -0.2) {
@@ -93,8 +100,10 @@ Web 1.0 Brutalism - JODI.org Wireframe + Original Header
                         }
 
                         let scale = 300 / (iy + 5); 
-                        let px = (canvas.width / 2) + (nx * 800 * (scale / 15));
-                        let py = offsetY + (iy * 15) - (z * 40 * (scale / 10));
+                        
+                        // Posizionamento orizzontale e verticale dinamico
+                        let px = (canvas.width / 2) + (nx * spreadX * (scale / 15));
+                        let py = offsetY + (iy * stepY) - (z * zMult * (scale / 10));
                         return [px, py];
                     };
 
@@ -111,12 +120,14 @@ Web 1.0 Brutalism - JODI.org Wireframe + Original Header
             ctx.stroke();
         }
 
-        // Disegna la geometria due volte
-        drawMesh(canvas.height * 0.15);
-        drawMesh(canvas.height * 0.65);
+        // Su mobile partiamo più in alto e distribuiamo le due griglie per coprire l'intero schermo
+        const offsetTop = isMobile ? canvas.height * 0.05 : canvas.height * 0.15;
+        const offsetBottom = isMobile ? canvas.height * 0.50 : canvas.height * 0.65;
+
+        drawMesh(offsetTop);
+        drawMesh(offsetBottom);
     }
 
-    // Statico, niente animazioni
     window.addEventListener("resize", renderWireframe);
     renderWireframe();
 
@@ -137,7 +148,7 @@ Web 1.0 Brutalism - JODI.org Wireframe + Original Header
 </html>
 
 <style is:global>
-    /* --- RESET E BODY --- */
+    /* --- RESET E LOCK SCHERMO --- */
     * {
         margin: 0;
         padding: 0;
@@ -147,9 +158,12 @@ Web 1.0 Brutalism - JODI.org Wireframe + Original Header
     body, html {
         background-color: #000000;
         color: #ffff00; 
-        height: 100vh;
-        width: 100vw;
-        overflow-x: hidden; 
+        height: 100%;
+        width: 100%;
+        overflow: hidden; 
+        position: fixed; 
+        touch-action: none; 
+        
         font-family: 'Courier New', Courier, Fixedsys, Terminal, monospace;
         font-weight: bold;
         -webkit-font-smoothing: none;
@@ -162,13 +176,13 @@ Web 1.0 Brutalism - JODI.org Wireframe + Original Header
         position: fixed;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         z-index: 0;
         pointer-events: none;
     }
 
-    /* --- HEADER (RIPRISTINATO DAL TUO CODICE ALLEGATO) --- */
+    /* --- HEADER (Desktop intatto) --- */
     header {
         width: 100%;
         padding: 20px;
@@ -247,13 +261,13 @@ Web 1.0 Brutalism - JODI.org Wireframe + Original Header
         color: #fff;
     }
 
-    /* --- TESTO STILE JODI --- */
+    /* --- TESTO STILE JODI (Desktop) --- */
     .jodi-content {
         padding-top: 25vh; 
         padding-left: 5vw;
         padding-right: 5vw;
         width: 100%;
-        height: 100vh;
+        height: 100%;
         z-index: 10;
         position: relative;
         pointer-events: none;
@@ -264,7 +278,6 @@ Web 1.0 Brutalism - JODI.org Wireframe + Original Header
         font-family: 'Courier New', Courier, Terminal, monospace;
         font-size: 2vw; 
         line-height: 1.1;
-        /* Usa pre-wrap per evitare che scappi dallo schermo */
         white-space: pre-wrap; 
         word-wrap: break-word;
         max-width: 100%;
@@ -292,9 +305,9 @@ Web 1.0 Brutalism - JODI.org Wireframe + Original Header
         display: block;
     }
 
-    /* --- MEDIA QUERIES --- */
+    /* --- MEDIA QUERIES (Modificate rigorosamente per Mobile) --- */
     @media (max-width: 768px) {
-        /* Header Mobile Ripristinato */
+        
         header { 
             padding: 10px; 
             flex-direction: column; 
@@ -327,22 +340,27 @@ Web 1.0 Brutalism - JODI.org Wireframe + Original Header
             letter-spacing: -1px; 
         }
 
-        /* Fix scorrimento orizzontale del testo JODI su Mobile */
+        /* Container del testo da Mobile */
         .jodi-content { 
-            padding-top: 30vh; 
-            overflow-x: hidden; /* Blocca scorrimento fuori dallo schermo */
+            padding-top: 22vh; 
+            padding-left: 15px;
+            padding-right: 15px;
+            overflow: hidden;
         }
+        
+        /* Scritte ingrandite e sicure */
         .raw-text { 
-            font-size: 2.8vw; /* Scala il font per mantenere l'impatto visivo */
-            white-space: pre-wrap; /* Manda a capo le righe ASCII lunghe */
-            word-break: break-all; /* Forza l'andata a capo se non ci sono spazi */
+            font-size: 14px; 
+            line-height: 1.1; 
+            white-space: pre-wrap; 
+            word-break: break-all; 
         }
         
         .pin-container { 
-            width: 100px; 
-            height: 100px; 
-            bottom: 15px; 
-            right: 15px; 
+            width: 90px; 
+            height: 90px; 
+            bottom: 20px; 
+            right: 20px; 
         }
     }
 </style>
