@@ -1,5 +1,5 @@
 ---
-title: Do you Adore your City?
+title: J'adorami sto cazzk
 description: Mentre il marketing ri-brandizza Napoli come una rassicurante
   cartolina, noi scegliamo la strada di Johnny Rotten. Tra la verità brutale di
   Simone Weil e il nichilismo del '77, esploriamo perché "adorare" la propria
