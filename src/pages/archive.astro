@@ -58,12 +58,11 @@ const cyanPaths = generateCyanLines();
 const topoPaths = generateTopoLines();
 const mapNumbers = generateNumbers();
 
-// 3. LOGICA PER GLI ARTICOLI (Valori preimpostati invece di random assoluto)
+// 3. LOGICA PER GLI ARTICOLI 
 const nonsenseSubtexts = ["message.hqx", "131.24.167", "Reflector", "SYS.ERR", "BINHEX"];
 const glitchSymbols = ['†', 'º', '‡', '±'];
 
-// Array di posizioni orizzontali in percentuale. 
-// Ciclando questi valori diamo l'illusione del caos, ma manteniamo il controllo totale.
+// Array di posizioni orizzontali in percentuale (vw)
 const leftPositions = [10, 55, 20, 60, 15, 50, 25];
 ---
 
@@ -102,15 +101,12 @@ const leftPositions = [10, 55, 20, 60, 15, 50, 25];
 
         <div class="articles-container">
             {posts.map((post, index) => {
-                // Assegniamo una posizione orizzontale basata sull'indice per evitare sovrapposizioni
                 const posLeft = leftPositions[index % leftPositions.length];
-                
-                // Usiamo l'indice anche qui invece di Math.random() così i simboli non "saltano" se ricarichi la pagina
                 const symbol = glitchSymbols[index % glitchSymbols.length];
                 const subtext = nonsenseSubtexts[index % nonsenseSubtexts.length];
 
                 return (
-                    <div class="article-node" style={`margin-left: ${posLeft}%;`}>
+                    <div class="article-node" style={`--offset-x: ${posLeft}vw;`}>
                         <a href={`/taccuino/${post.slug}`} class="main-title">
                             {post.data.title.toUpperCase()}{symbol}
                         </a>
@@ -135,17 +131,16 @@ const leftPositions = [10, 55, 20, 60, 15, 50, 25];
 
     body, html {
         background-color: #000000;
-        /* Rimosso overflow: hidden e height: 100vh fissi per permettere lo scroll */
         min-height: 100vh;
-        overflow-x: hidden; /* Evita lo scroll orizzontale indesiderato */
-        overflow-y: auto;   /* Riabilita lo scorrimento verso il basso */
+        overflow-x: hidden; 
+        overflow-y: auto;   
         font-family: Arial, Helvetica, sans-serif; 
         cursor: crosshair;
     }
 
     /* --- BACKGROUND SVG --- */
     .jodi-bg {
-        position: fixed; /* Il background resta immobile mentre scorri i testi */
+        position: fixed; 
         top: 0;
         left: 0;
         width: 100vw;
@@ -175,15 +170,14 @@ const leftPositions = [10, 55, 20, 60, 15, 50, 25];
     .articles-container {
         display: flex;
         flex-direction: column;
-        /* Questa è la magia: 25vh di distanza forza esattamente ~4 elementi visibili per ogni "schermata" */
         gap: 25vh; 
-        padding-top: 15vh; /* Lascia spazio in alto per la HOME */
-        padding-bottom: 20vh; /* Lascia un bel respiro sotto l'ultimo articolo */
+        padding-top: 15vh; 
+        padding-bottom: 20vh; 
     }
 
     /* --- HOME LINK --- */
     .home-link {
-        position: fixed; /* Adesso è fixed, non absolute. Ti segue mentre scorri. */
+        position: fixed; 
         top: 5%;
         left: 5%;
         color: #ff0000;
@@ -205,14 +199,16 @@ const leftPositions = [10, 55, 20, 60, 15, 50, 25];
 
     /* --- ARTICOLI --- */
     .article-node {
-        /* Rimosso position: absolute. Ora usano il flusso normale del documento */
         position: relative; 
         display: flex;
         flex-direction: column;
         align-items: flex-start;
         background-color: rgba(0, 0, 0, 0.6); 
-        padding: 2px 6px;
-        width: max-content; /* Impedisce al background nero di allungarsi fino a fine pagina */
+        padding: 4px 8px;
+        
+        margin-left: var(--offset-x);
+        width: fit-content;
+        max-width: calc(92vw - var(--offset-x)); 
     }
 
     .main-title {
@@ -222,6 +218,10 @@ const leftPositions = [10, 55, 20, 60, 15, 50, 25];
         font-size: 28px;
         font-weight: 900;
         letter-spacing: 1px;
+        
+        white-space: normal; 
+        word-wrap: break-word; 
+        line-height: 1.1; 
     }
 
     .main-title:hover {
@@ -236,8 +236,9 @@ const leftPositions = [10, 55, 20, 60, 15, 50, 25];
         text-decoration-thickness: 2px;
         font-size: 22px;
         font-weight: 700;
-        margin-top: -2px;
+        margin-top: 2px;
         pointer-events: none;
+        word-wrap: break-word;
     }
 
     /* --- MOBILE --- */
@@ -245,7 +246,11 @@ const leftPositions = [10, 55, 20, 60, 15, 50, 25];
         .main-title { font-size: 20px; text-decoration-thickness: 2px; }
         .sub-title { font-size: 16px; }
         .home-link { font-size: 20px; top: 3%; left: 3%; }
-        /* Riduciamo un po' il gap su mobile per evitare scroll infiniti */
         .articles-container { gap: 20vh; } 
+        
+        .article-node {
+            margin-left: calc(var(--offset-x) * 0.2);
+            max-width: calc(94vw - calc(var(--offset-x) * 0.2));
+        }
     }
 </style>
