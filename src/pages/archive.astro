@@ -5,7 +5,6 @@ import { getCollection } from 'astro:content';
 const posts = await getCollection('taccuino');
 
 // 2. FUNZIONI GENERATIVE PER L'ARTWORK SVG
-// Generiamo linee azzurre "spezzate" simili a confini radar/fiumi
 const generateCyanLines = () => {
     let paths = [];
     for (let i = 0; i < 8; i++) {
@@ -18,13 +17,12 @@ const generateCyanLines = () => {
     return paths;
 };
 
-// Generiamo linee topografiche gialle (cerchi concentrici distorti)
 const generateTopoLines = () => {
     let paths = [];
     const peaks = [
-        { cx: 20, cy: 80, layers: 15, radius: 25 }, // Picco in basso a sx
-        { cx: 60, cy: 40, layers: 20, radius: 35 }, // Picco centrale
-        { cx: 85, cy: 30, layers: 10, radius: 15 }  // Picco in alto a dx
+        { cx: 20, cy: 80, layers: 15, radius: 25 },
+        { cx: 60, cy: 40, layers: 20, radius: 35 },
+        { cx: 85, cy: 30, layers: 10, radius: 15 }
     ];
 
     peaks.forEach(peak => {
@@ -32,7 +30,6 @@ const generateTopoLines = () => {
             let points = [];
             let currentRadius = (l / peak.layers) * peak.radius;
             for (let angle = 0; angle < 360; angle += 20) {
-                // Distorsione matematica (rumore casuale)
                 let jitter = (Math.random() - 0.5) * 4; 
                 let r = currentRadius + jitter;
                 let x = peak.cx + r * Math.cos((angle * Math.PI) / 180);
@@ -45,7 +42,6 @@ const generateTopoLines = () => {
     return paths;
 };
 
-// Generiamo i numeretti sparsi (es. 64, 56, 90)
 const generateNumbers = () => {
     let numbers = [];
     for (let i = 0; i < 30; i++) {
@@ -58,91 +54,72 @@ const generateNumbers = () => {
     return numbers;
 };
 
-// Eseguiamo i calcoli per il background
 const cyanPaths = generateCyanLines();
 const topoPaths = generateTopoLines();
 const mapNumbers = generateNumbers();
 
-// 3. LOGICA PER GLI ARTICOLI (Scritte Rosse)
-const getRandomPos = () => ({
-    // Range tra 15% e 80% per lasciare libero l'angolo in alto a sinistra per la HOME
-    top: Math.floor(Math.random() * 65 + 15) + '%',
-    left: Math.floor(Math.random() * 65 + 15) + '%'
-});
-
+// 3. LOGICA PER GLI ARTICOLI (Valori preimpostati invece di random assoluto)
 const nonsenseSubtexts = ["message.hqx", "131.24.167", "Reflector", "SYS.ERR", "BINHEX"];
 const glitchSymbols = ['†', 'º', '‡', '±'];
+
+// Array di posizioni orizzontali in percentuale. 
+// Ciclando questi valori diamo l'illusione del caos, ma manteniamo il controllo totale.
+const leftPositions = [10, 55, 20, 60, 15, 50, 25];
 ---
 
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BETALAB // I HATE NAPOLI</title>
+    <title>%Taccuino&</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
 </head>
 <body>
 
-    <!-- ARTWORK GENERATO VIA CODICE (SVG) -->
     <svg class="jodi-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
-        
-        <!-- Confini azzurri -->
         {cyanPaths.map(path => (
             <path d={path} fill="none" stroke="#00ffff" stroke-width="0.3" vector-effect="non-scaling-stroke" class="cyan-line" />
         ))}
-
-        <!-- Topografia gialla -->
         {topoPaths.map(path => (
             <path d={path} fill="none" stroke="#ffff00" stroke-width="0.2" vector-effect="non-scaling-stroke" />
         ))}
-
-        <!-- Numeri gialli sparsi -->
         {mapNumbers.map(num => (
             <text x={num.x} y={num.y} fill="#ffff00" font-size="2" font-family="monospace">
                 {num.val}
             </text>
         ))}
-
-        <!-- Bersagli topografici Rossi in SVG -->
         <circle cx="20" cy="80" r="1.5" fill="none" stroke="#ff0000" stroke-width="0.5" vector-effect="non-scaling-stroke" />
         <circle cx="20" cy="80" r="0.4" fill="#ff0000" />
-        
         <circle cx="60" cy="40" r="1.5" fill="none" stroke="#ff0000" stroke-width="0.5" vector-effect="non-scaling-stroke" />
         <circle cx="60" cy="40" r="0.4" fill="#ff0000" />
-
     </svg>
 
-    <!-- LIVELLO SUPERIORE HTML: UI e ARTICOLI -->
     <main class="ui-layer">
 
-        <!-- IL LINK HOME IN ALTO A SINISTRA -->
         <a href="/" class="home-link">
             "HOME=
         </a>
 
-        <!-- GLI ARTICOLI SPARSI -->
-        {posts.map((post) => {
-            const pos = getRandomPos();
-            const symbol = glitchSymbols[Math.floor(Math.random() * glitchSymbols.length)];
-            const subtext = nonsenseSubtexts[Math.floor(Math.random() * nonsenseSubtexts.length)];
+        <div class="articles-container">
+            {posts.map((post, index) => {
+                // Assegniamo una posizione orizzontale basata sull'indice per evitare sovrapposizioni
+                const posLeft = leftPositions[index % leftPositions.length];
+                
+                // Usiamo l'indice anche qui invece di Math.random() così i simboli non "saltano" se ricarichi la pagina
+                const symbol = glitchSymbols[index % glitchSymbols.length];
+                const subtext = nonsenseSubtexts[index % nonsenseSubtexts.length];
 
-            return (
-                <div class="article-node" style={`top: ${pos.top}; left: ${pos.left};`}>
-                    <a href={`/taccuino/${post.slug}`} class="main-title">
-                        {post.data.title.toUpperCase()}{symbol}
-                    </a>
-                    <div class="sub-title">{subtext}</div>
-                </div>
-            );
-        })}
+                return (
+                    <div class="article-node" style={`margin-left: ${posLeft}%;`}>
+                        <a href={`/taccuino/${post.slug}`} class="main-title">
+                            {post.data.title.toUpperCase()}{symbol}
+                        </a>
+                        <div class="sub-title">{subtext}</div>
+                    </div>
+                );
+            })}
+        </div>
 
-        <!-- TORRETTA FINTA DECORATIVA -->
-        <!-- <div class="fake-target" style="bottom: 15%; right: 25%;">
-            "target=
-            <div class="beacon-tower">
-                <div class="beacon-light"></div>
-                <div class="beacon-base"></div>
-            </div>
-        </div> -->
     </main>
 
 </body>
@@ -158,16 +135,17 @@ const glitchSymbols = ['†', 'º', '‡', '±'];
 
     body, html {
         background-color: #000000;
-        height: 100vh;
-        width: 100vw;
-        overflow: hidden; 
+        /* Rimosso overflow: hidden e height: 100vh fissi per permettere lo scroll */
+        min-height: 100vh;
+        overflow-x: hidden; /* Evita lo scroll orizzontale indesiderato */
+        overflow-y: auto;   /* Riabilita lo scorrimento verso il basso */
         font-family: Arial, Helvetica, sans-serif; 
         cursor: crosshair;
     }
 
     /* --- BACKGROUND SVG --- */
     .jodi-bg {
-        position: fixed;
+        position: fixed; /* Il background resta immobile mentre scorri i testi */
         top: 0;
         left: 0;
         width: 100vw;
@@ -190,13 +168,22 @@ const glitchSymbols = ['†', 'º', '‡', '±'];
     .ui-layer {
         position: relative;
         width: 100%;
-        height: 100%;
         z-index: 10;
+    }
+
+    /* --- LAYOUT ARTICOLI --- */
+    .articles-container {
+        display: flex;
+        flex-direction: column;
+        /* Questa è la magia: 25vh di distanza forza esattamente ~4 elementi visibili per ogni "schermata" */
+        gap: 25vh; 
+        padding-top: 15vh; /* Lascia spazio in alto per la HOME */
+        padding-bottom: 20vh; /* Lascia un bel respiro sotto l'ultimo articolo */
     }
 
     /* --- HOME LINK --- */
     .home-link {
-        position: absolute;
+        position: fixed; /* Adesso è fixed, non absolute. Ti segue mentre scorri. */
         top: 5%;
         left: 5%;
         color: #ff0000;
@@ -207,7 +194,7 @@ const glitchSymbols = ['†', 'º', '‡', '±'];
         letter-spacing: 1px;
         background-color: rgba(0, 0, 0, 0.6); 
         padding: 2px 6px;
-        z-index: 100; /* Assicuriamoci che stia sempre sopra a tutto */
+        z-index: 100;
     }
 
     .home-link:hover {
@@ -218,12 +205,14 @@ const glitchSymbols = ['†', 'º', '‡', '±'];
 
     /* --- ARTICOLI --- */
     .article-node {
-        position: absolute;
+        /* Rimosso position: absolute. Ora usano il flusso normale del documento */
+        position: relative; 
         display: flex;
         flex-direction: column;
         align-items: flex-start;
         background-color: rgba(0, 0, 0, 0.6); 
         padding: 2px 6px;
+        width: max-content; /* Impedisce al background nero di allungarsi fino a fine pagina */
     }
 
     .main-title {
@@ -248,47 +237,7 @@ const glitchSymbols = ['†', 'º', '‡', '±'];
         font-size: 22px;
         font-weight: 700;
         margin-top: -2px;
-        pointer-events: none; /* Rende la sottoscritta non cliccabile per non infastidire */
-    }
-
-    /* --- DECORAZIONE TORRETTA RADAR ("target=") --- */
-    .fake-target {
-        position: absolute;
-        color: #ff0000;
-        text-decoration: underline;
-        font-size: 24px;
-        font-weight: bold;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
         pointer-events: none;
-    }
-
-    .beacon-tower {
-        margin-top: 5px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .beacon-base {
-        width: 0;
-        height: 0;
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
-        border-bottom: 20px solid #ff0000;
-    }
-
-    .beacon-light {
-        width: 6px;
-        height: 6px;
-        background-color: #ff0000;
-        margin-bottom: 2px;
-        animation: beaconBlink 0.8s infinite step-end;
-    }
-
-    @keyframes beaconBlink {
-        50% { opacity: 0; }
     }
 
     /* --- MOBILE --- */
@@ -296,7 +245,7 @@ const glitchSymbols = ['†', 'º', '‡', '±'];
         .main-title { font-size: 20px; text-decoration-thickness: 2px; }
         .sub-title { font-size: 16px; }
         .home-link { font-size: 20px; top: 3%; left: 3%; }
-        .fake-target { font-size: 18px; }
-        body, html { overflow: auto; } 
+        /* Riduciamo un po' il gap su mobile per evitare scroll infiniti */
+        .articles-container { gap: 20vh; } 
     }
 </style>
