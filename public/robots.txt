@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 
-Sitemap: https://www.strummolo.com/sitemap-index.xml
+Sitemap: https://www.strummolo.com/sitemap-0.xml
