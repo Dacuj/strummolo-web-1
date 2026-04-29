@@ -28,13 +28,45 @@ const exhibits = [
   }
 ];
 
-// Generiamo posizioni casuali per i pallini in fase di build per spargerli sull'immagine
-const dotsWithPositions = exhibits.map((exhibit) => ({
-  ...exhibit,
-  // Mantiene i pallini all'interno di un'area sicura (10% - 90%) per non farli uscire dai bordi
-  top: Math.floor(Math.random() * 80) + 10,
-  left: Math.floor(Math.random() * 80) + 10,
-}));
+// // Generiamo posizioni casuali per i pallini in fase di build per spargerli sull'immagine
+// const dotsWithPositions = exhibits.map((exhibit) => ({
+//   ...exhibit,
+//   // Mantiene i pallini all'interno di un'area sicura (10% - 90%) per non farli uscire dai bordi
+//   top: Math.floor(Math.random() * 80) + 10,
+//   left: Math.floor(Math.random() * 80) + 10,
+// }));
+
+// Distanza minima (in percentuale) che deve esserci tra un pallino e l'altro
+const MIN_DISTANCE = 15; 
+const dotsWithPositions = [];
+
+for (const exhibit of exhibits) {
+  let top, left;
+  let isTooClose = true;
+  let attempts = 0; // Limite di sicurezza per evitare loop infiniti
+
+  // Continua a cercare coordinate finché non trova un punto abbastanza lontano dagli altri
+  while (isTooClose && attempts < 100) {
+    top = Math.floor(Math.random() * 80) + 10;
+    left = Math.floor(Math.random() * 80) + 10;
+    isTooClose = false;
+
+    // Teorema di Pitagora per calcolare la distanza tra il nuovo pallino e quelli già piazzati
+    for (const existingDot of dotsWithPositions) {
+      const dx = left - existingDot.left;
+      const dy = top - existingDot.top;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < MIN_DISTANCE) {
+        isTooClose = true; // Troppo vicino, il loop riparte
+        break;
+      }
+    }
+    attempts++;
+  }
+
+  dotsWithPositions.push({ ...exhibit, top, left });
+}
 ---
 
 <!DOCTYPE html>
