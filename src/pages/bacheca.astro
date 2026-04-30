@@ -28,6 +28,7 @@
     </div>
 
     <form id="chat-form">
+        <input type="text" id="chat-nick" placeholder="Il tuo nome (opzionale)" maxlength="20" style="width: 150px; padding: 10px; border: 2px solid black; font-family: monospace;" />
       <input type="text" id="chat-input" placeholder="Scrivi qualcosa..." required maxlength="250" />
       <button type="submit">Invia</button>
     </form>
@@ -39,6 +40,7 @@
       const chatBox = document.getElementById('chat-box');
       const chatForm = document.getElementById('chat-form');
       const chatInput = document.getElementById('chat-input');
+      const chatNick = document.getElementById('chat-nick');
 
       async function loadMessages() {
         try {
@@ -46,11 +48,13 @@
           const messages = await res.json();
           
           // Ribaltiamo l'array per avere i vecchi in alto e i nuovi in basso
+       
+
           chatBox.innerHTML = messages.reverse().map(msg => 
             `<div class="msg">
-              <span>Anonimo:</span> ${msg.content}
+                <span>${msg.nickname || 'Anonimo'}:</span> ${msg.content}
             </div>`
-          ).join('');
+            ).join('');
           
         } catch (err) {
           console.error("Errore di connessione", err);

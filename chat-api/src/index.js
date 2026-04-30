@@ -16,12 +16,14 @@ export default {
 		const { results } = await env.DB.prepare("SELECT * FROM messages ORDER BY created_at DESC LIMIT 50").all();
 		return Response.json(results, { headers });
 	  }
-  
+	  
 	  if (request.method === 'POST' && url.pathname === '/messages') {
-		const { content } = await request.json();
+		const { content, nickname } = await request.json();
 		if(!content) return new Response('Errore', { status: 400 });
 		
-		await env.DB.prepare("INSERT INTO messages (content) VALUES (?)").bind(content).run();
+		const author = nickname && nickname.trim() !== '' ? nickname.trim() : 'Anonimo';
+		
+		await env.DB.prepare("INSERT INTO messages (content, nickname) VALUES (?, ?)").bind(content, author).run();
 		return new Response('Creato', { status: 201, headers });
 	  }
   
