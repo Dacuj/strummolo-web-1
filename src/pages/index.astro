@@ -1,9 +1,8 @@
-
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>strummolo123 </title>
+    <title>strummolo123</title>
     <meta name="description" content="Blogblogblogblog undergroounnnnd su napOLI ahhaha" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +20,7 @@
         <span>s</span><span>t</span><span>r</span><span>u</span><span>m</span><span>m</span><span>o</span><span>l</span><span>o</span><span class="arrows">123</span>
     </a>
     <nav class="navbar">
-        <a href="/about" class="nav-link">about</a>
+        <a href="/bacheka" class="nav-link footprint">leave your digital footprint</a>
         <a href="/archive" class="nav-link">taccuino</a>
         <a href="/more" class="nav-link">more</a>
     </nav>
@@ -74,11 +73,8 @@
         const cols = 45;
         const rows = 30;
         
-        // Check per applicare la prospettiva adattiva
         const isMobile = window.innerWidth <= 768;
         
-        // Calcoli proporzionali per evitare che il wireframe "scappi" dallo schermo mobile
-        // La larghezza scala con lo schermo, l'altezza scala in base alla viewport
         const spreadX = isMobile ? canvas.width * 1.4 : 800;
         const stepY = isMobile ? (canvas.height / 30) : 15; 
         const zMult = isMobile ? 50 : 40; 
@@ -102,7 +98,6 @@
 
                         let scale = 300 / (iy + 5); 
                         
-                        // Posizionamento orizzontale e verticale dinamico
                         let px = (canvas.width / 2) + (nx * spreadX * (scale / 15));
                         let py = offsetY + (iy * stepY) - (z * zMult * (scale / 10));
                         return [px, py];
@@ -121,7 +116,6 @@
             ctx.stroke();
         }
 
-        // Su mobile partiamo più in alto e distribuiamo le due griglie per coprire l'intero schermo
         const offsetTop = isMobile ? canvas.height * 0.05 : canvas.height * 0.15;
         const offsetBottom = isMobile ? canvas.height * 0.50 : canvas.height * 0.65;
 
@@ -135,21 +129,21 @@
 </script>
 
 <script>
-	if (window.netlifyIdentity) {
-	  window.netlifyIdentity.on("init", user => {
-		if (!user) {
-		  window.netlifyIdentity.on("login", () => {
-			document.location.href = "/admin/";
-		  });
-		}
-	  });
-	}
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", user => {
+        if (!user) {
+          window.netlifyIdentity.on("login", () => {
+            document.location.href = "/admin/";
+          });
+        }
+      });
+    }
 </script>
 </body>
 </html>
 
 <style is:global>
-    /* --- RESET E LOCK SCHERMO --- */
+    /* --- RESET E BLOCCO TOTALE DELLO SCROLL --- */
     * {
         margin: 0;
         padding: 0;
@@ -159,11 +153,12 @@
     body, html {
         background-color: #000000;
         color: #ffff00; 
-        height: 100%;
-        width: 100%;
-        overflow: hidden; 
-        position: fixed; 
-        touch-action: none; 
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden; /* Blocca totalmente lo scroll in ogni direzione */
+        
+        /* LA MAGIA CHE BLOCCA IL RIMBALZO E LO SPAZIO VUOTO SOTTO */
+        overscroll-behavior: none;
         
         font-family: 'Courier New', Courier, Fixedsys, Terminal, monospace;
         font-weight: bold;
@@ -174,7 +169,7 @@
 
     /* --- SFONDO CANVAS JODI --- */
     #bg-canvas {
-        position: fixed;
+        position: fixed; 
         top: 0;
         left: 0;
         width: 100%;
@@ -183,7 +178,7 @@
         pointer-events: none;
     }
 
-    /* --- HEADER (Desktop intatto) --- */
+    /* --- HEADER (Desktop) --- */
     header {
         width: 100%;
         padding: 20px;
@@ -191,7 +186,7 @@
         align-items: flex-start; 
         justify-content: space-between;
         background-color: transparent; 
-        position: fixed;
+        position: fixed; 
         top: 0;
         left: 0;
         z-index: 1000;
@@ -221,8 +216,8 @@
     .logo span:nth-child(3) { color: #4285f4; } 
     .logo span:nth-child(4) { color: #34a853; } 
     .logo span:nth-child(5) { color: #ea4335; } 
-    .logo span:nth-child(6) { color: #fff; }    
-    .logo span:nth-child(7) { color: #fff; }    
+    .logo span:nth-child(6) { color: #fff; }  
+    .logo span:nth-child(7) { color: #fff; }  
     .logo .arrows { color: #4285f4; margin-left: 5px; }
     .logo:hover { opacity: 0.8; }
 
@@ -251,6 +246,13 @@
         box-shadow: 2px 2px 0px rgba(0,0,0,0.5); 
     }
 
+    a.nav-link.footprint {
+        font-size: 1.2rem;
+        line-height: 0.9;
+        letter-spacing: -1px;
+        padding: 4px 6px;
+    }
+
     .navbar a:nth-child(1) { margin-right: auto; margin-top: 0px; transform: rotate(-2deg); }
     .navbar a:nth-child(2) { margin-top: 15px; margin-right: 40px; transform: rotate(3deg); }
     .navbar a:nth-child(3) { margin-top: 5px; transform: rotate(-3deg); }
@@ -262,13 +264,13 @@
         color: #fff;
     }
 
-    /* --- TESTO STILE JODI (Desktop) --- */
+    /* --- TESTO STILE JODI --- */
     .jodi-content {
         padding-top: 25vh; 
         padding-left: 5vw;
         padding-right: 5vw;
         width: 100%;
-        height: 100%;
+        height: 100vh; /* Si adatta alla finestra senza forzare lo scroll */
         z-index: 10;
         position: relative;
         pointer-events: none;
@@ -290,7 +292,7 @@
 
     /* --- SPILLA VINTAGE --- */
     .pin-container {
-        position: fixed;
+        position: fixed; 
         bottom: 40px;
         right: 40px;
         width: 130px; 
@@ -306,7 +308,7 @@
         display: block;
     }
 
-    /* --- MEDIA QUERIES (Modificate rigorosamente per Mobile) --- */
+    /* --- MEDIA QUERIES (Mobile) --- */
     @media (max-width: 768px) {
         
         header { 
@@ -324,32 +326,39 @@
             transform: none; 
         }
         .navbar { 
-            gap: 15px; 
+            gap: 12px;
             width: 100%; 
             justify-content: center; 
             padding-right: 0;
             padding-left: 0;
+            flex-wrap: wrap; 
         }
         .navbar a:nth-child(n) { 
             margin-top: 0; 
             margin-right: 0; 
             transform: none; 
         }
+        
+        a.nav-link.footprint {
+            font-size: clamp(1rem, 5vw, 1.4rem); 
+            width: 100%; 
+            text-align: center;
+            white-space: normal; 
+        }
+
         .nav-link { 
             font-size: 1.5rem; 
             line-height: 0.8; 
             letter-spacing: -1px; 
         }
 
-        /* Container del testo da Mobile */
         .jodi-content { 
             padding-top: 22vh; 
             padding-left: 15px;
             padding-right: 15px;
-            overflow: hidden;
+            height: 100vh; 
         }
         
-        /* Scritte ingrandite e sicure */
         .raw-text { 
             font-size: 14px; 
             line-height: 1.1; 

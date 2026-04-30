@@ -1,0 +1,368 @@
+---
+// src/pages/bacheca.astro
+---
+
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sturmmolo - Bacheca</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- CSS STATICO -->
+    <style>
+      * { box-sizing: border-box; }
+      
+      body { 
+        background-color: #000000; 
+        color: #ffffff; 
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+        margin: 0;
+        /* Padding inferiore per non far finire i messaggi sotto la barra fissa */
+        padding: 0 0 80px 0; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-x: hidden; 
+      }
+
+      /* Banner full-width */
+      .header-banner-full {
+        width: 100vw;
+        min-height: 200px; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px; 
+        background-color: white;
+        background-image: 
+          radial-gradient(#cc0000 40%, transparent 40%), 
+          radial-gradient(#cc0000 40%, transparent 40%);
+        background-size: 24px 24px;
+        background-position: 0 0, 12px 12px;
+        border: none;
+      }
+
+      .header-banner-full img {
+        width: 100%;
+        max-width: 700px; 
+        height: auto;
+        display: block;
+        background-color: transparent;
+        border: none;
+        box-shadow: none;
+      }
+
+      /* Barra Input Fissa in basso */
+      form { 
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        background: #000;
+        border-top: 4px solid #cc0000;
+        display: flex;
+        gap: 10px;
+        padding: 15px 20px;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      
+      input { 
+        font-family: 'Courier New', Courier, monospace; 
+        font-size: 16px; 
+        border: 2px solid #333; 
+        padding: 12px;
+        background: #fff; 
+        color: #000;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #cc0000;
+        background: #ffffcc;
+      }
+
+      #chat-nick { width: 20%; max-width: 150px; }
+      #chat-input { width: 60%; max-width: 600px; }
+      
+      button[type="submit"] { 
+        font-family: inherit;
+        font-weight: 900;
+        font-size: 18px;
+        background-color: #cc0000; 
+        color: #FFF; 
+        border: none; 
+        padding: 12px 20px;
+        cursor: pointer; 
+        text-transform: uppercase;
+        transition: transform 0.1s;
+      }
+      
+      button[type="submit"]:active {
+        transform: scale(0.95);
+      }
+
+      /* Whiteboard Container */
+      .whiteboard-full {
+        width: 100vw;
+        background: #000;
+        border: none;
+      }
+
+      #whiteboard { 
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        gap: 0;
+      }
+
+      /* Pulsante Load More */
+      #load-more-btn {
+        width: 100%;
+        padding: 20px;
+        background: #222;
+        color: #fff;
+        font-size: 24px;
+        font-weight: 900;
+        text-transform: uppercase;
+        border: none;
+        cursor: pointer;
+        display: none;
+        border-top: 2px solid #444;
+      }
+      
+      #load-more-btn:hover {
+        background: #333;
+      }
+
+      /* MEDIA QUERIES PER MOBILE */
+      @media (max-width: 768px) {
+        body { padding-bottom: 120px; }
+        
+        form {
+          flex-wrap: wrap;
+          padding: 10px;
+        }
+        
+        #chat-nick { width: 30%; }
+        #chat-input { width: calc(70% - 10px); }
+        button[type="submit"] { width: 100%; padding: 10px; }
+
+        .header-banner-full {
+          min-height: 150px;
+          padding: 20px;
+        }
+      }
+    </style>
+
+    <!-- CSS GLOBALE PER I MESSAGGI -->
+    <style is:global>
+      .msg-wrapper { 
+        flex-grow: 1; 
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 15px 25px;
+        min-height: 80px;
+        text-align: center;
+        border: 1px solid #000; 
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .msg-text {
+        font-size: clamp(20px, 4vw, 36px); 
+        line-height: 1.1; 
+        font-weight: 900;
+        color: #000;
+        word-wrap: break-word; 
+        white-space: pre-wrap;
+        text-transform: uppercase;
+        letter-spacing: -1px;
+        z-index: 2;
+      }
+
+      .msg-name { 
+        margin-top: 8px;
+        background-color: #000; 
+        color: #FFF;
+        font-size: 14px; 
+        font-weight: bold;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        font-family: 'Courier New', Courier, monospace;
+        letter-spacing: 1px;
+        z-index: 2;
+      }
+
+      /* Variante per i testi scuri */
+      .text-light { color: #fff; }
+      .text-light .msg-name { background-color: #fff; color: #000; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="header-banner-full">
+      <img src="img/Footprint.webp" alt="Leave your digital footprint" onerror="this.style.display='none'" />
+    </div>
+
+    <div class="whiteboard-full">
+      <div id="whiteboard">
+        <!-- I messaggi si inietteranno qui -->
+      </div>
+      <button id="load-more-btn">LOAD MORE OLD MESSAGES</button>
+    </div>
+
+    <form id="chat-form">
+      <input type="text" id="chat-nick" placeholder="NOME" maxlength="20" autocomplete="off" />
+      <input type="text" id="chat-input" placeholder="SHARE MESSAGE" required maxlength="250" autocomplete="off" />
+      <button type="submit">GO</button>
+    </form>
+
+    <script>
+      const API_URL = "https://chat-api.davidecucciardi.workers.dev/messages";
+      
+      const whiteboard = document.getElementById('whiteboard');
+      const chatForm = document.getElementById('chat-form');
+      const chatInput = document.getElementById('chat-input');
+      const chatNick = document.getElementById('chat-nick');
+      const loadMoreBtn = document.getElementById('load-more-btn');
+
+      const messageColors = [
+        '#FF0000', '#00FF00', '#FFFF00', '#FF00FF', '#00FFFF', 
+        '#0000FF', '#FF9900', '#FFFFFF', '#000000'
+      ];
+      
+      const fontFamilies = [
+        "'Helvetica Neue', Helvetica, Arial, sans-serif",
+        "'Courier New', Courier, monospace",
+        "Impact, Charcoal, sans-serif",
+        "'Times New Roman', Times, serif"
+      ];
+
+      let allMessages = [];
+      let displayedCount = 0;
+      const LIMIT_PER_PAGE = 20;
+
+      function hashCode(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          hash = (hash << 5) - hash + str.charCodeAt(i);
+          hash |= 0; 
+        }
+        return Math.abs(hash);
+      }
+
+      function getDeterministicRandom(seed) {
+        const x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+      }
+
+      function createMessageNode(msg) {
+        const stringSeed = msg.content + (msg.nickname || '');
+        const baseSeed = hashCode(stringSeed);
+        
+        const colorIndex = Math.floor(getDeterministicRandom(baseSeed) * messageColors.length);
+        const fontIndex = Math.floor(getDeterministicRandom(baseSeed + 1) * fontFamilies.length);
+        
+        const bgColor = messageColors[colorIndex];
+        const fontFamily = fontFamilies[fontIndex];
+        
+        const isDarkBg = bgColor === '#000000' || bgColor === '#0000FF';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = `msg-wrapper ${isDarkBg ? 'text-light' : ''}`;
+        wrapper.style.backgroundColor = bgColor;
+        wrapper.style.fontFamily = fontFamily;
+
+        wrapper.innerHTML = `
+            <div class="msg-text">
+              ${msg.content}
+            </div>
+            <div class="msg-name">
+              ${msg.nickname || 'anon'}
+            </div>
+        `;
+        return wrapper;
+      }
+
+      async function loadInitialMessages() {
+        try {
+          const res = await fetch(API_URL);
+          const data = await res.json();
+          
+          // ORDINE CRONOLOGICO CORRETTO:
+          // Ordiniamo l'array in modo che l'ID più grande (il più recente) sia in cima all'array (indice 0)
+          data.sort((a, b) => b.id - a.id); 
+          
+          allMessages = data; 
+          renderNextChunk();
+        } catch (err) {
+          console.error("Errore di caricamento", err);
+        }
+      }
+
+      function renderNextChunk() {
+        const fragment = document.createDocumentFragment();
+        const messagesToRender = allMessages.slice(displayedCount, displayedCount + LIMIT_PER_PAGE);
+
+        messagesToRender.forEach(msg => {
+          fragment.appendChild(createMessageNode(msg));
+        });
+
+        whiteboard.appendChild(fragment);
+        displayedCount += messagesToRender.length;
+
+        if (displayedCount >= allMessages.length) {
+          loadMoreBtn.style.display = 'none';
+        } else {
+          loadMoreBtn.style.display = 'block';
+        }
+      }
+
+      loadMoreBtn.addEventListener('click', () => {
+        renderNextChunk();
+      });
+
+      chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const content = chatInput.value;
+        const nickname = chatNick.value;
+
+        if (!content.trim()) return;
+
+        chatInput.value = ''; 
+        
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content, nickname })
+        });
+
+        // Simuliamo un id molto alto (es. il timestamp attuale) per essere sicuri
+        // che localmente il messaggio venga considerato il più nuovo in assoluto
+        const newMsgData = { 
+          id: Date.now(), 
+          content, 
+          nickname: nickname || 'anon' 
+        };
+        
+        // Lo iniettiamo fisicamente in cima alla griglia HTML
+        const newNode = createMessageNode(newMsgData);
+        whiteboard.prepend(newNode);
+        
+        // Lo aggiungiamo anche in cima all'array dei dati per mantenerlo sincronizzato col tasto "load more"
+        allMessages.unshift(newMsgData);
+        displayedCount++;
+      });
+
+      loadInitialMessages();
+    </script>
+  </body>
+</html>
