@@ -16,7 +16,7 @@
 	],
 	"d1_databases": [
 		{
-			"binding": "sturmmolo_chat",
+			"binding": "DB",
 			"database_name": "sturmmolo-chat",
 			"database_id": "4bd99773-2da2-4a58-8eb5-e0c3610e8abd",
 			"remote": true
