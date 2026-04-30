@@ -65,7 +65,7 @@
         e.preventDefault();
         const content = chatInput.value;
         const nickname = chatNick.value;
-        
+
         if (!content.trim()) return;
 
         chatInput.value = ''; // Svuota il campo per farti scrivere di nuovo subito
@@ -73,7 +73,7 @@
         await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content })
+          body: JSON.stringify({ content, nickname })
         });
 
         loadMessages(); // Ricarica subito i messaggi
