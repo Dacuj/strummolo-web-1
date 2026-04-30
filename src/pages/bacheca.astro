@@ -1,0 +1,84 @@
+---
+// src/pages/bacheca.astro
+---
+
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <title>Bacheca Anonima - I hate Napoli</title>
+    <meta name="viewport" content="width=device-width" />
+    <style>
+      /* Stile grezzo e minimale, adattalo al tuo CSS globale */
+      body { background: #fff; color: #000; font-family: monospace; padding: 20px; }
+      #chat-box { border: 3px solid black; height: 500px; overflow-y: auto; padding: 10px; margin-bottom: 20px; background: #fafafa; }
+      .msg { border-bottom: 1px dashed #ccc; padding: 10px 0; }
+      .msg span { font-weight: bold; text-transform: uppercase; color: red; }
+      form { display: flex; gap: 10px; }
+      input { flex-grow: 1; padding: 10px; border: 2px solid black; font-family: monospace; font-size: 16px; }
+      button { padding: 10px 20px; background: black; color: white; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+      button:hover { background: red; }
+    </style>
+  </head>
+  <body>
+    <h1>BACHECA ANONIMA</h1>
+    <p>Sputa il rospo.</p>
+
+    <div id="chat-box">
+      <!-- I messaggi si caricano qui -->
+    </div>
+
+    <form id="chat-form">
+      <input type="text" id="chat-input" placeholder="Scrivi qualcosa..." required maxlength="250" />
+      <button type="submit">Invia</button>
+    </form>
+
+    <script>
+      // INSERISCI QUI L'URL DEL TUO WORKER
+      const API_URL = "https://chat-api.davidecucciardi.workers.dev";
+      
+      const chatBox = document.getElementById('chat-box');
+      const chatForm = document.getElementById('chat-form');
+      const chatInput = document.getElementById('chat-input');
+
+      async function loadMessages() {
+        try {
+          const res = await fetch(API_URL);
+          const messages = await res.json();
+          
+          // Ribaltiamo l'array per avere i vecchi in alto e i nuovi in basso
+          chatBox.innerHTML = messages.reverse().map(msg => 
+            `<div class="msg">
+              <span>Anonimo:</span> ${msg.content}
+            </div>`
+          ).join('');
+          
+        } catch (err) {
+          console.error("Errore di connessione", err);
+        }
+      }
+
+      chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const content = chatInput.value;
+        if (!content.trim()) return;
+
+        chatInput.value = ''; // Svuota il campo per farti scrivere di nuovo subito
+        
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content })
+        });
+
+        loadMessages(); // Ricarica subito i messaggi
+        // Scrolla in basso
+        setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
+      });
+
+      // Carica i messaggi all'apertura
+      loadMessages();
+      // Polling: controlla se ci sono nuovi messaggi ogni 3 secondi
+      setInterval(loadMessages, 3000);
+    </script>
+  </body>
+</html>
