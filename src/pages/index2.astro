@@ -9,14 +9,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@200;300;400;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
 </head>
 <body>
 
-<!-- VIDEO BACKGROUND LOOP -->
-<!-- Sostituisci il src con il link effettivo del tuo video -->
-<video class="bg-video" autoplay loop muted playsinline>
-    <source src="/img/outputASCII.mp4" type="video/mp4">
-</video>
+<canvas id="bg-canvas"></canvas>
 
 <header>
     <a href="/" class="logo">
@@ -29,9 +26,108 @@
     </nav>
 </header>
 
+<main class="jodi-content">
+    <h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;">
+        Strummolo - Blog underground.
+    </h1>
+<pre class="raw-text">
+¬#172;WASTED;YOUTH"/"#±°
+                                17%              CIAO.NAPOLI
+                      ______________________________________
+                                                        0.1b
+                      ______________________________________
+:!;¬fromdkids!"#°
+òºto_the@±-²³ HATE NAPOLI µ¶·andDIE¸ÿ¬Üý½¾¿
+°¼½(¯°±)þÿ²³_A«·»µ¶+Ç¿ª¬#'Õ,-¡¢
+µ¶ÎÏ¹¤¥#!¸¹§ðñðñ·_C
+                                12%               0:40:33 PM
+                      ______________________________________
+                                12%               -:--:-- --
+                      ______________________________________
+¯°±²³´µ¶)+·¸¹º»noN:__A B B IA MO >>/ÐÑé
+¾¬ÿ¡¢Ü¾¿£#¾:ÿ°¤ª P Iù NUL LA D A D IRE¬;Ê¤£´ÿ°!¤ª¬;Ê
+Ö¥ÿØÙ**@Ú¤¥!§¨½¿&¼«(¬ýÿ¬
+
+</pre>
+</main>
+
 <div class="pin-container">
     <img src="/img/HAVEANEROTIC.png" draggable="false" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png'" alt="Spilla Vintage" class="pin-image">
 </div>
+
+<script>
+    // MOTORE WIREFRAME 2D PURO - Stile Net.Art anni '90
+    const canvas = document.getElementById("bg-canvas");
+    const ctx = canvas.getContext("2d");
+
+    function renderWireframe() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = "#FFFF00";
+        ctx.lineWidth = 1;
+        ctx.imageSmoothingEnabled = false; 
+
+        const cols = 45;
+        const rows = 30;
+        
+        const isMobile = window.innerWidth <= 768;
+        
+        const spreadX = isMobile ? canvas.width * 1.4 : 800;
+        const stepY = isMobile ? (canvas.height / 30) : 15; 
+        const zMult = isMobile ? 50 : 40; 
+
+        function drawMesh(offsetY) {
+            ctx.beginPath();
+            for (let y = 0; y < rows - 1; y++) {
+                for (let x = 0; x < cols - 1; x++) {
+                    
+                    let getPoint = (ix, iy) => {
+                        let nx = (ix / cols) * 2 - 1; 
+                        
+                        let z = 0;
+                        if (nx < -0.2) {
+                            z = Math.sin(nx * 8 + iy * 0.2) * 0.2; 
+                        } else if (nx > 0.3) {
+                            z = (Math.sin(nx * 15) * Math.cos(iy * 0.8)) * (nx * 3); 
+                        } else {
+                            z = -1.5 + Math.abs(nx) * 2; 
+                        }
+
+                        let scale = 300 / (iy + 5); 
+                        
+                        let px = (canvas.width / 2) + (nx * spreadX * (scale / 15));
+                        let py = offsetY + (iy * stepY) - (z * zMult * (scale / 10));
+                        return [px, py];
+                    };
+
+                    let p1 = getPoint(x, y);
+                    let p2 = getPoint(x + 1, y);
+                    let p3 = getPoint(x, y + 1);
+
+                    ctx.moveTo(p1[0], p1[1]);
+                    ctx.lineTo(p2[0], p2[1]);
+                    ctx.moveTo(p1[0], p1[1]);
+                    ctx.lineTo(p3[0], p3[1]);
+                }
+            }
+            ctx.stroke();
+        }
+
+        const offsetTop = isMobile ? canvas.height * 0.05 : canvas.height * 0.15;
+        const offsetBottom = isMobile ? canvas.height * 0.50 : canvas.height * 0.65;
+
+        drawMesh(offsetTop);
+        drawMesh(offsetBottom);
+    }
+
+    window.addEventListener("resize", renderWireframe);
+    renderWireframe();
+
+</script>
 
 <script>
     if (window.netlifyIdentity) {
@@ -56,12 +152,14 @@
     }
 
     body, html {
-        /* FONDAMENTALE: Riportiamo lo sfondo a nero */
-        /* background-color: #000000;  */
+        background-color: #000000;
+        color: #ffff00; 
         height: 100vh;
         width: 100vw;
-        overflow: hidden; 
-        overscroll-behavior: none; 
+        overflow: hidden; /* Blocca totalmente lo scroll in ogni direzione */
+        
+        /* LA MAGIA CHE BLOCCA IL RIMBALZO E LO SPAZIO VUOTO SOTTO */
+        overscroll-behavior: none;
         
         font-family: 'Courier New', Courier, Fixedsys, Terminal, monospace;
         font-weight: bold;
@@ -70,41 +168,16 @@
         cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), auto;
     }
 
-    /* --- VIDEO BACKGROUND --- */
-    .bg-video {
+    /* --- SFONDO CANVAS JODI --- */
+    #bg-canvas {
         position: fixed; 
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
-        object-fit: cover;
-        /* Spostiamo il video ancora più indietro */
-        z-index: -2; 
-        pointer-events: none;
-        /* IMPORTANTE: Riportiamo l'opacità a 1.0 (nessuna trasparenza) */
-        opacity: 1.0; 
-    }
-
-    /* --- DARK OVERLAY (Il trucco per scurire) --- */
-    /* Crea un velo scuro tra il video (-2) e il contenuto (+1) */
-    body::after {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        /* Questo è un nero semi-trasparente */
-        /* L'ultimo numero (0.6) è l'opacità del velo. 
-           - 0.0 è trasparente.
-           - 1.0 è nero totale.
-           0.6 (60%) è un buon valore per scurire molto. */
-        background-color: rgba(0, 0, 0, 0.6); 
-        z-index: -1; /* Sta sopra il video ma sotto il testo */
+        width: 100%;
+        height: 100%;
+        z-index: 0;
         pointer-events: none;
     }
-
-    /* --- IL RESTO DEL CSS RIMANE INVARIATO --- */
 
     /* --- HEADER (Desktop) --- */
     header {
@@ -192,6 +265,32 @@
         color: #fff;
     }
 
+    /* --- TESTO STILE JODI --- */
+    .jodi-content {
+        padding-top: 25vh; 
+        padding-left: 5vw;
+        padding-right: 5vw;
+        width: 100%;
+        height: 100vh; /* Si adatta alla finestra senza forzare lo scroll */
+        z-index: 10;
+        position: relative;
+        pointer-events: none;
+        box-sizing: border-box;
+    }
+
+    .raw-text {
+        font-family: 'Courier New', Courier, Terminal, monospace;
+        font-size: 2vw; 
+        line-height: 1.1;
+        white-space: pre-wrap; 
+        word-wrap: break-word;
+        max-width: 100%;
+        color: #ffff00;
+        text-shadow: 2px 2px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 0px #000; 
+        pointer-events: auto;
+        user-select: text; 
+    }
+
     /* --- SPILLA VINTAGE --- */
     .pin-container {
         position: fixed; 
@@ -252,6 +351,20 @@
             font-size: 1.5rem; 
             line-height: 0.8; 
             letter-spacing: -1px; 
+        }
+
+        .jodi-content { 
+            padding-top: 22vh; 
+            padding-left: 15px;
+            padding-right: 15px;
+            height: 100vh; 
+        }
+        
+        .raw-text { 
+            font-size: 14px; 
+            line-height: 1.1; 
+            white-space: pre-wrap; 
+            word-break: break-all; 
         }
         
         .pin-container { 
