@@ -1,5 +1,5 @@
 ---
-// src/pages/bacheca.astro
+// src/pages/bacheka.astro
 const generateCyanLines = () => {
     let paths = [];
     for (let i = 0; i < 8; i++) {
@@ -62,7 +62,16 @@ const mapNumbers = generateNumbers();
     <style is:global>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body, html {
+    /* --- GESTIONE DEGLI STATI DEL BODY --- */
+    body.disclaimer-mode {
+        background-color: #000000;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    body.chat-mode {
         background: repeating-linear-gradient(0deg, #000000, #000000 2px, #00ff00 2px, #00ff00 4px);
         min-height: 100vh;
         overflow-x: hidden; 
@@ -71,6 +80,72 @@ const mapNumbers = generateNumbers();
         cursor: crosshair;
     }
 
+    /* --- STILI DISCLAIMER --- */
+    .terminal-container {
+        padding: 2rem;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .content-disclaimer {
+        max-width: 850px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2.5rem;
+    }
+
+    .content-disclaimer p {
+        color: #00ff00;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 1.6rem;
+        line-height: 1.3;
+        margin: 0;
+    }
+
+    .entry-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .nick-input {
+        background-color: #ffffff;
+        color: #000000;
+        border: 1px solid #ffffff;
+        font-family: Arial, sans-serif;
+        font-size: 0.8rem;
+        font-weight: bold;
+        padding: 4px 10px;
+        text-align: center;
+        width: 100%;
+        max-width: 300px;
+        outline: none;
+        text-transform: uppercase;
+    }
+
+    .nick-input::placeholder { color: #888888; text-transform: uppercase; }
+    .nick-input:focus { background-color: #cccccc; color: #000000; }
+
+    .accept-btn {
+        background-color: #ffffff;
+        color: #000000;
+        text-decoration: none;
+        padding: 4px 15px;
+        font-family: Arial, sans-serif;
+        font-size: 0.8rem;
+        font-weight: bold;
+        border: 1px solid #ffffff;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+    .accept-btn:hover { background-color: #cccccc; }
+
+    /* --- STILI CHAT (BACHEKA) --- */
     .jodi-bg {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         z-index: 1; pointer-events: none; 
@@ -80,7 +155,6 @@ const mapNumbers = generateNumbers();
     @keyframes glitchPath { 90% { stroke-opacity: 1; } 95% { stroke-opacity: 0.2; } 100% { stroke-opacity: 1; } }
 
     .ui-layer { position: relative; width: 100%; z-index: 10; padding-bottom: 120px; }
-
     .articles-container { display: flex; flex-direction: column; gap: 25vh; padding-top: 15vh; }
 
     .home-link {
@@ -115,11 +189,8 @@ const mapNumbers = generateNumbers();
         z-index: 1000; pointer-events: none; 
     }
 
-    form { pointer-events: auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
-
+    #chat-form { pointer-events: auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
     #load-more-btn { pointer-events: auto; display: none; margin-bottom: 10px; }
-
-    /* Feedback visivo quando il bottone è disabilitato (cooldown) */
     button:disabled { opacity: 0.5; cursor: not-allowed; }
 
     @media (max-width: 768px) {
@@ -132,196 +203,258 @@ const mapNumbers = generateNumbers();
     }
     </style>
 </head>
-<body>
-<svg class="jodi-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
-    {cyanPaths.map(path => ( <path d={path} fill="none" stroke="#00ffff" stroke-width="0.3" vector-effect="non-scaling-stroke" class="cyan-line" /> ))}
-    {topoPaths.map(path => ( <path d={path} fill="none" stroke="#ffff00" stroke-width="0.2" vector-effect="non-scaling-stroke" /> ))}
-    {mapNumbers.map(num => ( <text x={num.x} y={num.y} fill="#ffff00" font-size="2" font-family="monospace">{num.val}</text> ))}
-    <circle cx="20" cy="80" r="1.5" fill="none" stroke="#0000ff" stroke-width="0.5" vector-effect="non-scaling-stroke" />
-    <circle cx="20" cy="80" r="0.4" fill="#0000ff" />
-    <circle cx="60" cy="40" r="1.5" fill="none" stroke="#0000ff" stroke-width="0.5" vector-effect="non-scaling-stroke" />
-    <circle cx="60" cy="40" r="0.4" fill="#0000ff" />
-</svg>
+<body class="disclaimer-mode">
 
-<main class="ui-layer">
-    <a href="/" class="home-link">"strummolo123=</a>
-    <div id="whiteboard" class="articles-container"></div>
-</main>
+    <!-- VIEW 1: DISCLAIMER -->
+    <main id="disclaimer-view" class="terminal-container" style="display: none;">
+        <div class="content-disclaimer">
+            <p>
+             You may enter this live chat at any time by accepting that you will leave a permanent digital footprint upon any and all of our servers and all related databases and all logs thereof, whether generated under the terms of this agreement or otherwise. We disclaim any and all responsibility immediately and without notice from us if, in their sole discretion, any user chooses to write whatever they want, regardless of any term or provision of this agreement. Upon entry, you must accept all risks associated with materials published on this site and any and all of our other sites and all copies thereof, whether made under the terms of this agreement or otherwise.
+            </p>
+            
+            <form id="entry-form" class="entry-form">
+                <input type="text" id="nickname" class="nick-input" placeholder="username" required maxlength="20" autocomplete="off" />
+                <button type="submit" class="accept-btn">ACCEPT</button>
+            </form>
+        </div>
+    </main>
 
-<div class="controls-wrapper">
-    <button id="load-more-btn">LOAD MORE_</button>
-    <form id="chat-form">
-        <input type="text" id="chat-input" placeholder="scrivi un messaggio" required maxlength="250" autocomplete="off" />
-        <button type="submit" id="submit-btn">INVIA</button>
-    </form>
-</div>
+    <!-- VIEW 2: BACHECA -->
+    <div id="chat-view" style="display: none;">
+        <svg class="jodi-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {cyanPaths.map(path => ( <path d={path} fill="none" stroke="#00ffff" stroke-width="0.3" vector-effect="non-scaling-stroke" class="cyan-line" /> ))}
+            {topoPaths.map(path => ( <path d={path} fill="none" stroke="#ffff00" stroke-width="0.2" vector-effect="non-scaling-stroke" /> ))}
+            {mapNumbers.map(num => ( <text x={num.x} y={num.y} fill="#ffff00" font-size="2" font-family="monospace">{num.val}</text> ))}
+            <circle cx="20" cy="80" r="1.5" fill="none" stroke="#0000ff" stroke-width="0.5" vector-effect="non-scaling-stroke" />
+            <circle cx="20" cy="80" r="0.4" fill="#0000ff" />
+            <circle cx="60" cy="40" r="1.5" fill="none" stroke="#0000ff" stroke-width="0.5" vector-effect="non-scaling-stroke" />
+            <circle cx="60" cy="40" r="0.4" fill="#0000ff" />
+        </svg>
+
+        <main class="ui-layer">
+            <a href="/" class="home-link">"strummolo123=</a>
+            <div id="whiteboard" class="articles-container"></div>
+        </main>
+
+        <div class="controls-wrapper">
+            <button id="load-more-btn">LOAD MORE_</button>
+            <form id="chat-form">
+                <input type="text" id="chat-input" placeholder="scrivi un messaggio" required maxlength="250" autocomplete="off" />
+                <button type="submit" id="submit-btn">INVIA</button>
+            </form>
+        </div>
+    </div>
 
 <script>
-    const userNickname = localStorage.getItem('sturmmolo_nick');
-    if (!userNickname) {
-        window.location.href = '/accept-bacheka'; 
-    }
-
-    const API_URL = "https://chat-api.davidecucciardi.workers.dev/messages";
+document.addEventListener("DOMContentLoaded", () => {
+    // Referenze DOM globali
+    const disclaimerView = document.getElementById('disclaimer-view');
+    const chatView = document.getElementById('chat-view');
+    const entryForm = document.getElementById('entry-form');
+    const nickInput = document.getElementById('nickname');
     
-    const whiteboard = document.getElementById('whiteboard');
-    const chatForm = document.getElementById('chat-form');
-    const chatInput = document.getElementById('chat-input');
-    const submitBtn = document.getElementById('submit-btn');
-    const loadMoreBtn = document.getElementById('load-more-btn');
+    // Variabile per memorizzare il nick corrente
+    let userNickname = localStorage.getItem('sturmmolo_nick');
 
-    const leftPositions = [10, 55, 20, 60, 15, 50, 25];
-    const glitchSymbols = ['†', 'º', '‡', '±', ''];
-
-    let allMessages = [];
-    let displayedCount = 0;
-    const LIMIT_PER_PAGE = 15;
-    let isSending = false; // Flag per prevenire multi-invii
-
-    // FUNZIONE DI SICUREZZA CRITICA: Escapa i caratteri HTML per prevenire XSS
-    function escapeHTML(str) {
-        if (!str) return '';
-        return str.replace(/[&<>'"]/g, 
-            tag => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                "'": '&#39;',
-                '"': '&quot;'
-            }[tag])
-        );
+    // Funzione per switchare alla vista Chat
+    function showChat() {
+        document.body.classList.remove('disclaimer-mode');
+        document.body.classList.add('chat-mode');
+        disclaimerView.style.display = 'none';
+        chatView.style.display = 'block';
+        initChat(); // Inizializza la bacheca solo quando viene mostrata
     }
 
-    function hashCode(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            hash = (hash << 5) - hash + str.charCodeAt(i);
-            hash |= 0; 
-        }
-        return Math.abs(hash);
+    // Funzione per mostrare il Disclaimer
+    function showDisclaimer() {
+        document.body.classList.remove('chat-mode');
+        document.body.classList.add('disclaimer-mode');
+        disclaimerView.style.display = 'flex';
+        chatView.style.display = 'none';
     }
 
-    function getDeterministicRandom(seed) {
-        const x = Math.sin(seed) * 10000;
-        return x - Math.floor(x);
+    // Controllo iniziale
+    if (userNickname) {
+        showChat();
+    } else {
+        showDisclaimer();
     }
 
-    function createMessageNode(msg) {
-        const stringSeed = msg.content + (msg.nickname || '');
-        const baseSeed = hashCode(stringSeed);
+    // Gestione accettazione Disclaimer
+    entryForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nickname = nickInput.value.trim();
         
-        const posIndex = Math.floor(getDeterministicRandom(baseSeed) * leftPositions.length);
-        const posLeft = leftPositions[posIndex];
-        
-        const symbolIndex = Math.floor(getDeterministicRandom(baseSeed + 1) * glitchSymbols.length);
-        const symbol = glitchSymbols[symbolIndex];
-
-        // Sanificazione dei dati in ingresso dall'API
-        const safeContent = escapeHTML(msg.content);
-        const safeNickname = escapeHTML(msg.nickname || '131.24.167');
-
-        const wrapper = document.createElement('div');
-        wrapper.className = 'article-node';
-        wrapper.style.setProperty('--offset-x', `${posLeft}vw`);
-
-        // Ora iniettiamo dati sicuri (safeContent e safeNickname)
-        wrapper.innerHTML = `
-            <div class="main-title">${safeContent.toUpperCase()}${symbol}</div>
-            <div class="sub-title">${safeNickname}</div>
-        `;
-        return wrapper;
-    }
-
-    async function loadInitialMessages() {
-        try {
-            const res = await fetch(API_URL);
-            const data = await res.json();
-            
-            data.sort((a, b) => b.id - a.id); 
-            allMessages = data; 
-            renderNextChunk();
-        } catch (err) {
-            console.error("Errore", err);
-            whiteboard.innerHTML = '<div class="article-node" style="--offset-x: 10vw;"><div class="main-title">SYS.ERR</div></div>';
+        if (nickname) {
+            localStorage.setItem('sturmmolo_nick', nickname);
+            userNickname = nickname; // Aggiorna la variabile
+            showChat();
         }
-    }
-
-    function renderNextChunk() {
-        const fragment = document.createDocumentFragment();
-        const messagesToRender = allMessages.slice(displayedCount, displayedCount + LIMIT_PER_PAGE);
-
-        messagesToRender.forEach(msg => {
-            fragment.appendChild(createMessageNode(msg));
-        });
-
-        whiteboard.appendChild(fragment);
-        displayedCount += messagesToRender.length;
-
-        if (displayedCount >= allMessages.length) {
-            loadMoreBtn.style.display = 'none';
-        } else {
-            loadMoreBtn.style.display = 'inline-block';
-        }
-    }
-
-    loadMoreBtn.addEventListener('click', () => {
-        renderNextChunk();
     });
 
-    chatForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    // --- LOGICA DELLA CHAT (isolata e protetta) ---
+    function initChat() {
+        const API_URL = "https://chat-api.davidecucciardi.workers.dev/messages";
         
-        if (isSending) return; // Se sta già inviando, blocca
-        
-        const content = chatInput.value.trim();
-        const nickname = userNickname.trim() || '131.24.167'; 
+        const whiteboard = document.getElementById('whiteboard');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const loadMoreBtn = document.getElementById('load-more-btn');
 
-        // Validazione extra client-side
-        if (!content || content.length > 250) return;
+        const leftPositions = [10, 55, 20, 60, 15, 50, 25];
+        const glitchSymbols = ['†', 'º', '‡', '±', ''];
 
-        // Disabilita il form (Cooldown di 3 secondi)
-        isSending = true;
-        submitBtn.disabled = true;
-        chatInput.disabled = true;
-        const originalBtnText = submitBtn.innerText;
-        submitBtn.innerText = "WAIT_";
+        let allMessages = [];
+        let displayedCount = 0;
+        const LIMIT_PER_PAGE = 15;
+        let isSending = false;
 
-        try {
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content, nickname })
+        // XSS Prevent
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;',
+                    "'": '&#39;', '"': '&quot;'
+                }[tag])
+            );
+        }
+
+        function hashCode(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = (hash << 5) - hash + str.charCodeAt(i);
+                hash |= 0; 
+            }
+            return Math.abs(hash);
+        }
+
+        function getDeterministicRandom(seed) {
+            const x = Math.sin(seed) * 10000;
+            return x - Math.floor(x);
+        }
+
+        function createMessageNode(msg) {
+            const stringSeed = msg.content + (msg.nickname || '');
+            const baseSeed = hashCode(stringSeed);
+            
+            const posIndex = Math.floor(getDeterministicRandom(baseSeed) * leftPositions.length);
+            const posLeft = leftPositions[posIndex];
+            
+            const symbolIndex = Math.floor(getDeterministicRandom(baseSeed + 1) * glitchSymbols.length);
+            const symbol = glitchSymbols[symbolIndex];
+
+            const safeContent = escapeHTML(msg.content);
+            const safeNickname = escapeHTML(msg.nickname || '131.24.167');
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'article-node';
+            wrapper.style.setProperty('--offset-x', `${posLeft}vw`);
+
+            wrapper.innerHTML = `
+                <div class="main-title">${safeContent.toUpperCase()}${symbol}</div>
+                <div class="sub-title">${safeNickname}</div>
+            `;
+            return wrapper;
+        }
+
+        async function loadInitialMessages() {
+            // Evita chiamate doppie se l'utente spam-clicca o si ricarica la logica
+            if (whiteboard.innerHTML !== '') return; 
+            
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                
+                data.sort((a, b) => b.id - a.id); 
+                allMessages = data; 
+                renderNextChunk();
+            } catch (err) {
+                console.error("Errore", err);
+                whiteboard.innerHTML = '<div class="article-node" style="--offset-x: 10vw;"><div class="main-title">SYS.ERR</div></div>';
+            }
+        }
+
+        function renderNextChunk() {
+            const fragment = document.createDocumentFragment();
+            const messagesToRender = allMessages.slice(displayedCount, displayedCount + LIMIT_PER_PAGE);
+
+            messagesToRender.forEach(msg => {
+                fragment.appendChild(createMessageNode(msg));
             });
 
-            const newMsgData = { 
-                id: Date.now(), 
-                content, 
-                nickname: nickname
-            };
-            
-            const newNode = createMessageNode(newMsgData);
-            whiteboard.prepend(newNode);
-            
-            allMessages.unshift(newMsgData);
-            displayedCount++;
-            chatInput.value = ''; 
-            
-        } catch (err) {
-            console.error("Invio fallito", err);
-            alert("Errore di connessione.");
-        } finally {
-            // Rilascia il blocco dopo 3 secondi
-            setTimeout(() => {
-                isSending = false;
-                submitBtn.disabled = false;
-                chatInput.disabled = false;
-                submitBtn.innerText = originalBtnText;
-                chatInput.focus();
-            }, 3000);
-        }
-    });
+            whiteboard.appendChild(fragment);
+            displayedCount += messagesToRender.length;
 
-    loadInitialMessages();
+            if (displayedCount >= allMessages.length) {
+                loadMoreBtn.style.display = 'none';
+            } else {
+                loadMoreBtn.style.display = 'inline-block';
+            }
+        }
+
+        // Previeni duplicazione degli event listener se l'init viene per caso chiamato di nuovo
+        loadMoreBtn.replaceWith(loadMoreBtn.cloneNode(true));
+        document.getElementById('load-more-btn').addEventListener('click', renderNextChunk);
+
+        chatForm.replaceWith(chatForm.cloneNode(true));
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (isSending) return;
+            
+            const inputField = document.getElementById('chat-input');
+            const submitButton = document.getElementById('submit-btn');
+            
+            const content = inputField.value.trim();
+            const nickname = userNickname || '131.24.167'; 
+
+            if (!content || content.length > 250) return;
+
+            isSending = true;
+            submitButton.disabled = true;
+            inputField.disabled = true;
+            const originalBtnText = submitButton.innerText;
+            submitButton.innerText = "WAIT_";
+
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content, nickname })
+                });
+
+                const newMsgData = { 
+                    id: Date.now(), 
+                    content, 
+                    nickname: nickname
+                };
+                
+                const newNode = createMessageNode(newMsgData);
+                document.getElementById('whiteboard').prepend(newNode);
+                
+                allMessages.unshift(newMsgData);
+                displayedCount++;
+                inputField.value = ''; 
+                
+            } catch (err) {
+                console.error("Invio fallito", err);
+                alert("Errore di connessione.");
+            } finally {
+                setTimeout(() => {
+                    isSending = false;
+                    submitButton.disabled = false;
+                    inputField.disabled = false;
+                    submitButton.innerText = originalBtnText;
+                    inputField.focus();
+                }, 3000);
+            }
+        });
+
+        loadInitialMessages();
+    }
+});
 </script>
 </body>
 </html>
