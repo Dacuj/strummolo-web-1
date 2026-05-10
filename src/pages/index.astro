@@ -215,43 +215,74 @@
         
         header { 
             padding: 10px; 
-            flex-direction: column; 
-            gap: 10px; 
-            background-color: rgba(0,0,0,0.8);
-            pointer-events: auto; 
+            display: block; /* Rimuoviamo il flex-col del mobile per gestire gli elementi in posizioni separate */
+            background-color: transparent; /* Togliamo il blocco nero della navbar per non oscurare tutto lo schermo */
+            pointer-events: none; 
         }
+
         .logo { 
             font-size: 1rem; 
             width: 100%; 
+            display: flex;
             justify-content: center; 
             margin-top: 0; 
             transform: none; 
+            background: rgba(0,0,0,0.8);
+            pointer-events: auto;
         }
+
         .navbar { 
-            gap: 12px;
-            width: 100%; 
-            justify-content: center; 
-            padding-right: 0;
-            padding-left: 0;
-            flex-wrap: wrap; 
+            /* Spostiamo la navbar esattamente al centro dello schermo */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column; /* Impila i bottoni uno sotto l'altro */
+            gap: 10px;
+            width: auto; 
+            padding: 0;
+            pointer-events: auto;
         }
+
+        /* Resettiamo le rotazioni folli del desktop per i figli */
         .navbar a:nth-child(n) { 
-            margin-top: 0; 
-            margin-right: 0; 
+            margin: 0; 
             transform: none; 
         }
         
-        a.nav-link.footprint {
-            font-size: clamp(1rem, 5vw, 1.4rem); 
-            width: 100%; 
+        /* Stile Bottone Browser Vintage (Anni 2000) */
+        .nav-link, a.nav-link.footprint {
+            font-family: 'Arial', sans-serif; /* Font basico di sistema */
+            font-size: 14px; /* Piccolini */
+            font-weight: normal;
+            letter-spacing: normal;
+            line-height: normal;
+            text-transform: none; /* Tolto il maiuscolo forzato */
+            color: #000;
+            background-color: #c0c0c0; /* Classico grigio Windows */
+            padding: 4px 12px;
+            
+            /* Bordo 3D tipico dell'HTML puro old-school */
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff; 
+            
+            box-shadow: none; /* Tolta l'ombra spessa del desktop */
+            width: 100%; /* Larghezza adattata al centro */
             text-align: center;
-            white-space: normal; 
+            white-space: nowrap; 
         }
 
-        .nav-link { 
-            font-size: 1.5rem; 
-            line-height: 0.8; 
-            letter-spacing: -1px; 
+        /* Annulliamo completamente l'hover del desktop */
+        .nav-link:hover, a.nav-link.footprint:hover {
+            transform: none !important;
+            background-color: #c0c0c0;
+            color: #000;
+        }
+
+        /* Effetto click "bottone incassato" per renderlo interattivo stile anni 2000 */
+        .nav-link:active, a.nav-link.footprint:active {
+            border-color: #808080 #ffffff #ffffff #808080;
         }
         
         .pin-container { 
