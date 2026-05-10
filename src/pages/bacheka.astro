@@ -58,7 +58,7 @@ const mapNumbers = generateNumbers();
 <head>
     <meta charset="utf-8" />
     <title>Sturmmolo - Bacheca</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <style is:global>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -73,6 +73,7 @@ const mapNumbers = generateNumbers();
 
     body.chat-mode {
         background: repeating-linear-gradient(0deg, #000000, #000000 2px, #00ff00 2px, #00ff00 4px);
+        background-attachment: fixed; /* FIX CRUCIALE PER NON FAR SDOPPIARE LE RIGHE */
         min-height: 100vh;
         overflow-x: hidden; 
         overflow-y: auto;   
@@ -116,9 +117,9 @@ const mapNumbers = generateNumbers();
     .nick-input {
         background-color: #ffffff;
         color: #000000;
-        border: 1px solid #ffffff;
+        border: 2px inset #ececec; 
         font-family: Arial, sans-serif;
-        font-size: 0.8rem;
+        font-size: 16px; 
         font-weight: bold;
         padding: 4px 10px;
         text-align: center;
@@ -126,24 +127,29 @@ const mapNumbers = generateNumbers();
         max-width: 300px;
         outline: none;
         text-transform: uppercase;
+        border-radius: 0;
     }
 
     .nick-input::placeholder { color: #888888; text-transform: uppercase; }
-    .nick-input:focus { background-color: #cccccc; color: #000000; }
 
     .accept-btn {
-        background-color: #ffffff;
+        background-color: #d4d0c8; 
         color: #000000;
-        text-decoration: none;
         padding: 4px 15px;
         font-family: Arial, sans-serif;
-        font-size: 0.8rem;
-        font-weight: bold;
-        border: 1px solid #ffffff;
+        font-size: 16px;
+        border: 2px outset #ffffff;
+        border-bottom-color: #404040;
+        border-right-color: #404040;
         cursor: pointer;
         text-transform: uppercase;
+        border-radius: 0;
     }
-    .accept-btn:hover { background-color: #cccccc; }
+    .accept-btn:active {
+        border: 2px inset #ffffff;
+        border-bottom-color: #404040;
+        border-right-color: #404040;
+    }
 
     /* --- STILI CHAT (BACHEKA) --- */
     .jodi-bg {
@@ -155,7 +161,8 @@ const mapNumbers = generateNumbers();
     @keyframes glitchPath { 90% { stroke-opacity: 1; } 95% { stroke-opacity: 0.2; } 100% { stroke-opacity: 1; } }
 
     .ui-layer { position: relative; width: 100%; z-index: 10; padding-bottom: 120px; }
-    .articles-container { display: flex; flex-direction: column; gap: 25vh; padding-top: 15vh; }
+    
+    .articles-container { display: flex; flex-direction: column; gap: 4rem; padding-top: 15vh; }
 
     .home-link {
         position: fixed; top: 5%; left: 5%; color: #0000ff; 
@@ -189,17 +196,94 @@ const mapNumbers = generateNumbers();
         z-index: 1000; pointer-events: none; 
     }
 
-    #chat-form { pointer-events: auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
-    #load-more-btn { pointer-events: auto; display: none; margin-bottom: 10px; }
+    .load-more-container {
+        width: 90%;
+        max-width: 500px;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 8px; 
+        pointer-events: none;
+    }
+
+    #load-more-btn { 
+        pointer-events: auto; 
+        display: none; 
+        background-color: #d4d0c8;
+        color: #000000;
+        border: 2px outset #ffffff;
+        border-bottom-color: #404040;
+        border-right-color: #404040;
+        padding: 4px 12px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 0;
+    }
+
+    #load-more-btn:active {
+        border: 2px inset #ffffff;
+        border-bottom-color: #404040;
+        border-right-color: #404040;
+    }
+
+    #chat-form { 
+        pointer-events: auto; 
+        display: flex; 
+        flex-wrap: nowrap; 
+        justify-content: center; 
+        gap: 5px; 
+        width: 90%;
+        max-width: 500px;
+    }
+
+    #chat-input {
+        flex-grow: 1; 
+        background-color: #ffffff;
+        color: #000000;
+        border: 2px inset #ececec; 
+        padding: 4px 6px;
+        font-family: Arial, sans-serif;
+        font-size: 16px; 
+        outline: none;
+        border-radius: 0;
+    }
+
+    #submit-btn {
+        pointer-events: auto;
+        background-color: #d4d0c8; 
+        color: #000000;
+        border: 2px outset #ffffff; 
+        border-bottom-color: #404040;
+        border-right-color: #404040;
+        padding: 4px 12px;
+        font-family: Arial, sans-serif;
+        font-size: 16px; 
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 0;
+    }
+
+    #submit-btn:active {
+        border: 2px inset #ffffff;
+        border-bottom-color: #404040;
+        border-right-color: #404040;
+    }
+
     button:disabled { opacity: 0.5; cursor: not-allowed; }
 
     @media (max-width: 768px) {
         .main-title { font-size: 20px; text-decoration-thickness: 2px; }
         .sub-title { font-size: 16px; }
         .home-link { font-size: 20px; top: 3%; left: 3%; }
-        .articles-container { gap: 20vh; padding-top: 10vh; } 
+        
+        .articles-container { gap: 2.5rem; padding-top: 10vh; } 
         .article-node { margin-left: calc(var(--offset-x) * 0.2); max-width: calc(94vw - calc(var(--offset-x) * 0.2)); }
         .ui-layer { padding-bottom: 180px; } 
+
+        .controls-wrapper {
+            bottom: 40px; 
+        }
     }
     </style>
 </head>
@@ -237,9 +321,11 @@ const mapNumbers = generateNumbers();
         </main>
 
         <div class="controls-wrapper">
-            <button id="load-more-btn">LOAD MORE_</button>
+            <div class="load-more-container">
+                <button id="load-more-btn">LOAD MORE_</button>
+            </div>
             <form id="chat-form">
-                <input type="text" id="chat-input" placeholder="scrivi un messaggio" required maxlength="250" autocomplete="off" />
+                <input type="text" id="chat-input" placeholder="Scrivi..." required maxlength="250" autocomplete="off" />
                 <button type="submit" id="submit-btn">INVIA</button>
             </form>
         </div>
@@ -247,25 +333,21 @@ const mapNumbers = generateNumbers();
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    // Referenze DOM globali
     const disclaimerView = document.getElementById('disclaimer-view');
     const chatView = document.getElementById('chat-view');
     const entryForm = document.getElementById('entry-form');
     const nickInput = document.getElementById('nickname');
     
-    // Variabile per memorizzare il nick corrente
     let userNickname = localStorage.getItem('sturmmolo_nick');
 
-    // Funzione per switchare alla vista Chat
     function showChat() {
         document.body.classList.remove('disclaimer-mode');
         document.body.classList.add('chat-mode');
         disclaimerView.style.display = 'none';
         chatView.style.display = 'block';
-        initChat(); // Inizializza la bacheca solo quando viene mostrata
+        initChat(); 
     }
 
-    // Funzione per mostrare il Disclaimer
     function showDisclaimer() {
         document.body.classList.remove('chat-mode');
         document.body.classList.add('disclaimer-mode');
@@ -273,26 +355,23 @@ document.addEventListener("DOMContentLoaded", () => {
         chatView.style.display = 'none';
     }
 
-    // Controllo iniziale
     if (userNickname) {
         showChat();
     } else {
         showDisclaimer();
     }
 
-    // Gestione accettazione Disclaimer
     entryForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const nickname = nickInput.value.trim();
         
         if (nickname) {
             localStorage.setItem('sturmmolo_nick', nickname);
-            userNickname = nickname; // Aggiorna la variabile
+            userNickname = nickname; 
             showChat();
         }
     });
 
-    // --- LOGICA DELLA CHAT (isolata e protetta) ---
     function initChat() {
         const API_URL = "https://chat-api.davidecucciardi.workers.dev/messages";
         
@@ -310,7 +389,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const LIMIT_PER_PAGE = 15;
         let isSending = false;
 
-        // XSS Prevent
         function escapeHTML(str) {
             if (!str) return '';
             return str.replace(/[&<>'"]/g, 
@@ -360,7 +438,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         async function loadInitialMessages() {
-            // Evita chiamate doppie se l'utente spam-clicca o si ricarica la logica
             if (whiteboard.innerHTML !== '') return; 
             
             try {
@@ -394,29 +471,25 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Previeni duplicazione degli event listener se l'init viene per caso chiamato di nuovo
-        loadMoreBtn.replaceWith(loadMoreBtn.cloneNode(true));
-        document.getElementById('load-more-btn').addEventListener('click', renderNextChunk);
+        // Listener pulito senza rimpiazzi o cloni
+        loadMoreBtn.addEventListener('click', renderNextChunk);
 
-        chatForm.replaceWith(chatForm.cloneNode(true));
-        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+        // Listener per invio messaggi
+        chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             if (isSending) return;
             
-            const inputField = document.getElementById('chat-input');
-            const submitButton = document.getElementById('submit-btn');
-            
-            const content = inputField.value.trim();
+            const content = chatInput.value.trim();
             const nickname = userNickname || '131.24.167'; 
 
             if (!content || content.length > 250) return;
 
             isSending = true;
-            submitButton.disabled = true;
-            inputField.disabled = true;
-            const originalBtnText = submitButton.innerText;
-            submitButton.innerText = "WAIT_";
+            submitBtn.disabled = true;
+            chatInput.disabled = true;
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.innerText = "WAIT";
 
             try {
                 await fetch(API_URL, {
@@ -432,11 +505,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 };
                 
                 const newNode = createMessageNode(newMsgData);
-                document.getElementById('whiteboard').prepend(newNode);
+                whiteboard.prepend(newNode);
                 
                 allMessages.unshift(newMsgData);
                 displayedCount++;
-                inputField.value = ''; 
+                chatInput.value = ''; 
                 
             } catch (err) {
                 console.error("Invio fallito", err);
@@ -444,10 +517,10 @@ document.addEventListener("DOMContentLoaded", () => {
             } finally {
                 setTimeout(() => {
                     isSending = false;
-                    submitButton.disabled = false;
-                    inputField.disabled = false;
-                    submitButton.innerText = originalBtnText;
-                    inputField.focus();
+                    submitBtn.disabled = false;
+                    chatInput.disabled = false;
+                    submitBtn.innerText = originalBtnText;
+                    chatInput.focus();
                 }, 3000);
             }
         });
