@@ -1,46 +1,38 @@
 ---
 title: J'adorami sto cazzk
-description: Mentre il marketing ri-brandizza Napoli come una rassicurante
-  cartolina, noi scegliamo la strada di Johnny Rotten. Tra la verità brutale di
-  Simone Weil e il nichilismo del '77, esploriamo perché "adorare" la propria
-  città sia l'inizio della sua fine, e perché un grido d'odio possa essere
-  l'unico atto d'amore capace di trasformare via Toledo in King’s Road.
-date: 2026-02-09
+description: J’adore, j’accuse, je refuse.
+date: 2026-05-14
 style: editorial
 fileNumber: FILE_001
 tags:
   - ESSAY
 ---
-Se fossimo una “[Blank Generation](https://it.wikipedia.org/wiki/Blank_Generation_(singolo))” come intona , o meglio, stona Richard Hell nel ‘77, `con cosa vorremmo riempire la nostra generazione vuota , con l’odio o con l’amore?`
+Il centro storico napoletano è ormai un luogo infestato dal proprio passato, come un’antica rovina che contiene dentro sé tutto ciò che era, ciò che resta e ciò che non sarà mai più. Giammai percorreremo quelle strade senza fantasmi muniti di reflex e di birkenstock con calzini di spugna, giammai gusteremo una pizza fritta senza almeno 20 minuti di fila e i pizzaioli grondanti sudore per essere la nuova servitù della gleba. Giammai vivremo la tanto decantata *vita lenta*, ormai anche i parcheggiatori abusivi vanno di fretta. C’è un colpevole per ciò che abbiamo perso? 
 
-La risposta cambia a seconda del soggetto. Potrete immaginare quella di Johnny Rotten e la sua celebre t-shirt <u>“***I hate Pink Floyd***”</u>, un capo appena uscito dal negozio poi strappato e ricomposto con spille da balia, poiché si sa che la distruzione non è altro che un atto creativo  \[che cosa creerà mai?] una nuova identità. Ed è proprio questa che ci interessa . 
+J’accuse *J’Adore Napoli* e tutto ciò che rappresenta.
 
-![](/img/img_5038.jpg)
+Avevamo bisogno di qualcuno che narrasse la nostra storia, ma non credevo si trattasse di un brand costruito a tavolino, fatto di magliette ceruleo con *Bukkin* e grafiche dei Looney Tunes.
 
-Simone Weil , e qua andiamo sul pesante, sostiene che 
+Non è quello che vogliamo, è tutto ciò che neghiamo.
 
-> amore e odio sono processi simili che hanno solo uno sguardo diverso sul mondo. 
+ *Je refuse* la mercificazione dell’identità partenopea. 
 
-Quando amiamo non vorremmo cambiare nulla del soggetto in questione, diremmo addirittura che “`ci piace così com’è!`”, e tante altre bugie che siamo in grado di proferire per perpetuare la specie. 
+*Je refuse* una Napoli da cartolina, commercializzata, vendibile ed invivibile. 
 
-L’odio invece vuole agire, trasformare, correggere e talvolta distruggere. Odiare significa riconoscere che c’è qualcosa di piacevole nel soggetto ma che non basta , per salvare ciò che di buono c’è abbiamo bisogno di sottoporlo ad un processo alchemico: quello della verità brutale. E, cosa risaputa, non c’è niente di più doloroso della verità. E non c’è niente di più difficile di tentare di capire il pensiero di Simone Weil con i miei due esami a scelta di Filosofia.   
+*Je refuse* la bellezza che non narra la complessità. 
 
-Dunque `l’amore non salva , mentre l’odio sì`, e per questo talvolta è distruttivo e dissacrante , poiché salvare è violenza ma anche conservazione. Pertanto l’amore non cambia il mondo , a limite lo accetta. In questa strana dissonanza che affligge l’esistenza anche un grido può diventare una canzone. E anche Via Toledo può tramutarsi in King’s Road, magari senza i Sex Pistols e Vivienne Westwood. Ma con la stessa quantità di contraddizioni che hanno spinto un giovane Rotten , fan dei Pink Floyd, ad indossare una maglietta appositamente malridotta per professarne l’odio. Rotten non odia la musica della rock band britannica, bensì ciò che rappresenta. 
+*Je refuse* trattare la città come un prodotto da consumare modellato sulle aspettative del turista.
 
-![](/img/image_2026-02-09_190753037.png)
+*Je refuse* essere turista della mia città se questo significa essere un parassita. 
 
-I concerti dei Pink Floyd erano divenuti eventi di massa, gli stadi gremiti di gente, gli assoli di chitarra tecnicamente impeccabili e le scenografie da milioni di sterline. Non avevano più nulla a che vedere con la Londra dei giovani disoccupati, arrabbiati , annoiati, affamati e con non troppe speranze per il futuro. 
+*Je refuse* la feticizzazione del folklore.
 
-Il punk nasce proprio da questo odio , formando così una nuova élite di reietti che ama i baffi aggiunti da Duchamp alla Gioconda, le borchie, la contestazione come atto politico, le giacche di pelle ed avere almeno metà testa rasata.   
+*J’Adore Napoli* non è raccontare la città a chi non la conosce, ma è offrirla come Ifigenia in Aulide, la vittima è pronta al sacrificio sull’altare del consumo turistico. La tradizione è svenduta come ornamento, non c’è niente di sacro o di eroico in questa operazione. C’è piuttosto un sistema che lucra sulla propria autodistruzione, e lo fa con una lucidità spietata, rivestendola però di un’estetica impeccabile presa in prestito da Dior. 
 
-Se invece volessimo essere romantici, dovremmo pensare a Milton Glaser e alla sua “I <3 NY”. Talvolta però il romanticismo è solo una buona mossa di marketing, studiata a tavolino, per ri-brandizzare una città in crisi. Tentando di nascondere il baratro finanziario di NY, il tasso record di criminalità, il problema dei clochard e la generale decadenza urbana , con le luci di Broadway e le pubblicità di Time Square. 
+Intanto, tra tarallucci e vino, assistiamo all’ennesimo atto di adorazione, o per meglio dire, di feticizzazione.
 
-[Napoli non è New York](https://genius.com/Drast-new-york-lyrics) , cita una struggente canzone degli anni recenti, eppure il mare, il sole, la pizza e il mandolino non sono le sue uniche realtà. Sicuramente rappresentano una delle tante narrazioni presenti, ma qui non siamo interessati all’idealizzazione di una cartolina che non parla dell’orrore, che attenzione, dentro se contiene comunque un’indicibile speranza. 
+Si venera la bellezza di un panorama svuotato del suo significato, si adora la forma dopo averne consumato l’essenza. Napoli così diviene innocua e perfetta, non più città viva, contraddittoria, popolare, dolorosa e stratificata, bensì il perfetto spot per una compagnia di tour operator alle prime armi.
 
-Dunque in cosa speriamo odiando il luogo che ci ha dato i natali ? Forse nel miglioramento, forse in nulla come dei banali ribelli senza causa o magari solo nella possibilità di trovare qualcuno con cui stare contro il mondo assieme perché abbiamo smesso di adorare e feticcizzare il bello, e forse è il caso di odiare un po’ ciò che ci piace per salvarlo meglio. `[Si lo so, Simone Weil e la mia terribile e fastidiosa retorica del paradosso, ma come si può pretendere di capire la realtà senza indagarne l’assurdità?]`
 
-***Napoli fatta di estremi apparentemente inconciliabili, è sempre in bilico fra la massima espressione della bellezza e l’apogeo della decadenza, non può solo piacerti, può stordirti col suo cattivo odore di piscio o con il profumo di un forno a legna.*** 
 
 ![](/img/046813d3-5fab-4125-990d-9e8da96e31df.jpg)
-
-Napoli frenetica, enigmatica, esoterica, imperterrita, coraggiosa, vigliacca, sporca, regale, frugale, ampollosa, esagerata, ammirata, degradata e tanti altri controsensi che sarei in grado di partorire perché sono di Napoli, e in caso non si fosse notato, sono paradossale anch’io.
