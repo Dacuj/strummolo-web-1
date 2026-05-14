@@ -15,7 +15,7 @@ Avevamo bisogno di qualcuno che narrasse la nostra storia, ma non credevo si tra
 
 Non è quello che vogliamo, è tutto ciò che neghiamo.
 
- *Je refuse* la mercificazione dell’identità partenopea. 
+*Je refuse* la mercificazione dell’identità partenopea. 
 
 *Je refuse* una Napoli da cartolina, commercializzata, vendibile ed invivibile. 
 
@@ -29,10 +29,10 @@ Non è quello che vogliamo, è tutto ciò che neghiamo.
 
 *J’Adore Napoli* non è raccontare la città a chi non la conosce, ma è offrirla come Ifigenia in Aulide, la vittima è pronta al sacrificio sull’altare del consumo turistico. La tradizione è svenduta come ornamento, non c’è niente di sacro o di eroico in questa operazione. C’è piuttosto un sistema che lucra sulla propria autodistruzione, e lo fa con una lucidità spietata, rivestendola però di un’estetica impeccabile presa in prestito da Dior. 
 
+![](https://images.vestiairecollective.com/images/resized/w=2920,q=75,f=auto,/produit/t-shirt-e-camicie-dior-jadore-dior-giallo-cotone-53290872-1_2.jpg)
+
 Intanto, tra tarallucci e vino, assistiamo all’ennesimo atto di adorazione, o per meglio dire, di feticizzazione.
 
 Si venera la bellezza di un panorama svuotato del suo significato, si adora la forma dopo averne consumato l’essenza. Napoli così diviene innocua e perfetta, non più città viva, contraddittoria, popolare, dolorosa e stratificata, bensì il perfetto spot per una compagnia di tour operator alle prime armi.
-
-
 
 ![](/img/046813d3-5fab-4125-990d-9e8da96e31df.jpg)
