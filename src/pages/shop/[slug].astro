@@ -1,0 +1,249 @@
+---
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const products = await getCollection('prodotti');
+  return products.map((p) => ({
+    params: { slug: p.slug },
+    props: { product: p },
+  }));
+}
+
+interface Props {
+  product: CollectionEntry<'prodotti'>;
+}
+
+const { product } = Astro.props;
+const { title, description, price, images, available } = product.data;
+const isAvailable = available !== false;
+const INSTAGRAM_HANDLE = 'strummolo123';
+const INSTAGRAM_URL = `https://instagram.com/${INSTAGRAM_HANDLE}`;
+---
+
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} // Strummolo Shop</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="product" />
+    {images && images[0] && <meta property="og:image" content={images[0]} />}
+  </head>
+  <body>
+
+    <header class="shop-header">
+      <a href="/shop" class="shop-back">← shop</a>
+      <span class="shop-title">{title}</span>
+      <span class="shop-spacer"></span>
+    </header>
+
+    <main class="detail-main">
+      <article class="detail-product">
+        <div class="detail-meta">
+          <span class="detail-price">{price}</span>
+          {!isAvailable && <span class="detail-sold">— sold out</span>}
+        </div>
+
+        {description && <p class="detail-desc">{description}</p>}
+
+        <div class="detail-gallery">
+          {images.map((src, i) => (
+            <figure class="detail-figure">
+              <img class="detail-img" src={src} alt={`${title} — foto ${i + 1}`} loading={i === 0 ? 'eager' : 'lazy'} />
+            </figure>
+          ))}
+        </div>
+
+        <footer class="detail-footer">
+          {isAvailable ? (
+            <p>
+              Per ordinare scrivici su
+              <a class="detail-link" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+                Instagram @{INSTAGRAM_HANDLE}
+              </a>
+            </p>
+          ) : (
+            <p>
+              Sold out — chiedi disponibilità su
+              <a class="detail-link" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+                Instagram @{INSTAGRAM_HANDLE}
+              </a>
+            </p>
+          )}
+        </footer>
+      </article>
+    </main>
+
+    <style is:global>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      ::selection { background: #fff; color: #000; }
+
+      html, body { height: 100%; }
+
+      body {
+        min-height: 100vh;
+        font-family: "Courier New", Courier, monospace;
+        color: #fff;
+        background-color: #000;
+        background-image: url('/img/mir.webp');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      a { color: inherit; text-decoration: none; }
+
+      /* ===== HEADER (stesso pattern di /shop) ===== */
+      .shop-header {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 32px;
+        font-size: 13px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+
+      .shop-back {
+        opacity: 0.85;
+        transition: opacity 0.15s;
+      }
+      .shop-back:hover { opacity: 1; text-decoration: underline; }
+
+      .shop-title {
+        font-weight: bold;
+        letter-spacing: 3px;
+        text-align: center;
+        max-width: 60%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .shop-spacer { width: 60px; }
+
+      /* ===== MAIN ===== */
+      .detail-main {
+        position: relative;
+        z-index: 1;
+        padding: 40px 24px 120px 24px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .detail-product {
+        width: 100%;
+        max-width: 720px;
+      }
+
+      /* ===== META / PREZZO ===== */
+      .detail-meta {
+        text-align: center;
+        margin-bottom: 24px;
+        font-size: 16px;
+        letter-spacing: 2px;
+      }
+
+      .detail-price {
+        font-weight: bold;
+      }
+
+      .detail-sold {
+        margin-left: 6px;
+        opacity: 0.7;
+        font-style: italic;
+        text-transform: lowercase;
+      }
+
+      /* ===== DESCRIZIONE ===== */
+      .detail-desc {
+        text-align: center;
+        max-width: 540px;
+        margin: 0 auto 60px auto;
+        font-size: 15px;
+        line-height: 1.6;
+        opacity: 0.85;
+      }
+
+      /* ===== GALLERIA ===== */
+      .detail-gallery {
+        display: flex;
+        flex-direction: column;
+        gap: 60px;
+        align-items: center;
+      }
+
+      .detail-figure {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      .detail-img {
+        max-width: 100%;
+        max-height: 80vh;
+        width: auto;
+        height: auto;
+        display: block;
+        /* Niente filtri sulle foto prodotto: devono essere fedeli */
+      }
+
+      /* ===== FOOTER / CONTATTO ===== */
+      .detail-footer {
+        margin-top: 80px;
+        text-align: center;
+        font-size: 15px;
+        letter-spacing: 1px;
+        opacity: 0.9;
+      }
+
+      .detail-footer p {
+        line-height: 1.8;
+      }
+
+      .detail-link {
+        display: inline;
+        margin-left: 6px;
+        color: #fff;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        transition: opacity 0.15s;
+      }
+      .detail-link:hover { opacity: 0.75; }
+
+      /* ===== RESPONSIVE ===== */
+      @media (max-width: 768px) {
+        .shop-header { padding: 16px 18px; font-size: 11px; letter-spacing: 1px; }
+        .shop-title { letter-spacing: 2px; max-width: 50%; }
+        .shop-spacer { width: 40px; }
+
+        .detail-main { padding: 20px 14px 80px 14px; }
+        .detail-meta { font-size: 14px; margin-bottom: 18px; }
+        .detail-desc { font-size: 14px; margin-bottom: 40px; }
+        .detail-gallery { gap: 40px; }
+        .detail-img { max-height: 70vh; }
+        .detail-footer { margin-top: 50px; font-size: 13px; }
+      }
+    </style>
+  </body>
+</html>

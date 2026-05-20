@@ -43,7 +43,7 @@ for (const p of allProducts) {
         available: p.data.available !== false,
     };
 }
-const INSTAGRAM_URL = 'https://instagram.com/strummolo';
+const INSTAGRAM_URL = 'https://instagram.com/strummolo123';
 
 // Prodotti collegati esplicitamente dal frontmatter (campo del CMS).
 // Filtra eventuali slug puntati a prodotti eliminati.
@@ -153,8 +153,9 @@ const wireframe2 = generateWireframe(-50, 300, 80);
             </div>
         </article>
 
-        <!-- ESPANSIONE PRODUCT EMBEDS A RUNTIME -->
-        <script is:inline define:vars={{ productMap, instagramUrl: INSTAGRAM_URL }}>
+        <!-- ESPANSIONE PRODUCT EMBEDS A RUNTIME (per chi inserisce manualmente
+             <div class="product-embed" data-slug="X"> nel markdown source) -->
+        <script is:inline define:vars={{ productMap }}>
             (function() {
                 function esc(s) {
                     return String(s == null ? '' : s)
@@ -170,72 +171,46 @@ const wireframe2 = generateWireframe(-50, 300, 80);
                     const slug = el.getAttribute('data-slug');
                     const p = productMap[slug];
                     if (!p) {
-                        el.classList.add('product-embed-missing');
-                        el.innerHTML = '<em>[PRODOTTO NON TROVATO: ' + esc(slug) + ']</em>';
+                        el.classList.add('minimal-embed-missing');
+                        el.innerHTML = '<em>[prodotto non trovato: ' + esc(slug) + ']</em>';
                         return;
                     }
 
                     const imgHTML = p.image
-                        ? '<img class="product-embed-img" src="' + esc(p.image) + '" alt="' + esc(p.title) + '" loading="lazy" />'
-                        : '<div class="product-embed-img product-embed-noimg">[NO IMAGE]</div>';
+                        ? '<img class="minimal-embed-img" src="' + esc(p.image) + '" alt="' + esc(p.title) + '" loading="lazy" />'
+                        : '<div class="minimal-embed-noimg">[no image]</div>';
 
-                    const descHTML = p.description
-                        ? '<p class="product-embed-desc">' + esc(p.description) + '</p>'
-                        : '';
-
-                    const ctaLabel = p.available
-                        ? '&gt;&gt; COMPRA / DM SU IG'
-                        : '&gt;&gt; SOLD OUT — CHIEDI DISPONIBILITÀ';
-
+                    el.classList.add('minimal-embed');
                     el.innerHTML =
-                        '<aside class="product-embed-card">' +
-                            '<a class="product-embed-link" href="/shop" aria-label="Apri shop">' +
-                                imgHTML +
-                            '</a>' +
-                            '<div class="product-embed-info">' +
-                                '<span class="product-embed-meta">// PRODOTTO_SHOP // ' + esc(p.price) + '</span>' +
-                                '<h3 class="product-embed-title">' + esc(p.title) + '</h3>' +
-                                descHTML +
-                                '<a class="product-embed-cta" href="' + esc(instagramUrl) + '" target="_blank" rel="noopener noreferrer">' +
-                                    ctaLabel +
-                                '</a>' +
-                            '</div>' +
-                        '</aside>';
+                        '<a class="minimal-embed-link" href="/shop/' + esc(slug) + '">' +
+                            imgHTML +
+                            '<span class="minimal-embed-title">' + esc(p.title) + '</span>' +
+                            '<span class="minimal-embed-label">shop →</span>' +
+                        '</a>';
                 });
             })();
         </script>
 
         <!-- PRODOTTI COLLEGATI (campo CMS prodotti_collegati) -->
         {linkedProducts.length > 0 && (
-            <aside class="jodi-window window-shop">
-                <header class="window-header">
-                    <h2 class="file-name">SHOP_LINKED.OUT</h2>
-                    <span class="file-size">{linkedProducts.length} ITEM{linkedProducts.length === 1 ? '' : 'S'}</span>
-                </header>
-                <div class="window-content shop-linked-body">
+            <section class="minimal-embed-section">
+                <div class="minimal-embed-section-hdr">&gt;&gt; SHOP</div>
+                <div class="minimal-embed-list">
                     {linkedProducts.map((p) => (
-                        <div class="product-embed">
-                            <aside class="product-embed-card">
-                                <a class="product-embed-link" href="/shop" aria-label="Apri shop">
-                                    {p.image ? (
-                                        <img class="product-embed-img" src={p.image} alt={p.title} loading="lazy" />
-                                    ) : (
-                                        <div class="product-embed-img product-embed-noimg">[NO IMAGE]</div>
-                                    )}
-                                </a>
-                                <div class="product-embed-info">
-                                    <span class="product-embed-meta">// PRODOTTO_SHOP // {p.price}</span>
-                                    <h3 class="product-embed-title">{p.title}</h3>
-                                    {p.description && <p class="product-embed-desc">{p.description}</p>}
-                                    <a class="product-embed-cta" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-                                        {p.available ? '>> COMPRA / DM SU IG' : '>> SOLD OUT — CHIEDI DISPONIBILITÀ'}
-                                    </a>
-                                </div>
-                            </aside>
+                        <div class="minimal-embed">
+                            <a class="minimal-embed-link" href={`/shop/${p.slug}`}>
+                                {p.image ? (
+                                    <img class="minimal-embed-img" src={p.image} alt={p.title} loading="lazy" />
+                                ) : (
+                                    <div class="minimal-embed-noimg">[no image]</div>
+                                )}
+                                <span class="minimal-embed-title">{p.title}</span>
+                                <span class="minimal-embed-label">shop →</span>
+                            </a>
                         </div>
                     ))}
                 </div>
-            </aside>
+            </section>
         )}
 
         <!-- FOOTER / NEXT POST -->
@@ -461,156 +436,124 @@ const wireframe2 = generateWireframe(-50, 300, 80);
     }
 
     /* ============================================================
-       PRODUCT EMBED — card inserita da Decap nei post
-       Riempita a runtime dallo script <script is:inline> sopra.
-       L'immagine eredita il filtro brutalist di .markdown-body img.
+       MINIMAL EMBED — card prodotto inline negli articoli.
+       Allineata allo stile minimale di /shop (solo PNG + link testuale).
+       Usata sia dal render server-side della sezione SHOP che dallo script
+       inline che espande <div class="product-embed" data-slug="X">.
        ============================================================ */
 
-    .product-embed {
-        display: block;
-        margin: 40px 0;
+    .minimal-embed-section {
+        margin: 60px 0 40px 0;
     }
 
-    .product-embed-card {
-        background: #fff;
-        border: 4px solid #ff0000;
-        box-shadow: 10px 10px 0 #000;
-        position: relative;
-        display: block;
-    }
-
-    .product-embed-card::before {
-        content: "// SHOP_BLOCK //";
-        position: absolute;
-        top: -14px;
-        left: 12px;
-        background: #ff0000;
-        color: #000;
-        padding: 1px 10px;
-        font-size: 11px;
-        font-weight: bold;
-        letter-spacing: 1px;
+    .minimal-embed-section-hdr {
         font-family: "Courier New", monospace;
-        border: 2px solid #000;
+        font-size: 14px;
+        color: #ff0000;
+        letter-spacing: 2px;
+        margin-bottom: 30px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #ff0000;
+        font-weight: bold;
     }
 
-    .product-embed-link {
+    .minimal-embed-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 40px 30px;
+        justify-items: center;
+    }
+
+    .minimal-embed {
+        display: block;
+        text-align: center;
+        max-width: 240px;
+    }
+
+    .minimal-embed-link {
         display: block;
         text-decoration: none;
-        background: #000;
+        color: inherit;
     }
 
-    .product-embed-img {
+    .minimal-embed-img {
         display: block;
+        max-width: 100%;
+        max-height: 240px;
+        margin: 0 auto;
+        /* NESSUN filtro: il PNG del prodotto deve restare fedele */
+    }
+
+    .minimal-embed-noimg {
         width: 100%;
-        height: auto;
-        max-height: 480px;
-        object-fit: contain;
-        background: #000;
-        margin: 0;
-        border: none;
-        border-bottom: 2px solid #000;
-        /* Stesso filtro di .markdown-body img */
-        filter: grayscale(100%) contrast(200%) sepia(100%) hue-rotate(-50deg) saturate(500%);
-        transition: filter 0.2s;
-    }
-
-    .product-embed-link:hover .product-embed-img {
-        filter: grayscale(0%) contrast(110%);
-    }
-
-    .product-embed-noimg {
+        height: 180px;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 200px;
-        background: #000;
+        background: #111;
         color: #ff0000;
-        font-weight: bold;
-        letter-spacing: 2px;
-    }
-
-    .product-embed-info {
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .product-embed-meta {
-        color: #ff0000;
-        font-size: 12px;
         font-family: "Courier New", monospace;
+        font-size: 13px;
         letter-spacing: 1px;
-        font-weight: bold;
     }
 
-    .product-embed-title {
-        font-size: 24px;
-        color: #000;
-        font-weight: bold;
-        text-transform: uppercase;
-        margin: 0;
-        padding: 0;
-        border: none;
-        line-height: 1.1;
-    }
-
-    /* Override del default .markdown-body h1/h2/h3 che ha border-bottom dashed */
-    .markdown-body .product-embed-title {
-        border-bottom: none;
-        padding-bottom: 0;
-        margin: 0;
-    }
-
-    .product-embed-desc {
-        color: #000;
-        font-size: 15px;
-        margin: 0;
-        line-height: 1.4;
-    }
-
-    .markdown-body .product-embed-desc {
-        margin-bottom: 0;
-        font-size: 15px;
-    }
-
-    .product-embed-cta {
+    .minimal-embed-title {
         display: block;
-        text-align: center;
-        margin-top: 12px;
-        background: #000;
-        color: #ff0000 !important;
-        border: 3px solid #ff0000;
-        padding: 16px;
-        font-weight: bold;
-        font-size: 20px;
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        text-decoration: none !important;
-        transition: background 0.15s, color 0.15s;
+        margin-top: 14px;
         font-family: "Courier New", monospace;
+        font-size: 13px;
+        color: #fff;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        opacity: 0.9;
     }
 
-    .product-embed-cta:hover {
-        background: #ff0000 !important;
-        color: #000 !important;
-        text-decoration: none !important;
+    .minimal-embed-label {
+        display: inline-block;
+        margin-top: 10px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        color: #ff0000;
+        letter-spacing: 2px;
+        text-transform: lowercase;
+        border-bottom: 1px solid #ff0000;
+        padding-bottom: 2px;
+        transition: background 0.15s, color 0.15s;
     }
 
-    .product-embed-missing {
-        padding: 20px;
-        border: 2px dashed #ff0000;
+    .minimal-embed-link:hover .minimal-embed-label {
+        background: #ff0000;
+        color: #000;
+    }
+
+    .minimal-embed-link:hover .minimal-embed-title {
+        opacity: 1;
+    }
+
+    /* Singolo embed inline nel markdown (non dentro la sezione SHOP):
+       gli dà un po' di respiro tra paragrafi */
+    .markdown-body .minimal-embed:not(.minimal-embed-list .minimal-embed) {
+        margin: 40px auto;
+    }
+
+    .minimal-embed-missing {
+        margin: 30px auto;
+        padding: 14px 20px;
+        border: 1px dashed #ff0000;
         color: #ff0000;
         background: #000;
         font-family: "Courier New", monospace;
         text-align: center;
+        font-size: 13px;
     }
 
     @media (max-width: 600px) {
-        .product-embed-card { box-shadow: 6px 6px 0 #000; }
-        .product-embed-title { font-size: 20px; }
-        .product-embed-cta { font-size: 16px; padding: 14px; letter-spacing: 2px; }
-        .product-embed-img { max-height: 360px; }
+        .minimal-embed-list {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px 16px;
+        }
+        .minimal-embed-img { max-height: 180px; }
+        .minimal-embed-title { font-size: 11px; letter-spacing: 1.5px; }
+        .minimal-embed-label { font-size: 12px; }
     }
 </style>
