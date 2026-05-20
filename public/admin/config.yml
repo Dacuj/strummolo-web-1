@@ -8,12 +8,28 @@ backend:
   base_url: https://quiet-pond-f51b.davidecucciardi.workers.dev
   auth_endpoint: auth      
 
-# Dove salvare le immagini caricate dal CMS
+# Dove salvare le immagini caricate dal CMS (back-compat per articoli vecchi)
+# I nuovi upload passano per Cloudinary (vedi media_library qui sotto)
 media_folder: "public/img"
 public_folder: "/img"
 
 # URL del tuo sito (opzionale, ma utile per le preview)
 site_url: https://strummolo-web-1.pages.dev
+
+# --- STORAGE IMMAGINI ESTERNO (Cloudinary) ---
+# Le immagini caricate dal CMS finiscono qui invece che nel repo GitHub.
+# Setup richiesto: account free su cloudinary.com -> crea un Upload Preset UNSIGNED
+# -> copia cloud_name e api_key (pubblici) dal dashboard e incollali sotto.
+# NON incollare MAI api_secret: deve restare solo nel dashboard Cloudinary.
+media_library:
+  name: cloudinary
+  output_filename_only: false
+  config:
+    cloud_name: YOUR_CLOUD_NAME
+    api_key: YOUR_API_KEY
+    default_transformations:
+      - - fetch_format: auto
+          quality: auto
 
 collections:
   - name: "taccuino" # Nome collezione
@@ -42,3 +58,21 @@ collections:
       
       # Il corpo dell'articolo
       - { label: "Contenuto Articolo", name: "body", widget: "markdown" }
+
+  # --- COLLEZIONE PRODOTTI (Shop) ---
+  - name: "prodotti"
+    label: "Shop (Prodotti)"
+    folder: "src/content/prodotti"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Titolo", name: "title", widget: "string" }
+      - { label: "Descrizione", name: "description", widget: "text" }
+      - { label: "Prezzo", name: "price", widget: "string", hint: "es. €25, DM su IG, SOLD" }
+      - label: "Immagini"
+        name: "images"
+        widget: "list"
+        summary: "{{fields.image}}"
+        field: { label: "Immagine", name: "image", widget: "image" }
+      - { label: "Disponibile", name: "available", widget: "boolean", default: true, required: false }
+      - { label: "Note (opzionali)", name: "body", widget: "markdown", required: false }

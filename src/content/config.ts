@@ -14,4 +14,17 @@ const taccuino = defineCollection({
 	}),
 });
 
-export const collections = { taccuino };
+// Collezione prodotti shop. images come array di stringhe accetta sia
+// URL Cloudinary assoluti (nuovi upload) sia path relativi /img/... (back-compat).
+const prodotti = defineCollection({
+	type: 'content',
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		price: z.string(),
+		images: z.array(z.string()).min(1),
+		available: z.boolean().default(true).optional(),
+	}),
+});
+
+export const collections = { taccuino, prodotti };

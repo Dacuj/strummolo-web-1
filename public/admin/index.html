@@ -159,80 +159,136 @@
 </head>
 <body>
 
+  <!-- Widget Cloudinary (necessario per media_library: cloudinary in config.yml) -->
+  <script src="https://media-library.cloudinary.com/global/all.js"></script>
+
   <script src="https://unpkg.com/decap-cms@^3.1.0/dist/decap-cms.js"></script>
-  
+
   <script>
-    // Registra CSS
+    // Registra CSS preview (mirror dello stile reale di /taccuino/[slug])
     CMS.registerPreviewStyle("/admin/preview.css");
 
     // --- SETUP REACT ---
-    // Decap espone React globalmente, ma per sicurezza facciamo un check
     const h = window.React ? window.React.createElement : null;
 
     if (!h) {
-        console.error("❌ Errore Critico: React non trovato. Decap CMS non caricato correttamente.");
+        console.error("❌ React non trovato. Decap CMS non caricato correttamente.");
     } else {
-        console.log("✅ React caricato. Inizializzazione Preview...");
+        console.log("✅ React caricato. Registro le preview...");
 
-        // Helper Formattazione Data
-        const formatDate = (dateRaw) => {
-            if (!dateRaw) return 'YYYY.MM.DD';
+        // --- HELPERS ---
+        // Mirror di formatSysDate in src/pages/taccuino/[slug].astro:21
+        const formatSysDate = (dateRaw) => {
+            if (!dateRaw) return 'YYYY-MM-DD // HH:MM:SS';
             try {
                 const d = new Date(dateRaw);
                 if (isNaN(d.getTime())) return String(dateRaw);
-                return d.toISOString().split('T')[0].replace(/-/g, '.');
+                return d.toISOString().replace('T', ' // ').substring(0, 19);
             } catch (e) {
                 return String(dateRaw);
             }
         };
 
-        // Componente Preview Funzionale
+        // Deterministic fake KB derivato dal titolo (no Math.random => no flicker)
+        const fakeKB = (title) => ((title || '').length * 37) % 800 + 10;
+
+        // Slugify-uppercase analog di {title.toUpperCase().replace(/\s/g, '_')}
+        const upperUnderscore = (s) => (s || 'UNTITLED').toUpperCase().replace(/\s+/g, '_');
+
+        // --- PREVIEW TACCUINO (articoli) ---
         const PostPreview = (props) => {
-            const entry = props.entry;
-            const data = entry.get('data');
-            
-            // Fallbacks sicuri
+            const data = props.entry.get('data');
             const title = data.get('title') || 'Senza Titolo';
             const description = data.get('description') || '';
-            const fileNumber = data.get('fileNumber') || 'UNK';
             const dateRaw = data.get('date');
             const bodyWidget = props.widgetFor('body');
 
-            return h('div', {}, 
-                // NAV
-                h('nav', {},
-                    h('a', { href: '#', className: 'nav-btn' }, '← Taccuino'),
-                    h('a', { href: '#', className: 'nav-btn' }, 'Home')
+            return h('div', { className: 'jodi-root' },
+                // NAV DI SISTEMA (mirror sys-nav in [slug].astro:89-94)
+                h('nav', { className: 'sys-nav' },
+                    h('a', { href: '#', className: 'sys-btn' }, '!HOME>'),
+                    h('span', { className: 'sys-info' }, formatSysDate(new Date().toISOString())),
+                    h('a', { href: '#', className: 'sys-btn' }, '/TACCUINO.!)')
                 ),
-                // ARTICLE
-                h('article', { className: 'article-container' },
-                    // HEADER
-                    h('header', { className: 'article-header' },
-                        h('span', { className: 'meta-data' }, `FILE: ${fileNumber} // DATE: ${formatDate(dateRaw)}`),
-                        h('h1', {}, title),
-                        h('p', { className: 'intro' }, description)
+                // WRAPPER FINESTRE
+                h('main', { className: 'jodi-window-wrapper' },
+                    // BOX 1: DESCRIZIONE
+                    h('aside', { className: 'jodi-window window-desc' },
+                        h('header', { className: 'window-header' },
+                            h('h2', { className: 'file-name' }, 'DESC'),
+                            h('span', { className: 'file-size' }, 'READ')
+                        ),
+                        h('div', { className: 'window-content desc-body' },
+                            h('p', null, h('strong', null, '[TITLE]: '), title),
+                            h('p', null, h('strong', null, '[DATE]: '), formatSysDate(dateRaw)),
+                            h('div', { className: 'desc-text' }, '> ' + description)
+                        )
                     ),
-                    // CONTENT
-                    h('div', { className: 'content' }, 
-                        bodyWidget,
-                        h('p', { 
-                            style: { textAlign: 'center', marginTop: '50px', fontFamily: "'Press Start 2P'", color: '#FC60B7' }
-                        }, '*** END OF TRANSMISSION ***')
+                    // BOX 2: CONTENUTO PRINCIPALE
+                    h('article', { className: 'jodi-window window-main' },
+                        h('header', { className: 'window-header' },
+                            h('h1', { className: 'file-name' }, upperUnderscore(title) + '.TXT'),
+                            h('span', { className: 'file-size' }, fakeKB(title) + ' KB')
+                        ),
+                        h('div', { className: 'window-content markdown-body' },
+                            bodyWidget
+                        )
                     ),
                     // FOOTER
-                    h('footer', { className: 'article-footer' },
-                        h('div', { className: 'prev-post' }),
-                        h('a', { href: '#', className: 'next-post' },
-                            h('span', { className: 'next-label' }, 'NEXT FILE →'),
-                            h('span', { className: 'next-title' }, '[ANTEPRIMA]')
+                    h('footer', { className: 'sys-footer' },
+                        h('a', { href: '#', className: 'next-link' }, '>> NEXT: [ANTEPRIMA]')
+                    )
+                )
+            );
+        };
+
+        // --- PREVIEW PRODOTTI (shop) ---
+        const ProductPreview = (props) => {
+            const data = props.entry.get('data');
+            const title = data.get('title') || 'PRODOTTO SENZA NOME';
+            const description = data.get('description') || '';
+            const price = data.get('price') || '---';
+            const imagesList = data.get('images');
+            // Decap passa images come Immutable.List; estraggo array di stringhe
+            let images = [];
+            if (imagesList && imagesList.toJS) {
+                images = imagesList.toJS().filter(Boolean);
+            } else if (Array.isArray(imagesList)) {
+                images = imagesList.filter(Boolean);
+            }
+            const firstImg = images[0] || '';
+            const seed = title.charCodeAt(0) || 1;
+            const rpm = ((seed % 9) + 0.1).toFixed(1);
+            const gpm = 1500 + (seed % 400);
+            const ft = 20 + (seed % 25);
+            const load = 30 + (seed % 50);
+
+            return h('div', { className: 'ics-root' },
+                h('div', { className: 'ics-node ics-node-preview' },
+                    h('header', { className: 'node-hdr' }, 'NODE: ' + upperUnderscore(title)),
+                    h('div', { className: 'node-readouts' },
+                        h('span', null, rpm + ' RPM'),
+                        h('span', null, gpm + ' GPM'),
+                        h('span', null, ft + '.0 FT')
+                    ),
+                    firstImg
+                        ? h('img', { className: 'node-thumb', src: firstImg, alt: title })
+                        : h('div', { className: 'node-thumb node-thumb-empty' }, '[NO SIGNAL]'),
+                    h('div', { className: 'node-load' }, '% LOAD: ' + load + ' ▮▮▮▯▯'),
+                    h('div', { className: 'node-price' }, price),
+                    h('div', { className: 'node-desc' }, description),
+                    h('div', { className: 'node-gallery' },
+                        images.slice(1).map((src, i) =>
+                            h('img', { key: i, src: src, alt: title + ' ' + (i + 2), className: 'node-thumb-mini' })
                         )
                     )
                 )
             );
         };
 
-        // Registrazione Template
+        // Registrazione
         CMS.registerPreviewTemplate("taccuino", PostPreview);
+        CMS.registerPreviewTemplate("prodotti", ProductPreview);
     }
   </script>
 

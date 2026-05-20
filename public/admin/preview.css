@@ -1,264 +1,323 @@
-/* --- 1. IMPORT FONTS --- */
-/* È fondamentale che questo stia alla riga 1 */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Arvo:wght@700&family=Permanent+Marker&family=Inter:wght@200;300;400;900&family=Courier+Prime&display=swap');
+/* ============================================================
+   PREVIEW.CSS — Mirror di src/pages/taccuino/[slug].astro
+   ============================================================
+   Adattamenti rispetto all'originale per girare nell'iframe Decap:
+   - position: fixed -> absolute (l'iframe ha un viewport ridotto e
+     fixed si ancora ai bordi creando artefatti)
+   - 100vw / 100vh -> 100% / auto (vw causa overflow orizzontale)
+   - Niente font @import: Courier New è sempre disponibile
+   ============================================================ */
 
-/* --- 2. RESET & SETUP IFRAME --- */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Selezione testo Fucsia */
 ::selection {
-    background: #FC60B7;
-    color: #000;
+    background: #000;
+    color: #ff0000;
 }
 
-/* Applicare lo sfondo anche a HTML previene flash bianchi nell'iframe */
 html {
     background-color: #000;
     height: 100%;
-    overflow-y: auto; /* Scorrimento fluido nell'iframe */
+    overflow-y: auto;
 }
 
-body {
-    background-color: #000;
-    color: #ccc; 
-    min-height: 100vh;
+body, .jodi-root {
+    background-color: #000000;
+    color: #ff0000;
+    min-height: 100%;
     width: 100%;
-    overflow-x: hidden; /* Previene scroll orizzontale indesiderato */
-    font-family: 'Courier Prime', monospace; 
-    cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), auto;
-    line-height: 1.6;
-    /* Opzionale: Smooth font rendering per Chrome/Mac */
-    -webkit-font-smoothing: antialiased; 
-    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 16px;
+    line-height: 1.4;
 }
 
-/* --- 3. HEADER NAVIGAZIONE --- */
-nav {
-    position: fixed; /* Funziona correttamente nell'iframe Decap */
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 20px;
+/* --- NAVIGAZIONE TOP --- */
+.sys-nav {
+    position: relative;
+    z-index: 10;
     display: flex;
     justify-content: space-between;
-    z-index: 1000;
-    background: linear-gradient(to bottom, #000 0%, rgba(0,0,0,0) 100%);
-    pointer-events: none; /* Permette di cliccare attraverso la barra trasparente */
+    padding: 10px 20px;
+    background: rgba(0,0,0,0.8);
+    border-bottom: 1px solid #ff0000;
+    font-weight: bold;
 }
 
-.nav-btn {
-    pointer-events: auto; /* Riabilita il click sui bottoni */
+.sys-btn {
+    color: #ff0000;
     text-decoration: none;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.7rem;
-    color: #fff;
-    background: #000;
-    padding: 10px 15px;
-    border: 1px solid #333;
-    transition: all 0.2s;
-    text-transform: uppercase;
-    display: inline-block;
 }
 
-.nav-btn:hover {
-    background: #fff;
+.sys-btn:hover {
+    background: #ff0000;
     color: #000;
-    border-color: #fff;
-    box-shadow: 4px 4px 0px #FC60B7;
-    transform: translate(-2px, -2px);
 }
 
-/* --- 4. CONTAINER ARTICOLO --- */
-.article-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 120px 20px 100px 20px; 
+.sys-info { display: none; }
+@media (min-width: 768px) { .sys-info { display: block; } }
+
+/* --- CONTENITORE FINESTRE --- */
+.jodi-window-wrapper {
+    position: relative;
+    z-index: 10;
+    max-width: 750px;
+    margin: 40px auto;
+    padding: 0 15px;
+}
+
+.jodi-window {
+    background-color: #8a8a8a;
+    border: 6px solid #ff0000;
+    box-shadow: 15px 15px 0px rgba(0,0,0,0.9);
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 40px;
     position: relative;
 }
 
-/* --- 5. HEADER ARTICOLO --- */
-.article-header {
-    margin-bottom: 60px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 40px;
+.window-main {
+    transform: translateX(10px);
 }
 
-.meta-data {
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.6rem;
-    color: #FC60B7;
+.window-header {
+    display: flex;
+    justify-content: space-between;
+    background: #ff0000;
+    color: #000;
+    padding: 5px 10px;
+    font-weight: bold;
+    border-bottom: 2px solid #000;
+}
+
+.file-name { font-size: 16px; margin: 0; }
+.file-size { font-size: 14px; }
+
+.window-content {
+    padding: 20px 30px;
+    color: #000000;
+}
+
+/* --- BOX 1: DESCRIZIONE --- */
+.desc-body p {
+    margin-bottom: 5px;
+    font-size: 14px;
+    border-bottom: 1px dashed rgba(0,0,0,0.3);
+}
+
+.desc-text {
+    margin-top: 15px;
+    background: #000;
+    color: #ff0000;
+    padding: 15px;
+    border: 2px inset #fff;
+    font-weight: bold;
+}
+
+/* --- BOX 2: MARKDOWN ARTICOLO --- */
+.markdown-body {
+    min-height: 200px;
+}
+
+.markdown-body p {
     margin-bottom: 20px;
-    display: block;
-    letter-spacing: 1px;
+    font-size: 16px;
 }
 
-h1 {
-    font-family: 'Inter', sans-serif;
-    font-weight: 900;
-    font-size: 4rem; 
-    line-height: 0.9;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: -2px;
-    margin-bottom: 30px;
+.markdown-body a {
+    color: #000;
+    text-decoration: underline;
+    font-weight: bold;
 }
 
-.intro {
-    font-family: 'Inter', sans-serif;
-    font-weight: 300;
-    font-size: 1.5rem;
-    line-height: 1.3;
-    color: #fff;
-    border-left: 2px solid #FC60B7;
-    padding-left: 20px;
-}
-
-/* --- 6. CONTENUTO (Markdown Styles) --- */
-/* Targettiamo gli elementi generati da widgetFor('body') */
-
-.content p {
-    margin-bottom: 30px;
-    font-size: 1.1rem;
-}
-
-/* Stile Link nel testo */
-.content a {
+.markdown-body a:hover {
+    background: #ff0000;
     color: #fff;
     text-decoration: none;
-    border-bottom: 1px solid #FC60B7;
-    transition: background 0.2s;
-    cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), pointer;
 }
 
-.content a:hover {
-    background: #FC60B7;
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+    font-size: 22px;
+    border-bottom: 2px dashed #000;
+    margin: 30px 0 15px 0;
+    padding-bottom: 5px;
+}
+
+.markdown-body blockquote {
+    border-left: 4px solid #ff0000;
+    padding-left: 15px;
+    margin-left: 0;
+    font-style: italic;
+    background: rgba(0,0,0,0.1);
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.markdown-body pre {
+    background: #000;
+    color: #ff0000;
+    padding: 15px;
+    border: 2px inset #fff;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.markdown-body img {
+    max-width: 100%;
+    height: auto;
+    border: 2px solid #000;
+    filter: grayscale(100%) contrast(200%) sepia(100%) hue-rotate(-50deg) saturate(500%);
+    margin: 20px 0;
+}
+
+/* --- FOOTER DI SISTEMA --- */
+.sys-footer {
+    margin-top: 50px;
+    margin-bottom: 50px;
+    text-align: right;
+    transform: translateX(10px);
+}
+
+.next-link {
+    display: inline-block;
+    background: #000;
+    color: #ff0000;
+    border: 2px solid #ff0000;
+    padding: 10px 15px;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.next-link:hover {
+    background: #ff0000;
     color: #000;
 }
 
-/* Immagini nell'articolo */
-/* Importante per Decap: max-width 100% evita che immagini grandi rompano l'iframe */
-.content img {
-    margin: 50px 0;
-    max-width: 100%; 
-    height: auto;
-    border: 1px solid #fff; 
-    filter: grayscale(100%) contrast(1.2); 
-    transition: filter 0.3s;
-    display: block;
+/* Finti quadretti glitch sul box principale */
+.window-main::before {
+    content: "";
+    position: absolute;
+    top: 40%;
+    left: -15px;
+    width: 10px;
+    height: 10px;
+    background: #8a8a8a;
+    box-shadow: 0 30px 0 #8a8a8a, -10px 40px 0 #8a8a8a;
 }
 
-.content img:hover {
-    filter: grayscale(0%) contrast(1);
+/* ============================================================
+   PREVIEW PRODOTTI (ICS node singolo)
+   ============================================================ */
+
+.ics-root {
+    background: #000;
+    padding: 40px 20px;
+    min-height: 100%;
+    font-family: 'VT323', 'Courier New', monospace;
+    color: #00ff7f;
 }
 
-/* Liste (Markdown standard) */
-.content ul, .content ol {
-    margin-bottom: 30px;
-    padding-left: 40px;
-    font-size: 1.1rem;
-}
-
-.content li {
-    margin-bottom: 10px;
-}
-
-/* Citazioni */
-blockquote {
-    font-family: 'Inter', sans-serif;
-    font-weight: 900;
-    font-size: 2rem;
-    text-transform: uppercase;
-    line-height: 1;
-    margin: 60px 0;
-    padding: 0 20px;
-    color: #fff;
-    text-align: center;
-    letter-spacing: -1px;
-    border: none;
-}
-
-/* Codice inline e blocchi */
-code {
-    font-family: 'VT323', monospace;
-    background: #222;
-    padding: 2px 5px;
-    color: #FC60B7;
-    font-size: 1.1em;
-    border-radius: 3px;
-}
-
-pre {
-    background: #111;
-    padding: 20px;
-    border: 1px dashed #333;
-    overflow-x: auto;
-    margin-bottom: 30px;
-}
-
-pre code {
-    background: transparent;
-    color: #ccc;
+.ics-node-preview {
+    max-width: 420px;
+    margin: 0 auto;
+    background: #000;
+    border: 2px solid #00ffff;
+    box-shadow: 0 0 20px rgba(0,255,255,0.3);
     padding: 0;
-    border-radius: 0;
+    display: flex;
+    flex-direction: column;
 }
 
-/* --- 7. FOOTER NAVIGAZIONE --- */
-.article-footer {
-    margin-top: 100px;
-    padding-top: 50px;
-    border-top: 1px dashed #333;
+.ics-node .node-hdr {
+    background: #ff00ff;
+    color: #000;
+    font-weight: bold;
+    padding: 6px 12px;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.ics-node .node-readouts {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    padding: 8px 12px;
+    color: #ffff00;
+    font-size: 18px;
+    border-bottom: 1px solid #00ffff;
+    text-shadow: 0 0 3px currentColor;
 }
 
-.next-post {
-    text-align: right;
-    text-decoration: none;
-    display: block; /* Assicura area cliccabile */
-}
-
-.next-label {
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.6rem;
-    color: #888;
+.ics-node .node-thumb {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-bottom: 1px solid #00ffff;
     display: block;
-    margin-bottom: 5px;
+    filter: grayscale(40%) contrast(120%);
 }
 
-.next-title {
-    font-family: 'Inter', sans-serif;
-    font-weight: 900;
-    font-size: 2rem;
-    color: #fff;
-    text-transform: uppercase;
-    transition: color 0.2s;
+.ics-node .node-thumb-empty {
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff0000;
+    font-size: 20px;
+    letter-spacing: 2px;
+    border-bottom: 1px solid #00ffff;
+    background: #110000;
 }
 
-.next-post:hover .next-title {
-    color: #FC60B7;
-    text-decoration: underline;
+.ics-node .node-load {
+    padding: 8px 12px;
+    color: #00ff7f;
+    font-size: 16px;
+    border-bottom: 1px dashed #00ffff;
+    text-shadow: 0 0 3px currentColor;
 }
 
-/* Classe di supporto per End Of Transmission (se non si usano stili inline) */
-.end-transmission {
-    text-align: center; 
-    margin-top: 50px; 
-    font-family: 'Press Start 2P'; 
-    color: #FC60B7;
+.ics-node .node-price {
+    padding: 8px 12px;
+    color: #00ffff;
+    font-size: 22px;
+    font-weight: bold;
+    text-align: right;
+    text-shadow: 0 0 4px currentColor;
 }
 
-/* --- 8. RESPONSIVE PER IFRAME PICCOLI --- */
+.ics-node .node-desc {
+    padding: 10px 12px;
+    color: #ccc;
+    font-size: 15px;
+    line-height: 1.4;
+    border-top: 1px dashed #00ffff;
+}
+
+.ics-node .node-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    padding: 8px;
+    border-top: 1px solid #00ffff;
+}
+
+.ics-node .node-thumb-mini {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    border: 1px solid #00ffff;
+    display: block;
+}
+
+/* --- RESPONSIVE --- */
 @media (max-width: 768px) {
-    h1 { font-size: 2.5rem; }
-    .intro { font-size: 1.2rem; }
-    .article-container { padding: 100px 15px 50px 15px; }
-    blockquote { font-size: 1.5rem; }
-    
-    .article-footer { flex-direction: column; gap: 30px; align-items: flex-start; }
-    .next-post { text-align: left; }
+    .ics-root { padding: 20px 10px; }
 }
