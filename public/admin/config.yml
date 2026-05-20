@@ -25,7 +25,7 @@ media_library:
   name: cloudinary
   output_filename_only: false
   config:
-    cloud_name: Root
+    cloud_name: dm2l954et
     api_key: 596327842155318
     default_transformations:
       - - fetch_format: auto
