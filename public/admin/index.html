@@ -289,6 +289,36 @@
         // Registrazione
         CMS.registerPreviewTemplate("taccuino", PostPreview);
         CMS.registerPreviewTemplate("prodotti", ProductPreview);
+
+        // --- BLOCCO INSERIBILE IN ARTICOLI: PRODOTTO SHOP ---
+        // Mostra nel bottom toolbar dell'editor markdown un pulsante "Prodotto Shop":
+        // l'autore sceglie un prodotto dalla collection 'prodotti' tramite dropdown
+        // e nel markdown viene salvato un placeholder <div data-slug="..."> che
+        // [slug].astro espande lato runtime nella card prodotto con CTA acquisto.
+        CMS.registerEditorComponent({
+            id: 'product',
+            label: 'Prodotto Shop',
+            fields: [{
+                label: 'Prodotto',
+                name: 'slug',
+                widget: 'relation',
+                collection: 'prodotti',
+                search_fields: ['title'],
+                value_field: '{{slug}}',
+                display_fields: ['title']
+            }],
+            pattern: /^<div class="product-embed" data-slug="([^"]+)"><\/div>$/,
+            fromBlock: function(match) {
+                return { slug: match[1] };
+            },
+            toBlock: function(data) {
+                if (!data || !data.slug) return '';
+                return '<div class="product-embed" data-slug="' + data.slug + '"></div>';
+            },
+            toPreview: function(data) {
+                return '<div class="product-embed" data-slug="' + (data.slug || '') + '"></div>';
+            }
+        });
     }
   </script>
 

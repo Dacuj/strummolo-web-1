@@ -22,6 +22,29 @@ const formatSysDate = (date: Date) => {
     return date.toISOString().replace('T', ' // ').substring(0, 19);
 };
 
+// --- PRODUCT EMBED DATA ---
+// Carico TUTTI i prodotti shop disponibili. Lo script inline più sotto
+// scorre i <div class="product-embed" data-slug="..."> dentro l'articolo
+// e li sostituisce con la card prodotto + CTA acquisto.
+const allProducts = await getCollection('prodotti');
+const productMap: Record<string, {
+    title: string;
+    description: string;
+    price: string;
+    image: string;
+    available: boolean;
+}> = {};
+for (const p of allProducts) {
+    productMap[p.slug] = {
+        title: p.data.title,
+        description: p.data.description,
+        price: p.data.price,
+        image: (p.data.images && p.data.images[0]) || '',
+        available: p.data.available !== false,
+    };
+}
+const INSTAGRAM_URL = 'https://instagram.com/strummolo';
+
 // --- GENERATORE WIREFRAME ---
 const generateWireframe = (offsetX: number, offsetY: number, scaleY: number) => {
     let paths = [];
@@ -122,6 +145,58 @@ const wireframe2 = generateWireframe(-50, 300, 80);
                 <Content />
             </div>
         </article>
+
+        <!-- ESPANSIONE PRODUCT EMBEDS A RUNTIME -->
+        <script is:inline define:vars={{ productMap, instagramUrl: INSTAGRAM_URL }}>
+            (function() {
+                function esc(s) {
+                    return String(s == null ? '' : s)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#39;');
+                }
+
+                const nodes = document.querySelectorAll('.product-embed[data-slug]');
+                nodes.forEach(function(el) {
+                    const slug = el.getAttribute('data-slug');
+                    const p = productMap[slug];
+                    if (!p) {
+                        el.classList.add('product-embed-missing');
+                        el.innerHTML = '<em>[PRODOTTO NON TROVATO: ' + esc(slug) + ']</em>';
+                        return;
+                    }
+
+                    const imgHTML = p.image
+                        ? '<img class="product-embed-img" src="' + esc(p.image) + '" alt="' + esc(p.title) + '" loading="lazy" />'
+                        : '<div class="product-embed-img product-embed-noimg">[NO IMAGE]</div>';
+
+                    const descHTML = p.description
+                        ? '<p class="product-embed-desc">' + esc(p.description) + '</p>'
+                        : '';
+
+                    const ctaLabel = p.available
+                        ? '&gt;&gt; COMPRA / DM SU IG'
+                        : '&gt;&gt; SOLD OUT — CHIEDI DISPONIBILITÀ';
+
+                    el.innerHTML =
+                        '<aside class="product-embed-card">' +
+                            '<a class="product-embed-link" href="/shop" aria-label="Apri shop">' +
+                                imgHTML +
+                            '</a>' +
+                            '<div class="product-embed-info">' +
+                                '<span class="product-embed-meta">// PRODOTTO_SHOP // ' + esc(p.price) + '</span>' +
+                                '<h3 class="product-embed-title">' + esc(p.title) + '</h3>' +
+                                descHTML +
+                                '<a class="product-embed-cta" href="' + esc(instagramUrl) + '" target="_blank" rel="noopener noreferrer">' +
+                                    ctaLabel +
+                                '</a>' +
+                            '</div>' +
+                        '</aside>';
+                });
+            })();
+        </script>
 
         <!-- FOOTER / NEXT POST -->
         {nextPost && (
@@ -343,5 +418,159 @@ const wireframe2 = generateWireframe(-50, 300, 80);
         height: 10px;
         background: #8a8a8a;
         box-shadow: 0 30px 0 #8a8a8a, -10px 40px 0 #8a8a8a;
+    }
+
+    /* ============================================================
+       PRODUCT EMBED — card inserita da Decap nei post
+       Riempita a runtime dallo script <script is:inline> sopra.
+       L'immagine eredita il filtro brutalist di .markdown-body img.
+       ============================================================ */
+
+    .product-embed {
+        display: block;
+        margin: 40px 0;
+    }
+
+    .product-embed-card {
+        background: #fff;
+        border: 4px solid #ff0000;
+        box-shadow: 10px 10px 0 #000;
+        position: relative;
+        display: block;
+    }
+
+    .product-embed-card::before {
+        content: "// SHOP_BLOCK //";
+        position: absolute;
+        top: -14px;
+        left: 12px;
+        background: #ff0000;
+        color: #000;
+        padding: 1px 10px;
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        font-family: "Courier New", monospace;
+        border: 2px solid #000;
+    }
+
+    .product-embed-link {
+        display: block;
+        text-decoration: none;
+        background: #000;
+    }
+
+    .product-embed-img {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 480px;
+        object-fit: contain;
+        background: #000;
+        margin: 0;
+        border: none;
+        border-bottom: 2px solid #000;
+        /* Stesso filtro di .markdown-body img */
+        filter: grayscale(100%) contrast(200%) sepia(100%) hue-rotate(-50deg) saturate(500%);
+        transition: filter 0.2s;
+    }
+
+    .product-embed-link:hover .product-embed-img {
+        filter: grayscale(0%) contrast(110%);
+    }
+
+    .product-embed-noimg {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+        background: #000;
+        color: #ff0000;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+
+    .product-embed-info {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .product-embed-meta {
+        color: #ff0000;
+        font-size: 12px;
+        font-family: "Courier New", monospace;
+        letter-spacing: 1px;
+        font-weight: bold;
+    }
+
+    .product-embed-title {
+        font-size: 24px;
+        color: #000;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin: 0;
+        padding: 0;
+        border: none;
+        line-height: 1.1;
+    }
+
+    /* Override del default .markdown-body h1/h2/h3 che ha border-bottom dashed */
+    .markdown-body .product-embed-title {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin: 0;
+    }
+
+    .product-embed-desc {
+        color: #000;
+        font-size: 15px;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .markdown-body .product-embed-desc {
+        margin-bottom: 0;
+        font-size: 15px;
+    }
+
+    .product-embed-cta {
+        display: block;
+        text-align: center;
+        margin-top: 12px;
+        background: #000;
+        color: #ff0000 !important;
+        border: 3px solid #ff0000;
+        padding: 16px;
+        font-weight: bold;
+        font-size: 20px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        text-decoration: none !important;
+        transition: background 0.15s, color 0.15s;
+        font-family: "Courier New", monospace;
+    }
+
+    .product-embed-cta:hover {
+        background: #ff0000 !important;
+        color: #000 !important;
+        text-decoration: none !important;
+    }
+
+    .product-embed-missing {
+        padding: 20px;
+        border: 2px dashed #ff0000;
+        color: #ff0000;
+        background: #000;
+        font-family: "Courier New", monospace;
+        text-align: center;
+    }
+
+    @media (max-width: 600px) {
+        .product-embed-card { box-shadow: 6px 6px 0 #000; }
+        .product-embed-title { font-size: 20px; }
+        .product-embed-cta { font-size: 16px; padding: 14px; letter-spacing: 2px; }
+        .product-embed-img { max-height: 360px; }
     }
 </style>

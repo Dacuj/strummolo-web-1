@@ -317,6 +317,46 @@ body, .jodi-root {
     display: block;
 }
 
+/* ============================================================
+   PRODUCT EMBED — placeholder visibile dentro la preview articolo
+   Il div viene espanso a runtime nel sito vero (vedi [slug].astro),
+   qui nella preview Decap mostriamo solo un placeholder informativo.
+   ============================================================ */
+
+.markdown-body .product-embed,
+.product-embed {
+    display: block;
+    margin: 30px 0;
+    padding: 20px;
+    background: #000;
+    border: 3px dashed #ff0000;
+    color: #ff0000;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.markdown-body .product-embed::before,
+.product-embed::before {
+    content: ">> PRODOTTO SHOP // SLUG: " attr(data-slug) " <<";
+    display: block;
+    font-size: 14px;
+}
+
+.markdown-body .product-embed::after,
+.product-embed::after {
+    content: "[ verrà mostrata la card prodotto con CTA acquisto ]";
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #888;
+    font-weight: normal;
+    letter-spacing: 1px;
+    text-transform: none;
+}
+
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
     .ics-root { padding: 20px 10px; }
