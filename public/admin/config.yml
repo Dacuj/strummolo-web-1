@@ -57,7 +57,13 @@ collections:
       - { label: "Tag", name: "tags", widget: "list", default: ["ESSAY"], required: false }
       
       # Il corpo dell'articolo
-      - { label: "Contenuto Articolo", name: "body", widget: "markdown" }
+      # editor_components: lista esplicita necessaria in Decap 3.x per far
+      # apparire i componenti custom nel menu "+" del rich text editor
+      # (default / image / code-block + il nostro 'product' registrato in index.html)
+      - label: "Contenuto Articolo"
+        name: "body"
+        widget: "markdown"
+        editor_components: ["image", "code-block", "product"]
 
   # --- COLLEZIONE PRODOTTI (Shop) ---
   - name: "prodotti"
