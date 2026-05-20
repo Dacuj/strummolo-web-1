@@ -45,6 +45,13 @@ for (const p of allProducts) {
 }
 const INSTAGRAM_URL = 'https://instagram.com/strummolo';
 
+// Prodotti collegati esplicitamente dal frontmatter (campo del CMS).
+// Filtra eventuali slug puntati a prodotti eliminati.
+const linkedProductSlugs: string[] = (post.data as any).prodotti_collegati || [];
+const linkedProducts = linkedProductSlugs
+    .map((slug) => ({ slug, ...productMap[slug] }))
+    .filter((p) => p && p.title);
+
 // --- GENERATORE WIREFRAME ---
 const generateWireframe = (offsetX: number, offsetY: number, scaleY: number) => {
     let paths = [];
@@ -197,6 +204,39 @@ const wireframe2 = generateWireframe(-50, 300, 80);
                 });
             })();
         </script>
+
+        <!-- PRODOTTI COLLEGATI (campo CMS prodotti_collegati) -->
+        {linkedProducts.length > 0 && (
+            <aside class="jodi-window window-shop">
+                <header class="window-header">
+                    <h2 class="file-name">SHOP_LINKED.OUT</h2>
+                    <span class="file-size">{linkedProducts.length} ITEM{linkedProducts.length === 1 ? '' : 'S'}</span>
+                </header>
+                <div class="window-content shop-linked-body">
+                    {linkedProducts.map((p) => (
+                        <div class="product-embed">
+                            <aside class="product-embed-card">
+                                <a class="product-embed-link" href="/shop" aria-label="Apri shop">
+                                    {p.image ? (
+                                        <img class="product-embed-img" src={p.image} alt={p.title} loading="lazy" />
+                                    ) : (
+                                        <div class="product-embed-img product-embed-noimg">[NO IMAGE]</div>
+                                    )}
+                                </a>
+                                <div class="product-embed-info">
+                                    <span class="product-embed-meta">// PRODOTTO_SHOP // {p.price}</span>
+                                    <h3 class="product-embed-title">{p.title}</h3>
+                                    {p.description && <p class="product-embed-desc">{p.description}</p>}
+                                    <a class="product-embed-cta" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+                                        {p.available ? '>> COMPRA / DM SU IG' : '>> SOLD OUT — CHIEDI DISPONIBILITÀ'}
+                                    </a>
+                                </div>
+                            </aside>
+                        </div>
+                    ))}
+                </div>
+            </aside>
+        )}
 
         <!-- FOOTER / NEXT POST -->
         {nextPost && (
