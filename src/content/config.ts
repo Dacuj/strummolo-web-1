@@ -11,6 +11,8 @@ const taccuino = defineCollection({
 		tags: z.array(z.string()).optional(),
 		// Opzionale: per i numeri "FILE_001" o "02"
 		fileNumber: z.string().optional(),
+		// Slug di prodotti shop da mostrare alla fine dell'articolo
+		prodotti_collegati: z.array(z.string()).optional(),
 	}),
 });
 

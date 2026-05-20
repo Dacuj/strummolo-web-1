@@ -57,7 +57,30 @@ collections:
       - { label: "Tag", name: "tags", widget: "list", default: ["ESSAY"], required: false }
       
       # Il corpo dell'articolo
-      - { label: "Contenuto Articolo", name: "body", widget: "markdown" }
+      - label: "Contenuto Articolo"
+        name: "body"
+        widget: "markdown"
+        editor_components: ["image", "code-block"]
+
+      # Prodotti collegati: selettore multi-relation verso la collection
+      # 'prodotti'. I prodotti scelti compaiono ALLA FINE dell'articolo con la
+      # card immagine + bottone "COMPRA / DM SU IG" (vedi [slug].astro).
+      # Nota: in Decap 3.x i custom EditorComponent inline non funzionano nel
+      # rich-text editor, per cui usiamo questo campo dedicato.
+      - label: "Prodotti collegati (in fondo all'articolo)"
+        name: "prodotti_collegati"
+        widget: "list"
+        required: false
+        hint: "Scegli uno o più prodotti dello shop. Verranno mostrati in fondo all'articolo."
+        summary: "{{fields.slug}}"
+        field:
+          label: "Prodotto"
+          name: "slug"
+          widget: "relation"
+          collection: "prodotti"
+          search_fields: ["title"]
+          value_field: "{{slug}}"
+          display_fields: ["title"]
 
   # --- COLLEZIONE PRODOTTI (Shop) ---
   - name: "prodotti"
