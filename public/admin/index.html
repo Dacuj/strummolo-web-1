@@ -118,6 +118,15 @@
   <link rel="icon" href="https://cur.cursors-4u.net/nature/nat-10/nat926.cur">
   
   <script>
+    // CMS_MANUAL_INIT = true blocca l'auto-init di decap-cms.js
+    // così possiamo registrare preview templates ed editor components
+    // PRIMA che il nuovo editor Plate (Decap 3.x) costruisca il suo
+    // registro plugin. Senza questo, CMS.registerEditorComponent() viene
+    // ignorato dal menu "+" dell'editor markdown in rich text mode.
+    window.CMS_MANUAL_INIT = true;
+  </script>
+
+  <script>
     (function() {
       console.log("📡 Auth Listener attivo e in attesa...");
       
@@ -320,6 +329,10 @@
             }
         });
     }
+
+    // Avvio Decap solo DOPO aver registrato preview e editor components.
+    // Necessario perché abbiamo settato CMS_MANUAL_INIT = true sopra.
+    CMS.init();
   </script>
 
 </body>
