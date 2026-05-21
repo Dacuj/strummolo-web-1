@@ -54,24 +54,8 @@ const products = await getCollection('prodotti', ({ data }) => data.available !=
         font-family: "Courier New", Courier, monospace;
         color: #fff;
         background-color: #000;
-        background-image: url('/img/mir.webp');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        background-repeat: no-repeat;
         position: relative;
         overflow-x: hidden;
-      }
-
-      /* Overlay scuro per leggibilità — quando avrai la foto definitiva basta
-         alzare/abbassare l'opacità qui sotto */
-      body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.45);
-        z-index: 0;
-        pointer-events: none;
       }
 
       a { color: inherit; text-decoration: none; }
