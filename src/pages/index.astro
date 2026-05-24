@@ -12,11 +12,8 @@
 </head>
 <body>
 
-<!-- VIDEO BACKGROUND LOOP -->
-<!-- Sostituisci il src con il link effettivo del tuo video -->
-<video class="bg-video" autoplay loop muted playsinline>
-    <source src="/img/outputASCII.mp4" type="video/mp4">
-</video>
+<!-- CANVAS BACKGROUND WIREFRAME RETRO -->
+<canvas id="bg-canvas"></canvas>
 
 <header>
     <a href="/" class="logo">
@@ -44,6 +41,72 @@
       });
     }
 </script>
+
+<!-- THREE.JS WIREFRAME RETRO BACKGROUND -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" is:inline></script>
+<script is:inline>
+    (function () {
+        const canvas = document.getElementById('bg-canvas');
+        if (!canvas || typeof THREE === 'undefined') return;
+
+        const scena = new THREE.Scene();
+        scena.fog = new THREE.FogExp2(0x000000, 0.025);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 8, 40);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false });
+        const scalaPixel = 4;
+        renderer.setSize(window.innerWidth / scalaPixel, window.innerHeight / scalaPixel, false);
+
+        const larghezza = 200;
+        const altezza = 200;
+        const segmenti = 35;
+
+        const geometria = new THREE.PlaneGeometry(larghezza, altezza, segmenti, segmenti);
+        const materiale = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+        const terreno = new THREE.Mesh(geometria, materiale);
+        terreno.rotation.x = -Math.PI / 2;
+        scena.add(terreno);
+
+        const clock = new THREE.Clock();
+        let ultimoTempo = 0;
+        const fpsDesiderati = 12;
+        const intervalloFrame = 1 / fpsDesiderati;
+
+        function anima() {
+            requestAnimationFrame(anima);
+            const tempo = clock.getElapsedTime();
+            const delta = tempo - ultimoTempo;
+
+            if (delta > intervalloFrame) {
+                ultimoTempo = tempo - (delta % intervalloFrame);
+                const posizioni = geometria.attributes.position;
+
+                for (let i = 0; i < posizioni.count; i++) {
+                    const x = posizioni.getX(i);
+                    const y = posizioni.getY(i);
+                    const movimentoY = y + tempo * 25;
+                    let z = Math.sin(x * 0.15) * Math.cos(movimentoY * 0.1) * 18;
+                    if (z < 4) z = 0;
+                    posizioni.setZ(i, z);
+                }
+
+                posizioni.needsUpdate = true;
+                renderer.render(scena, camera);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth / scalaPixel, window.innerHeight / scalaPixel, false);
+        });
+
+        anima();
+    })();
+</script>
 </body>
 </html>
 
@@ -56,13 +119,12 @@
     }
 
     body, html {
-        /* FONDAMENTALE: Riportiamo lo sfondo a nero */
-        /* background-color: #000000;  */
+        background-color: #000000;
         height: 100vh;
         width: 100vw;
-        overflow: hidden; 
-        overscroll-behavior: none; 
-        
+        overflow: hidden;
+        overscroll-behavior: none;
+
         font-family: 'Courier New', Courier, Fixedsys, Terminal, monospace;
         font-weight: bold;
         -webkit-font-smoothing: none;
@@ -70,38 +132,19 @@
         cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), auto;
     }
 
-    /* --- VIDEO BACKGROUND --- */
-    .bg-video {
-        position: fixed; 
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        object-fit: cover;
-        /* Spostiamo il video ancora più indietro */
-        z-index: -2; 
-        pointer-events: none;
-        /* IMPORTANTE: Riportiamo l'opacità a 1.0 (nessuna trasparenza) */
-        opacity: 1.0; 
-    }
-
-    /* --- DARK OVERLAY (Il trucco per scurire) --- */
-    /* Crea un velo scuro tra il video (-2) e il contenuto (+1) */
-    body::after {
-        content: '';
+    /* --- CANVAS WIREFRAME RETRO BACKGROUND --- */
+    #bg-canvas {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        /* Questo è un nero semi-trasparente */
-        /* L'ultimo numero (0.6) è l'opacità del velo. 
-           - 0.0 è trasparente.
-           - 1.0 è nero totale.
-           0.6 (60%) è un buon valore per scurire molto. */
-        background-color: rgba(0, 0, 0, 0.6); 
-        z-index: -1; /* Sta sopra il video ma sotto il testo */
+        display: block;
+        z-index: -2;
         pointer-events: none;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        background-color: #000000;
     }
 
     /* --- IL RESTO DEL CSS RIMANE INVARIATO --- */
