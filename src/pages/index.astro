@@ -16,25 +16,26 @@
 </a>
 
 <main class="desktop">
-    <!-- ICONE = foto in stile macOS (placeholder): sostituisci i 4 src con le tue foto -->
+    <div class="marquee" hidden></div>
+    <!-- ICONE = PNG placeholder che prendono la forma dell'immagine: sostituisci i 4 src con i tuoi PNG -->
     <div class="icons">
         <a class="desktop-icon i-bacheka" href="/bacheka" data-nav draggable="false">
-            <span class="ico-photo"><img src="/img/psq.webp" alt="" draggable="false"></span>
+            <span class="ico-photo"><img src="/img/HAVEANEROTIC.png" alt="" draggable="false"></span>
             <span class="label">Bacheka</span>
         </a>
 
         <a class="desktop-icon i-archive" href="/archive" data-nav draggable="false">
-            <span class="ico-photo"><img src="/img/mir.webp" alt="" draggable="false"></span>
+            <span class="ico-photo"><img src="/img/image_2026-02-09_190753037.png" alt="" draggable="false"></span>
             <span class="label">Taccuino</span>
         </a>
 
         <a class="desktop-icon i-more" href="/more" data-nav draggable="false">
-            <span class="ico-photo"><img src="/img/nothingreal.webp" alt="" draggable="false"></span>
+            <span class="ico-photo"><img src="/img/nanananna.png" alt="" draggable="false"></span>
             <span class="label">More</span>
         </a>
 
         <a class="desktop-icon i-shop" href="/shop" data-nav draggable="false">
-            <span class="ico-photo"><img src="/img/046813d3-5fab-4125-990d-9e8da96e31df.jpg" alt="" draggable="false"></span>
+            <span class="ico-photo"><img src="/img/3.png" alt="" draggable="false"></span>
             <span class="label">Shop</span>
         </a>
     </div>
@@ -112,6 +113,58 @@
                 window.setTimeout(function () { window.location.href = href; }, 550);
             });
         });
+    })();
+</script>
+
+<script>
+    // selezione ad area (marquee): trascina col tasto sinistro sul desktop vuoto (solo mouse)
+    (function () {
+        var layer = document.querySelector('.icons');
+        var box = document.querySelector('.marquee');
+        if (!layer || !box) return;
+        var icons = Array.prototype.slice.call(document.querySelectorAll('a.desktop-icon'));
+        var selecting = false, sx = 0, sy = 0;
+
+        function clearSel() { icons.forEach(function (i) { i.classList.remove('selected'); }); }
+
+        layer.addEventListener('pointerdown', function (e) {
+            if (e.pointerType && e.pointerType !== 'mouse') return;
+            if (e.button && e.button !== 0) return;
+            if (e.target.closest('.desktop-icon')) return;
+            selecting = true;
+            sx = e.clientX; sy = e.clientY;
+            clearSel();
+            box.style.left = sx + 'px';
+            box.style.top = sy + 'px';
+            box.style.width = '0px';
+            box.style.height = '0px';
+            box.hidden = false;
+            try { layer.setPointerCapture(e.pointerId); } catch (err) {}
+        });
+
+        layer.addEventListener('pointermove', function (e) {
+            if (!selecting) return;
+            var left = Math.min(sx, e.clientX), top = Math.min(sy, e.clientY);
+            var w = Math.abs(e.clientX - sx), h = Math.abs(e.clientY - sy);
+            box.style.left = left + 'px';
+            box.style.top = top + 'px';
+            box.style.width = w + 'px';
+            box.style.height = h + 'px';
+            var r1 = left, t1 = top, r2 = left + w, b2 = top + h;
+            icons.forEach(function (icon) {
+                var r = icon.getBoundingClientRect();
+                icon.classList.toggle('selected', !(r.right < r1 || r.left > r2 || r.bottom < t1 || r.top > b2));
+            });
+        });
+
+        function endSelect(e) {
+            if (!selecting) return;
+            selecting = false;
+            box.hidden = true;
+            try { layer.releasePointerCapture(e.pointerId); } catch (err) {}
+        }
+        layer.addEventListener('pointerup', endSelect);
+        layer.addEventListener('pointercancel', endSelect);
     })();
 </script>
 
@@ -210,33 +263,23 @@
         touch-action: none;
     }
 
-    /* tile foto stile vecchio macOS (Aqua): angoli arrotondati, lucentezza, ombra */
+    /* icona = PNG che prende la sua forma, nessun riquadro */
     .ico-photo {
-        position: relative;
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 144px;
         height: 184px;
-        border-radius: 0;
-        overflow: hidden;
-        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.5);
-        transition: transform 0.12s ease, box-shadow 0.12s ease;
+        transition: transform 0.12s ease;
     }
 
     .ico-photo img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+        max-width: 100%;
+        max-height: 100%;
         display: block;
-    }
-
-    .ico-photo::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.14) 38%, rgba(255, 255, 255, 0) 52%);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
-        pointer-events: none;
+        -webkit-user-drag: none;
+        filter: drop-shadow(0 6px 7px rgba(0, 0, 0, 0.55));
+        transition: filter 0.12s ease;
     }
 
     .desktop-icon .label {
@@ -251,10 +294,10 @@
     .desktop-icon:focus { outline: none; }
 
     .desktop-icon:hover .ico-photo,
-    .desktop-icon:focus .ico-photo {
-        transform: scale(1.05);
-        box-shadow: 0 16px 26px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.35);
-    }
+    .desktop-icon:focus .ico-photo { transform: scale(1.05); }
+
+    .desktop-icon:hover .ico-photo img,
+    .desktop-icon:focus .ico-photo img { filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.6)); }
 
     .desktop-icon:hover .label,
     .desktop-icon:focus .label {
@@ -265,9 +308,26 @@
 
     .desktop-icon.dragging { z-index: 100; }
 
-    .desktop-icon.dragging .ico-photo {
-        transform: scale(1.04);
-        box-shadow: 0 20px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.5);
+    .desktop-icon.dragging .ico-photo { transform: scale(1.04); }
+
+    .desktop-icon.dragging .ico-photo img { filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.65)); }
+
+    /* rettangolo di selezione (marquee) + icone selezionate */
+    .marquee {
+        position: absolute;
+        border: 1px solid rgba(90, 150, 255, 0.9);
+        background: rgba(90, 150, 255, 0.25);
+        pointer-events: none;
+    }
+    .marquee[hidden] { display: none; }
+
+    .desktop-icon.selected {
+        background: rgba(90, 150, 255, 0.22);
+        border-radius: 6px;
+    }
+    .desktop-icon.selected .label {
+        background: #2f6fe0;
+        text-shadow: none;
     }
 
     /* posizioni iniziali sparse e asimmetriche (desktop) — poi trascinabili */
@@ -285,7 +345,6 @@
         .ico-photo {
             width: 104px;
             height: 132px;
-            border-radius: 0;
         }
 
         .desktop-icon .label { font-size: 15px; }
