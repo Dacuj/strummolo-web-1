@@ -97,5 +97,8 @@ collections:
         widget: "list"
         summary: "{{fields.image}}"
         field: { label: "Immagine", name: "image", widget: "image" }
+      - { label: "Head (solo display shop)", name: "head", widget: "image", required: false, hint: "Pezzo in alto dell'outfit. Solo per la vetrina shop." }
+      - { label: "Bottom (solo display shop)", name: "bottom", widget: "image", required: false, hint: "Pezzo in basso dell'outfit. Solo per la vetrina shop." }
+      - { label: "Ordine nello shop", name: "order", widget: "number", value_type: "int", required: false, hint: "Numero più basso = più in alto. Vuoto = in fondo." }
       - { label: "Disponibile", name: "available", widget: "boolean", default: true, required: false }
       - { label: "Note (opzionali)", name: "body", widget: "markdown", required: false }

@@ -26,6 +26,11 @@ const prodotti = defineCollection({
 		price: z.string(),
 		images: z.array(z.string()).min(1),
 		available: z.boolean().default(true).optional(),
+		// Pezzi extra solo per il display dell'outfit nello shop.
+		head: z.string().optional(),
+		bottom: z.string().optional(),
+		// Ordine dell'outfit nello shop: numero più basso = più in alto.
+		order: z.number().optional(),
 	}),
 });
 
