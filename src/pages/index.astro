@@ -41,16 +41,78 @@
 </main>
 
 <script>
-    // navigazione con effetto "clessidra" (loading) ispirato al vecchio desktop
-    document.querySelectorAll('a[data-nav]').forEach(function (a) {
-        a.addEventListener('click', function (e) {
-            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-            e.preventDefault();
-            var href = a.getAttribute('href');
-            document.body.classList.add('busy');
-            window.setTimeout(function () { window.location.href = href; }, 550);
+    // drag & drop delle icone sul desktop + navigazione con effetto "clessidra"
+    (function () {
+        var THRESHOLD = 5;
+
+        document.querySelectorAll('a.desktop-icon').forEach(function (icon) {
+            var dragging = false, moved = false, justDragged = false;
+            var startX = 0, startY = 0, baseLeft = 0, baseTop = 0;
+            var posKey = 'iconpos:' + (icon.getAttribute('href') || '');
+
+            function place(left, top) {
+                var w = icon.offsetWidth, h = icon.offsetHeight;
+                left = Math.max(0, Math.min(left, window.innerWidth - w));
+                top = Math.max(0, Math.min(top, window.innerHeight - h));
+                icon.style.left = left + 'px';
+                icon.style.top = top + 'px';
+                icon.style.right = 'auto';
+                icon.style.bottom = 'auto';
+            }
+
+            try {
+                var saved = JSON.parse(localStorage.getItem(posKey) || 'null');
+                if (saved && typeof saved.left === 'number') place(saved.left, saved.top);
+            } catch (e) {}
+
+            icon.addEventListener('pointerdown', function (e) {
+                if (e.button && e.button !== 0) return;
+                dragging = true; moved = false;
+                startX = e.clientX; startY = e.clientY;
+                var r = icon.getBoundingClientRect();
+                baseLeft = r.left; baseTop = r.top;
+                try { icon.setPointerCapture(e.pointerId); } catch (err) {}
+            });
+
+            icon.addEventListener('pointermove', function (e) {
+                if (!dragging) return;
+                var dx = e.clientX - startX, dy = e.clientY - startY;
+                if (!moved && (dx * dx + dy * dy) > THRESHOLD * THRESHOLD) {
+                    moved = true;
+                    icon.classList.add('dragging');
+                }
+                if (moved) place(baseLeft + dx, baseTop + dy);
+            });
+
+            function endDrag(e) {
+                if (!dragging) return;
+                dragging = false;
+                try { icon.releasePointerCapture(e.pointerId); } catch (err) {}
+                if (moved) {
+                    justDragged = true;
+                    icon.classList.remove('dragging');
+                    try {
+                        localStorage.setItem(posKey, JSON.stringify({
+                            left: parseInt(icon.style.left, 10) || 0,
+                            top: parseInt(icon.style.top, 10) || 0
+                        }));
+                    } catch (err) {}
+                    window.setTimeout(function () { justDragged = false; }, 300);
+                }
+            }
+            icon.addEventListener('pointerup', endDrag);
+            icon.addEventListener('pointercancel', endDrag);
+
+            icon.addEventListener('click', function (e) {
+                if (justDragged) { justDragged = false; e.preventDefault(); return; }
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                e.preventDefault();
+                var href = icon.getAttribute('href');
+                document.body.classList.add('busy');
+                window.setTimeout(function () { window.location.href = href; }, 550);
+            });
         });
-    });
+    })();
 </script>
 
 <script>
@@ -145,17 +207,18 @@
         -webkit-user-select: none;
         user-select: none;
         -webkit-tap-highlight-color: transparent;
+        touch-action: none;
     }
 
     /* tile foto stile vecchio macOS (Aqua): angoli arrotondati, lucentezza, ombra */
     .ico-photo {
         position: relative;
         display: block;
-        width: 150px;
-        height: 150px;
-        border-radius: 28px;
+        width: 144px;
+        height: 184px;
+        border-radius: 0;
         overflow: hidden;
-        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.5);
         transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
 
@@ -200,13 +263,18 @@
         text-shadow: none;
     }
 
-    .desktop-icon:active { cursor: var(--cur-busy), wait; }
+    .desktop-icon.dragging { z-index: 100; }
 
-    /* posizioni sparse (desktop): grandi tile agli angoli, volto centrale visibile */
-    .i-bacheka { top: 8%;  left: 5%;  }
-    .i-archive { top: 8%;  left: 66%; }
-    .i-more    { top: 55%; left: 7%;  }
-    .i-shop    { top: 55%; left: 66%; }
+    .desktop-icon.dragging .ico-photo {
+        transform: scale(1.04);
+        box-shadow: 0 20px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.5);
+    }
+
+    /* posizioni iniziali sparse e asimmetriche (desktop) — poi trascinabili */
+    .i-bacheka { top: 7%;  left: 5%;  }
+    .i-archive { top: 15%; left: 63%; }
+    .i-more    { top: 58%; left: 11%; }
+    .i-shop    { top: 49%; left: 71%; }
 
     /* mobile: stessa vibe, icone sparse in modo asimmetrico (no griglia) */
     @media (max-width: 768px) {
@@ -216,8 +284,8 @@
 
         .ico-photo {
             width: 104px;
-            height: 104px;
-            border-radius: 20px;
+            height: 132px;
+            border-radius: 0;
         }
 
         .desktop-icon .label { font-size: 15px; }
