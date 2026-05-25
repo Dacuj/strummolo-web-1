@@ -15,7 +15,9 @@ interface Props {
 }
 
 const { product } = Astro.props;
-const { title, description, images } = product.data;
+const { title, description, price, images } = product.data;
+const INSTAGRAM_HANDLE = 'strummolo123';
+const INSTAGRAM_URL = `https://instagram.com/${INSTAGRAM_HANDLE}`;
 ---
 
 <!DOCTYPE html>
@@ -33,11 +35,38 @@ const { title, description, images } = product.data;
   </head>
   <body>
 
-    <a href="/shop" class="wip-back" aria-label="Torna allo shop">← shop</a>
+    <a href="/shop" class="back" aria-label="Torna allo shop">← shop</a>
 
-    <main class="wip-main">
-      <p class="wip-title">{title}</p>
-      <h1 class="wip-text">Work in progress</h1>
+    <main class="pdp">
+      <h1 class="pdp-title">{title}</h1>
+      {price && <p class="pdp-price">{price}</p>}
+
+      <div class="pdp-gallery">
+        {images.map((src, i) => (
+          <img
+            class="pdp-img"
+            src={src}
+            alt={`${title} — foto ${i + 1}`}
+            loading={i === 0 ? 'eager' : 'lazy'}
+          />
+        ))}
+      </div>
+
+      {description && <p class="pdp-desc">{description}</p>}
+
+      <div class="pdp-info">
+        <p>
+          <strong>Random single stitch.</strong> Ogni capo è una maglietta single stitch
+          vintage, di un colore sempre diverso: non esistono due pezzi uguali. La stampa
+          originale della maglietta viene preservata — la nostra stampa viene applicata
+          all'interno, <em>inside out</em>.
+        </p>
+        <p class="pdp-note">
+          Questo non è un vero negozio, è solo uno showcase: dal sito non si ordina.
+          Se vuoi organizzare una spedizione, scrivici in DM su
+          <a class="pdp-link" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">Instagram @{INSTAGRAM_HANDLE}</a>.
+        </p>
+      </div>
     </main>
 
     <style is:global>
@@ -57,7 +86,7 @@ const { title, description, images } = product.data;
 
       a { color: inherit; text-decoration: none; }
 
-      .wip-back {
+      .back {
         position: fixed;
         top: 14px;
         left: 16px;
@@ -67,30 +96,80 @@ const { title, description, images } = product.data;
         opacity: 0.7;
         transition: opacity 0.15s;
       }
-      .wip-back:hover { opacity: 1; text-decoration: underline; }
+      .back:hover { opacity: 1; text-decoration: underline; }
 
-      .wip-main {
-        min-height: 100vh;
+      .pdp {
+        width: 100%;
+        max-width: 620px;
+        margin: 0 auto;
+        padding: 64px 20px 100px;
+      }
+
+      .pdp-title {
+        text-align: center;
+        font-size: 38px;
+        font-weight: 700;
+        line-height: 1.1;
+        word-break: break-word;
+      }
+
+      .pdp-price {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 15px;
+        letter-spacing: 2px;
+        opacity: 0.8;
+      }
+
+      .pdp-gallery {
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        gap: 28px;
+        margin: 36px 0;
+      }
+
+      .pdp-img {
+        display: block;
+        max-width: 100%;
+        max-height: 80vh;
+        width: auto;
+        height: auto;
+      }
+
+      .pdp-desc {
         text-align: center;
-        padding: 40px 20px;
+        font-size: 15px;
+        line-height: 1.6;
+        opacity: 0.85;
+        margin-bottom: 28px;
       }
 
-      .wip-title {
-        font-size: 14px;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        opacity: 0.6;
-        margin-bottom: 14px;
+      .pdp-info {
+        max-width: 520px;
+        margin: 0 auto;
+        text-align: center;
+        font-size: 15px;
+        line-height: 1.7;
       }
+      .pdp-info p + p { margin-top: 18px; }
+      .pdp-info strong { font-weight: 700; }
+      .pdp-info em { font-style: italic; }
 
-      .wip-text {
-        font-size: 34px;
-        font-weight: 700;
-        letter-spacing: 1px;
+      .pdp-note { opacity: 0.85; }
+
+      .pdp-link {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        white-space: nowrap;
+        transition: opacity 0.15s;
+      }
+      .pdp-link:hover { opacity: 0.7; }
+
+      @media (max-width: 480px) {
+        .pdp { padding: 56px 16px 80px; }
+        .pdp-title { font-size: 30px; }
+        .pdp-gallery { gap: 20px; }
       }
     </style>
   </body>
