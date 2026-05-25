@@ -4,34 +4,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>strummolo123</title>
     <meta name="description" content="Blogblogblogblog undergroounnnnd su napOLI ahhaha" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@200;300;400;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="/favicon.png" />
 </head>
 <body>
 
-<!-- VIDEO BACKGROUND LOOP -->
-<!-- Sostituisci il src con il link effettivo del tuo video -->
-<video class="bg-video" autoplay loop muted playsinline>
-    <source src="/img/outputASCII.mp4" type="video/mp4">
-</video>
+<main class="desktop">
+    <div class="icons">
+        <a class="desktop-icon i-bacheka" href="/bacheka" data-nav draggable="false">
+            <svg class="ico" viewBox="0 0 48 48" aria-hidden="true">
+                <rect x="7" y="9" width="34" height="24" rx="4" fill="#ffffff" stroke="#222" stroke-width="2"/>
+                <path d="M16 33 v7 l9 -7 z" fill="#ffffff" stroke="#222" stroke-width="2" stroke-linejoin="round"/>
+                <circle cx="17" cy="21" r="2.3" fill="#222"/>
+                <circle cx="24" cy="21" r="2.3" fill="#222"/>
+                <circle cx="31" cy="21" r="2.3" fill="#222"/>
+            </svg>
+            <span class="label">Bacheka</span>
+        </a>
 
-<header>
-    <a href="/" class="logo">
-        <span>s</span><span>t</span><span>r</span><span>u</span><span>m</span><span>m</span><span>o</span><span>l</span><span>o</span><span class="arrows">123</span>
-    </a>
-    <nav class="navbar">
-        <a href="/bacheka" class="nav-link footprint">leave your digital footprint</a>
-        <a href="/archive" class="nav-link">taccuino</a>
-        <a href="/more" class="nav-link">more</a>
-    </nav>
-</header>
+        <a class="desktop-icon i-archive" href="/archive" data-nav draggable="false">
+            <svg class="ico" viewBox="0 0 48 48" aria-hidden="true">
+                <rect x="9" y="5" width="30" height="38" rx="2" fill="#fdfdf2" stroke="#222" stroke-width="2"/>
+                <rect x="9" y="5" width="30" height="8" fill="#3a6ea5" stroke="#222" stroke-width="2"/>
+                <line x1="14" y1="20" x2="34" y2="20" stroke="#9aa3ad" stroke-width="2"/>
+                <line x1="14" y1="26" x2="34" y2="26" stroke="#9aa3ad" stroke-width="2"/>
+                <line x1="14" y1="32" x2="34" y2="32" stroke="#9aa3ad" stroke-width="2"/>
+                <line x1="14" y1="38" x2="27" y2="38" stroke="#9aa3ad" stroke-width="2"/>
+            </svg>
+            <span class="label">Taccuino</span>
+        </a>
 
-<div class="pin-container">
-    <img src="/img/HAVEANEROTIC.png" draggable="false" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1200px-SNice.svg.png'" alt="Spilla Vintage" class="pin-image">
-</div>
+        <a class="desktop-icon i-more" href="/more" data-nav draggable="false">
+            <svg class="ico" viewBox="0 0 48 48" aria-hidden="true">
+                <path d="M5 13 h14 l4 4 h20 v22 a2 2 0 0 1 -2 2 h-34 a2 2 0 0 1 -2 -2 z" fill="#e0a92e" stroke="#6d4f12" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M5 19 h38 v18 a2 2 0 0 1 -2 2 h-34 a2 2 0 0 1 -2 -2 z" fill="#ffd166" stroke="#6d4f12" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+            <span class="label">More</span>
+        </a>
+
+        <a class="desktop-icon i-shop" href="/shop" data-nav draggable="false">
+            <svg class="ico" viewBox="0 0 48 48" aria-hidden="true">
+                <path d="M12 16 h24 l-2 26 a2 2 0 0 1 -2 2 h-16 a2 2 0 0 1 -2 -2 z" fill="#e85d8a" stroke="#3a1020" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M18 18 v-4 a6 6 0 0 1 12 0 v4" fill="none" stroke="#3a1020" stroke-width="2.4"/>
+            </svg>
+            <span class="label">Shop</span>
+        </a>
+    </div>
+</main>
+
+<script>
+    // navigazione con effetto "clessidra" (loading) ispirato al vecchio desktop
+    document.querySelectorAll('a[data-nav]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            e.preventDefault();
+            var href = a.getAttribute('href');
+            document.body.classList.add('busy');
+            window.setTimeout(function () { window.location.href = href; }, 550);
+        });
+    });
+</script>
 
 <script>
     if (window.netlifyIdentity) {
@@ -48,248 +79,121 @@
 </html>
 
 <style is:global>
-    /* --- RESET E BLOCCO TOTALE DELLO SCROLL --- */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+    :root {
+        /* SFONDO: per usare la foto dei manichini carica il file in public/img/
+           e cambia SOLO questa riga, es. url('/img/desktop-bg.jpg') */
+        --wallpaper: url('/img/046813d3-5fab-4125-990d-9e8da96e31df.jpg');
+
+        --cur-arrow: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='24'%20height='24'%3E%3Cpath%20d='M2%202L2%2018L6.5%2013.5L9.5%2020L12%2019L9%2012.5L15%2012.5Z'%20fill='white'%20stroke='black'%20stroke-width='1.3'%20stroke-linejoin='round'/%3E%3C/svg%3E") 2 2;
+        --cur-busy: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='24'%20height='24'%3E%3Cg%20stroke='black'%20stroke-width='1.4'%20stroke-linejoin='round'%3E%3Crect%20x='4.5'%20y='2'%20width='15'%20height='2.6'%20fill='white'/%3E%3Crect%20x='4.5'%20y='19.4'%20width='15'%20height='2.6'%20fill='white'/%3E%3Cpath%20d='M6%204.6L18%204.6L12%2012Z'%20fill='white'/%3E%3Cpath%20d='M12%2012L6%2019.4L18%2019.4Z'%20fill='white'/%3E%3C/g%3E%3Cpath%20d='M9.3%2017.6L14.7%2017.6L12%2013.9Z'%20fill='goldenrod'/%3E%3Crect%20x='11.4'%20y='11.5'%20width='1.2'%20height='5'%20fill='goldenrod'/%3E%3C/svg%3E") 12 12;
     }
 
-    body, html {
-        /* FONDAMENTALE: Riportiamo lo sfondo a nero */
-        /* background-color: #000000;  */
-        height: 100vh;
-        width: 100vw;
-        overflow: hidden; 
-        overscroll-behavior: none; 
-        
-        font-family: 'Courier New', Courier, Fixedsys, Terminal, monospace;
-        font-weight: bold;
-        -webkit-font-smoothing: none;
-        font-smooth: never;
-        cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat926.cur'), auto;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* --- VIDEO BACKGROUND --- */
-    .bg-video {
-        position: fixed; 
-        top: 0;
-        left: 0;
+    html, body { height: 100%; }
+
+    body {
         width: 100vw;
         height: 100vh;
-        object-fit: cover;
-        /* Spostiamo il video ancora più indietro */
-        z-index: -2; 
-        pointer-events: none;
-        /* IMPORTANTE: Riportiamo l'opacità a 1.0 (nessuna trasparenza) */
-        opacity: 1.0; 
+        overflow: hidden;
+        overscroll-behavior: none;
+        background: #0a3a6b;
+        font-family: Tahoma, Verdana, Geneva, sans-serif;
+        cursor: var(--cur-arrow), auto;
     }
 
-    /* --- DARK OVERLAY (Il trucco per scurire) --- */
-    /* Crea un velo scuro tra il video (-2) e il contenuto (+1) */
-    body::after {
-        content: '';
+    body.busy,
+    body.busy * { cursor: var(--cur-busy), wait !important; }
+
+    .desktop {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        /* Questo è un nero semi-trasparente */
-        /* L'ultimo numero (0.6) è l'opacità del velo. 
-           - 0.0 è trasparente.
-           - 1.0 è nero totale.
-           0.6 (60%) è un buon valore per scurire molto. */
-        background-color: rgba(0, 0, 0, 0.6); 
-        z-index: -1; /* Sta sopra il video ma sotto il testo */
-        pointer-events: none;
+        inset: 0;
+        background-image: var(--wallpaper);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
     }
 
-    /* --- IL RESTO DEL CSS RIMANE INVARIATO --- */
+    .icons { position: absolute; inset: 0; }
 
-    /* --- HEADER (Desktop) --- */
-    header {
-        width: 100%;
-        padding: 20px;
+    .desktop-icon {
+        position: absolute;
+        width: 88px;
         display: flex;
-        align-items: flex-start; 
-        justify-content: space-between;
-        background-color: transparent; 
-        position: fixed; 
-        top: 0;
-        left: 0;
-        z-index: 1000;
-        pointer-events: none; 
-    }
-
-    .logo, .navbar {
-        pointer-events: auto;
-    }
-
-    .logo {
-        font-family: 'Press Start 2P', cursive;
-        font-size: 0.7rem;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 4px;
         text-decoration: none;
-        display: flex;
-        gap: 2px;
-        text-shadow: 2px 2px 0px #000; 
-        background: rgba(0,0,0,0.8);
-        padding: 8px;
-        margin-top: 10px; 
-        transform: rotate(-1deg); 
-        flex-shrink: 0;
+        text-align: center;
+        border: 1px solid transparent;
+        cursor: var(--cur-arrow), auto;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
     }
 
-    .logo span:nth-child(1) { color: #ea4335; } 
-    .logo span:nth-child(2) { color: #fbbc05; } 
-    .logo span:nth-child(3) { color: #4285f4; } 
-    .logo span:nth-child(4) { color: #34a853; } 
-    .logo span:nth-child(5) { color: #ea4335; } 
-    .logo span:nth-child(6) { color: #fff; }  
-    .logo span:nth-child(7) { color: #fff; }  
-    .logo .arrows { color: #4285f4; margin-left: 5px; }
-    .logo:hover { opacity: 0.8; }
-
-    .navbar {
-        display: flex;
-        align-items: flex-start;
-        flex-grow: 1; 
-        padding-left: 60px; 
-        padding-right: 20px;
+    .desktop-icon .ico {
+        width: 48px;
+        height: 48px;
+        filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.55));
     }
 
-    .nav-link {
-        font-family: 'Inter', 'Helvetica Neue', 'Arial', sans-serif; 
-        font-weight: 300; 
-        font-size: 2.8rem; 
-        letter-spacing: -2px; 
-        color: #000; 
-        text-decoration: none;
-        text-transform: uppercase; 
-        padding: 0px 2px; 
-        line-height: 0.75; 
-        background: #fff; 
-        border: none;
-        transition: transform 0.1s, background 0.1s, color 0.1s;
-        display: inline-block; 
-        box-shadow: 2px 2px 0px rgba(0,0,0,0.5); 
-    }
-
-    a.nav-link.footprint {
-        font-size: 1.2rem;
-        line-height: 0.9;
-        letter-spacing: -1px;
-        padding: 4px 6px;
-    }
-
-    .navbar a:nth-child(1) { margin-right: auto; margin-top: 0px; transform: rotate(-2deg); }
-    .navbar a:nth-child(2) { margin-top: 15px; margin-right: 40px; transform: rotate(3deg); }
-    .navbar a:nth-child(3) { margin-top: 5px; transform: rotate(-3deg); }
-
-    .nav-link:hover { 
-        transform: scale(1.02) rotate(0deg) !important;
-        z-index: 10;
-        background: #000; 
+    .desktop-icon .label {
+        font-size: 13px;
+        line-height: 1.15;
         color: #fff;
+        padding: 1px 4px;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 2px rgba(0, 0, 0, 0.85);
     }
 
-    /* --- SPILLA VINTAGE --- */
-    .pin-container {
-        position: fixed; 
-        bottom: 40px;
-        right: 40px;
-        width: 130px; 
-        height: 130px;
-        z-index: 2000; 
-        pointer-events: auto;
+    .desktop-icon:hover,
+    .desktop-icon:focus {
+        outline: none;
+        background: rgba(11, 100, 194, 0.30);
+        border: 1px dotted rgba(255, 255, 255, 0.75);
     }
 
-    .pin-image {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        display: block;
+    .desktop-icon:hover .label,
+    .desktop-icon:focus .label {
+        background: #0a64c2;
+        text-shadow: none;
     }
 
-    /* --- MEDIA QUERIES (Mobile) --- */
+    .desktop-icon:active { cursor: var(--cur-busy), wait; }
+
+    /* posizioni sparse (desktop) */
+    .i-bacheka { top: 10%; left: 9%;  }
+    .i-archive { top: 20%; left: 70%; }
+    .i-more    { top: 64%; left: 18%; }
+    .i-shop    { top: 72%; left: 58%; }
+
+    /* mobile: stessa vibe, icone in griglia centrata */
     @media (max-width: 768px) {
-        
-        header { 
-            padding: 10px; 
-            display: block; /* Rimuoviamo il flex-col del mobile per gestire gli elementi in posizioni separate */
-            background-color: transparent; /* Togliamo il blocco nero della navbar per non oscurare tutto lo schermo */
-            pointer-events: none; 
-        }
-
-        .logo { 
-            font-size: 1rem; 
-            width: 100%; 
+        .desktop {
             display: flex;
-            justify-content: center; 
-            margin-top: 0; 
-            transform: none; 
-            background: rgba(0,0,0,0.8);
-            pointer-events: auto;
+            align-items: center;
+            justify-content: center;
         }
 
-        .navbar { 
-            /* Spostiamo la navbar esattamente al centro dello schermo */
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            flex-direction: column; /* Impila i bottoni uno sotto l'altro */
-            gap: 10px;
-            width: auto; 
-            padding: 0;
-            pointer-events: auto;
+        .icons {
+            position: relative;
+            inset: auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px 12px;
+            width: min(86vw, 360px);
+            padding: 16px;
         }
 
-        /* Resettiamo le rotazioni folli del desktop per i figli */
-        .navbar a:nth-child(n) { 
-            margin: 0; 
-            transform: none; 
-        }
-        
-        /* Stile Bottone Browser Vintage (Anni 2000) */
-        .nav-link, a.nav-link.footprint {
-            font-family: 'Arial', sans-serif; /* Font basico di sistema */
-            font-size: 14px; /* Piccolini */
-            font-weight: normal;
-            letter-spacing: normal;
-            line-height: normal;
-            text-transform: none; /* Tolto il maiuscolo forzato */
-            color: #000;
-            background-color: #c0c0c0; /* Classico grigio Windows */
-            padding: 4px 12px;
-            
-            /* Bordo 3D tipico dell'HTML puro old-school */
-            border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff; 
-            
-            box-shadow: none; /* Tolta l'ombra spessa del desktop */
-            width: 100%; /* Larghezza adattata al centro */
-            text-align: center;
-            white-space: nowrap; 
+        .desktop-icon {
+            position: static;
+            width: auto;
         }
 
-        /* Annulliamo completamente l'hover del desktop */
-        .nav-link:hover, a.nav-link.footprint:hover {
-            transform: none !important;
-            background-color: #c0c0c0;
-            color: #000;
-        }
-
-        /* Effetto click "bottone incassato" per renderlo interattivo stile anni 2000 */
-        .nav-link:active, a.nav-link.footprint:active {
-            border-color: #808080 #ffffff #ffffff #808080;
-        }
-        
-        .pin-container { 
-            width: 90px; 
-            height: 90px; 
-            bottom: 20px; 
-            right: 20px; 
+        .desktop-icon .ico {
+            width: 44px;
+            height: 44px;
         }
     }
 </style>
