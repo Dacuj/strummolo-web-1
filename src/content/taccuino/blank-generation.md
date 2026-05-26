@@ -6,7 +6,9 @@ style: editorial
 fileNumber: FILE_001
 tags:
   - ESSAY
-prodotti_collegati: []
+prodotti_collegati:
+  - place-like-this
+  - my-computer-understands-me
 ---
 Il centro storico napoletano è ormai un luogo infestato dal proprio passato, come un’antica rovina che contiene dentro sé tutto ciò che era, ciò che resta e ciò che non sarà mai più. Giammai percorreremo quelle strade senza fantasmi muniti di reflex e di birkenstock con calzini di spugna, giammai gusteremo una pizza fritta senza almeno 20 minuti di fila e i pizzaioli grondanti sudore per essere la nuova servitù della gleba. Giammai vivremo la tanto decantata *vita lenta*, ormai anche i parcheggiatori abusivi vanno di fretta. C’è un colpevole per ciò che abbiamo perso? 
 
