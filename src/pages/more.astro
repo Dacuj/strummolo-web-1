@@ -67,17 +67,23 @@ for (const exhibit of exhibits) {
 
   dotsWithPositions.push({ ...exhibit, top, left });
 }
+
+import Seo from '../components/Seo.astro';
 ---
 
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <link rel="icon" type="image/png" href="/favicon.png" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sturmmolo | MUSEUM</title>
+    <Seo
+      title="More — il museo di strummolo"
+      description="More: il museo digitale di strummolo. Reperti, artefatti e curiosità dall'underground napoletano."
+    />
 </head>
 <body>
+
+    <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">More — il museo di strummolo</h1>
 
     <main class="layout-container">
         <div class="left-panel">

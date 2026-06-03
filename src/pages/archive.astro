@@ -64,16 +64,22 @@ const glitchSymbols = ['†', 'º', '‡', '±'];
 
 // Array di posizioni orizzontali in percentuale (vw)
 const leftPositions = [10, 55, 20, 60, 15, 50, 25];
+
+import Seo from '../components/Seo.astro';
 ---
 
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>%Taccuino&</title>
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <Seo
+      title="Taccuino — gli articoli di strummolo"
+      description="Il Taccuino di strummolo: archivio di articoli, saggi e appunti underground da Napoli."
+    />
 </head>
 <body>
+
+    <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Taccuino — gli articoli di strummolo</h1>
 
     <svg class="jodi-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
         {cyanPaths.map(path => (

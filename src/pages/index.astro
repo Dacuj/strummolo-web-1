@@ -1,13 +1,36 @@
+---
+import Seo from '../components/Seo.astro';
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "strummolo",
+    "url": "https://www.strummolo.com",
+    "inLanguage": "it",
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "strummolo",
+    "url": "https://www.strummolo.com",
+    "logo": "https://www.strummolo.com/favicon.png",
+    "sameAs": ["https://instagram.com/strummolo123"],
+  },
+];
+---
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>strummolo123</title>
-    <meta name="description" content="Blogblogblogblog undergroounnnnd su napOLI ahhaha" />
+    <Seo
+      title="strummolo123 — blog underground da Napoli"
+      description="strummolo: blog underground napoletano. Bacheca live, Taccuino di articoli e shop di pezzi unici. Direttamente da Napoli."
+      jsonLd={jsonLd}
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="/favicon.png" />
 </head>
 <body>
 
@@ -16,26 +39,27 @@
 </a>
 
 <main class="desktop">
+    <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">strummolo — blog underground da Napoli</h1>
     <div class="marquee" hidden></div>
     <!-- ICONE = PNG placeholder che prendono la forma dell'immagine: sostituisci i 4 src con i tuoi PNG -->
     <div class="icons">
         <a class="desktop-icon i-bacheka" href="/bacheka" data-nav draggable="false">
-            <span class="ico-photo"><img src="/img/madonna.webp" alt="" draggable="false"></span>
+            <span class="ico-photo"><img src="/img/madonna.webp" alt="Bacheca live di strummolo" draggable="false"></span>
             <span class="label">Leave your digital footprint</span>
         </a>
 
         <a class="desktop-icon i-archive" href="/archive" data-nav draggable="false">
-            <span class="ico-photo"><img src="/img/iloveinfotee.png" alt="" draggable="false"></span>
+            <span class="ico-photo"><img src="/img/iloveinfotee.png" alt="Taccuino: gli articoli di strummolo" draggable="false"></span>
             <span class="label">Taccuino</span>
         </a>
 
         <a class="desktop-icon i-more" href="/more" data-nav draggable="false">
-            <span class="ico-photo"><img src="/img/clownpin.webp" alt="" draggable="false"></span>
+            <span class="ico-photo"><img src="/img/clownpin.webp" alt="More: il museo di strummolo" draggable="false"></span>
             <span class="label">More</span>
         </a>
 
         <a class="desktop-icon i-shop" href="/shop" data-nav draggable="false">
-            <span class="ico-photo"><img src="/img/3.png" alt="" draggable="false"></span>
+            <span class="ico-photo"><img src="/img/3.png" alt="Shop: i pezzi di strummolo" draggable="false"></span>
             <span class="label">Shop</span>
         </a>
     </div>

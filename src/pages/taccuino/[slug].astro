@@ -86,6 +86,30 @@ const generateWireframe = (offsetX: number, offsetY: number, scaleY: number) => 
 
 const wireframe1 = generateWireframe(-100, 50, 60);
 const wireframe2 = generateWireframe(-50, 300, 80);
+
+import Seo from '../../components/Seo.astro';
+
+// Immagine di condivisione: prima immagine di un prodotto collegato, se presente.
+const featuredImage = linkedProducts[0]?.image || undefined;
+const publishedISO = post.data.date.toISOString();
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
+
+const articleJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": post.data.title,
+  "description": post.data.description,
+  "datePublished": publishedISO,
+  "inLanguage": "it",
+  "mainEntityOfPage": canonicalURL,
+  "author": { "@type": "Organization", "name": "strummolo" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "strummolo",
+    "logo": { "@type": "ImageObject", "url": "https://www.strummolo.com/favicon.png" },
+  },
+  ...(featuredImage ? { image: featuredImage } : {}),
+};
 ---
 
 <!DOCTYPE html>
@@ -93,16 +117,14 @@ const wireframe2 = generateWireframe(-50, 300, 80);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>0x{post.slug.toUpperCase()} | strummolo </title>
-    <link rel="icon" type="image/png" href="/favicon.png" />
-
-    <meta name="description" content={post.data.description} />
-
-    <meta property="og:title" content={post.data.title} />
-    <meta property="og:description" content={post.data.description} />
-    <meta property="og:type" content="article" />
-
-    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <Seo
+      title={`${post.data.title} | strummolo`}
+      description={post.data.description}
+      type="article"
+      publishedTime={publishedISO}
+      image={featuredImage}
+      jsonLd={articleJsonLd}
+    />
 </head>
 <body>
 

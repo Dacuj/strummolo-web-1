@@ -52,13 +52,17 @@ const generateNumbers = () => {
 const cyanPaths = generateCyanLines();
 const topoPaths = generateTopoLines();
 const mapNumbers = generateNumbers();
+
+import Seo from '../components/Seo.astro';
 ---
 
 <html lang="it">
 <head>
     <meta charset="utf-8" />
-    <title>Sturmmolo - Bacheca</title>
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <Seo
+      title="Bacheca live — strummolo"
+      description="La bacheca live di strummolo: chat anonima e temporanea. Lascia la tua impronta digitale."
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <style is:global>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -182,13 +186,15 @@ const mapNumbers = generateNumbers();
     .main-title {
         color: #0000ff; text-decoration: underline; text-decoration-thickness: 3px;
         font-size: 28px; font-weight: 900; letter-spacing: 1px;
-        white-space: pre-wrap; word-wrap: break-word; line-height: 1.1; 
+        white-space: pre-wrap; word-wrap: break-word; line-height: 1.1;
+        overflow-wrap: anywhere; word-break: break-word; max-width: 100%;
     }
 
     .sub-title {
         color: #0000ff; text-decoration: underline; text-decoration-thickness: 2px;
         font-size: 22px; font-weight: 700; margin-top: 2px;
         pointer-events: none; word-wrap: break-word;
+        overflow-wrap: anywhere; word-break: break-word; max-width: 100%;
     }
 
     .controls-wrapper {
@@ -289,6 +295,8 @@ const mapNumbers = generateNumbers();
     </style>
 </head>
 <body class="disclaimer-mode">
+
+    <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Bacheca live di strummolo</h1>
 
     <!-- VIEW 1: DISCLAIMER -->
     <main id="disclaimer-view" class="terminal-container" style="display: none;">
@@ -483,9 +491,17 @@ document.addEventListener("DOMContentLoaded", () => {
             if (isSending) return;
             
             const content = chatInput.value.trim();
-            const nickname = userNickname || '131.24.167'; 
+            const nickname = userNickname || '131.24.167';
 
             if (!content || content.length > 250) return;
+
+            // Stessa regola del server: niente "parole" senza spazi troppo lunghe
+            // (romperebbero il layout). Limite a 40 caratteri.
+            const MAX_WORD = 40;
+            if (content.split(/\s+/).some(word => word.length > MAX_WORD)) {
+                alert(`Parola troppo lunga: max ${MAX_WORD} caratteri senza spazi.`);
+                return;
+            }
 
             isSending = true;
             submitBtn.disabled = true;

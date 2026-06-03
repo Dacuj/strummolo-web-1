@@ -18,6 +18,39 @@ const { product } = Astro.props;
 const { title, description, price, images } = product.data;
 const INSTAGRAM_HANDLE = 'strummolo123';
 const INSTAGRAM_URL = `https://instagram.com/${INSTAGRAM_HANDLE}`;
+
+import Seo from '../../components/Seo.astro';
+
+const siteUrl = Astro.site ?? new URL('https://www.strummolo.com');
+const canonicalURL = new URL(Astro.url.pathname, siteUrl).href;
+const absoluteImages = (images || []).map((src) => new URL(src, siteUrl).href);
+const available = product.data.available !== false;
+
+// Il prezzo è testo libero (es. "€25", "DM su IG", "SOLD"): estraiamo un numero se c'è.
+const priceMatch = String(price ?? '').match(/[\d]+([.,][\d]+)?/);
+const numericPrice = priceMatch ? priceMatch[0].replace(',', '.') : undefined;
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": title,
+  "description": description,
+  "image": absoluteImages,
+  "brand": { "@type": "Brand", "name": "strummolo" },
+  ...(numericPrice
+    ? {
+        offers: {
+          "@type": "Offer",
+          "priceCurrency": "EUR",
+          "price": numericPrice,
+          "availability": available
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+          "url": canonicalURL,
+        },
+      }
+    : {}),
+};
 ---
 
 <!DOCTYPE html>
@@ -25,13 +58,13 @@ const INSTAGRAM_URL = `https://instagram.com/${INSTAGRAM_HANDLE}`;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} // Strummolo Shop</title>
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="description" content={description} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:type" content="product" />
-    {images && images[0] && <meta property="og:image" content={images[0]} />}
+    <Seo
+      title={`${title} // Strummolo Shop`}
+      description={description}
+      type="product"
+      image={images && images[0] ? images[0] : undefined}
+      jsonLd={productJsonLd}
+    />
   </head>
   <body>
 

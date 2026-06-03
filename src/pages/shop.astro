@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import Seo from '../components/Seo.astro';
 
 const products = (await getCollection('prodotti', ({ data }) => data.available !== false))
   .sort((a, b) => (a.data.order ?? Infinity) - (b.data.order ?? Infinity));
@@ -10,9 +11,10 @@ const products = (await getCollection('prodotti', ({ data }) => data.available !
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shop // Strummolo</title>
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="description" content="Strummolo shop — per ordinare scrivici su Instagram @strummolo123." />
+    <Seo
+      title="Shop — strummolo"
+      description="Lo shop di strummolo: pezzi unici e vintage da Napoli. Per ordinare scrivici su Instagram @strummolo123."
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
@@ -22,6 +24,8 @@ const products = (await getCollection('prodotti', ({ data }) => data.available !
     <a href="/" class="logo" aria-label="strummolo123">
       <span>s</span><span>t</span><span>r</span><span>u</span><span>m</span><span>m</span><span>o</span><span>l</span><span>o</span><span class="arrows">123</span>
     </a>
+
+    <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Shop di strummolo</h1>
 
     <main class="shop-col">
       {products.length === 0 ? (
@@ -34,13 +38,13 @@ const products = (await getCollection('prodotti', ({ data }) => data.available !
             <h2 class="outfit-title">{p.data.title}</h2>
 
             {p.data.head && (
-              <img class="piece" src={p.data.head} alt="" loading="lazy" />
+              <img class="piece" src={p.data.head} alt={`${p.data.title} — pezzo superiore`} loading="lazy" />
             )}
 
             <img class="piece" src={p.data.images[0]} alt={p.data.title} loading="lazy" />
 
             {p.data.bottom && (
-              <img class="piece" src={p.data.bottom} alt="" loading="lazy" />
+              <img class="piece" src={p.data.bottom} alt={`${p.data.title} — pezzo inferiore`} loading="lazy" />
             )}
           </a>
         ))

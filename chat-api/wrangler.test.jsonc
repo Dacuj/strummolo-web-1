@@ -1,0 +1,19 @@
+/**
+ * Config Wrangler usata SOLO dai test (Vitest).
+ * Identica a wrangler.jsonc ma con il binding D1 in modalità LOCALE
+ * (niente "remote": true), così i test girano senza login Cloudflare.
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "chat-api",
+	"main": "src/index.js",
+	"compatibility_date": "2026-04-30",
+	"compatibility_flags": ["nodejs_compat"],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "sturmmolo-chat",
+			"database_id": "4bd99773-2da2-4a58-8eb5-e0c3610e8abd"
+		}
+	]
+}
