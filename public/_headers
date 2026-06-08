@@ -1,11 +1,18 @@
 # Header di sicurezza HTTP per Cloudflare Pages.
-# La regola più specifica (/admin/*) ha precedenza su /* per gli header omonimi.
+# ATTENZIONE: Cloudflare Pages NON sovrascrive gli header tra regole che combaciano:
+# li SOMMA. Una richiesta a /admin/ combacia sia con /admin/* sia con /*, quindi
+# riceverebbe due header Content-Security-Policy. Per evitare che la CSP restrittiva
+# di /* venga applicata in intersezione (bloccando Decap CMS), /admin/* la stacca con "! ".
 
 # --- Pannello CMS: policy permissiva (Decap/NetlifyCMS carica da CDN esterne) ---
 /admin/*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: SAMEORIGIN
+  # Stacca la CSP restrittiva ereditata dalla regola /* (Cloudflare somma gli header
+  # tra regole che combaciano: senza questo "!" il browser applicherebbe entrambe
+  # le CSP in intersezione, bloccando gli script esterni di Decap CMS).
+  ! Content-Security-Policy
   Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; img-src 'self' data: blob: https:; connect-src 'self' https:; frame-src 'self' https:;
 
 # --- Tutto il resto del sito: policy restrittiva ---
