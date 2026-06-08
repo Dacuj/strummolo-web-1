@@ -6,6 +6,6 @@ images:
   - https://res.cloudinary.com/dm2l954et/image/upload/f_auto,q_auto/v1779731771/tee1_twqha0.png
   - https://res.cloudinary.com/dm2l954et/image/upload/f_auto,q_auto/v1779789351/tee1.2_cbmsq9.png
 head: https://res.cloudinary.com/dm2l954et/image/upload/f_auto,q_auto/v1779731781/head1_fp2y5k.png
-bottom: https://res.cloudinary.com/dm2l954et/image/upload/f_auto,q_auto/v1779731781/bot2_rhpa8i.png
+bottom: https://res.cloudinary.com/dm2l954et/image/upload/f_auto,q_auto/v1780939739/Screenshot_2026-06-08_at_19.28.44_uslchh.png
 available: true
 ---
