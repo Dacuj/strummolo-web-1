@@ -1,24 +1,23 @@
 # Header di sicurezza HTTP per Cloudflare Pages.
-# ATTENZIONE: Cloudflare Pages NON sovrascrive gli header tra regole che combaciano:
-# li SOMMA. Una richiesta a /admin/ combacia sia con /admin/* sia con /*, quindi
-# riceverebbe due header Content-Security-Policy. Per evitare che la CSP restrittiva
-# di /* venga applicata in intersezione (bloccando Decap CMS), /admin/* la stacca con "! ".
+#
+# NOTA SULLA CSP — Cloudflare Pages SOMMA gli header tra regole che combaciano
+# (e il detach "! " NON rimuove un header impostato da un'altra regola). Una
+# richiesta a /admin/ combacia sia con /admin/* sia con /*: se entrambe le regole
+# impostano una Content-Security-Policy, il browser riceve DUE header CSP e li
+# applica in intersezione (vince il più restrittivo), bloccando gli script esterni
+# di Decap CMS. Per questo:
+#   - la CSP restrittiva del sito pubblico è impostata via <meta http-equiv> in
+#     src/components/Seo.astro, NON qui (così non diventa un header su /admin);
+#   - qui sotto c'è SOLO la CSP permissiva di /admin/*, unica fonte CSP via header,
+#     necessaria a Decap CMS che carica React/widget da CDN esterne.
 
-# --- Pannello CMS: policy permissiva (Decap/NetlifyCMS carica da CDN esterne) ---
+# --- Pannello CMS: unica CSP via header, permissiva (Decap carica da CDN esterne) ---
 /admin/*
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
-  X-Frame-Options: SAMEORIGIN
-  # Stacca la CSP restrittiva ereditata dalla regola /* (Cloudflare somma gli header
-  # tra regole che combaciano: senza questo "!" il browser applicherebbe entrambe
-  # le CSP in intersezione, bloccando gli script esterni di Decap CMS).
-  ! Content-Security-Policy
   Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; img-src 'self' data: blob: https:; connect-src 'self' https:; frame-src 'self' https:;
 
-# --- Tutto il resto del sito: policy restrittiva ---
+# --- Tutto il sito: header di sicurezza (la CSP pubblica è via <meta> nel layout) ---
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: https://res.cloudinary.com; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://chat-api.davidecucciardi.workers.dev; upgrade-insecure-requests
