@@ -1,4 +1,4 @@
-// Worker della chat "Bacheka" di Strummolo.
+// Worker della chat "Bacheka" di Strummolo + analytics privacy-friendly.
 // Sicurezza:
 //  - Le query D1 sono parametrizzate (niente SQL injection).
 //  - Il contenuto viene salvato GREZZO: l'escaping anti-XSS avviene SOLO in fase di
@@ -6,6 +6,11 @@
 //    (es. "&" che diventava "&amp;").
 //  - Validazione lunghezza messaggio/nickname e rifiuto di "parole" troppo lunghe.
 //  - Rate-limiting per IP per limitare spam/flood.
+// Analytics (POST /track, GET /stats):
+//  - Nessun dato personale: niente cookie, niente IP, niente user-agent, niente
+//    fingerprinting. Si salvano SOLO contatori aggregati per giorno+percorso
+//    (visite e secondi di lettura). Non è possibile risalire al singolo visitatore.
+//  - GET /stats è protetto dal secret STATS_TOKEN (npx wrangler secret put STATS_TOKEN).
 
 // I tuoi domini autorizzati (Whitelist)
 const ALLOWED_ORIGINS = [
@@ -23,6 +28,12 @@ const MAX_WORD = 40; // un singolo token senza spazi non può superare questa lu
 const RATE_WINDOW_SECONDS = 60;   // finestra temporale
 const RATE_MAX_MESSAGES = 5;      // messaggi consentiti per IP nella finestra
 const RATE_CLEANUP_SECONDS = 600; // righe più vecchie di così vengono ripulite
+
+// Analytics
+const MAX_PATH = 200;             // lunghezza massima del percorso tracciato
+const MAX_BEACON_SECONDS = 1800;  // tetto per singolo beacon (30 min) contro valori assurdi
+const STATS_DEFAULT_DAYS = 30;    // finestra di default per GET /stats
+const STATS_MAX_DAYS = 365;       // finestra massima richiedibile
 
 function jsonResponse(body, status, corsHeaders) {
     return new Response(JSON.stringify(body), {
@@ -44,7 +55,7 @@ export default {
     const corsHeaders = {
       "Access-Control-Allow-Origin": corsOrigin,
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
     };
 
     // 1. Gestione del Preflight CORS (Metodo OPTIONS)
@@ -135,6 +146,82 @@ export default {
 
       } catch (e) {
         return jsonResponse({ error: "Errore interno del server" }, 500, corsHeaders);
+      }
+    }
+
+    // 4. POST /track: beacon analytics anonimo.
+    // Il client invia { p: percorso, v: 1 } alla visita e { p: percorso, s: secondi }
+    // quando lascia la pagina. Il body arriva come text/plain (navigator.sendBeacon
+    // con stringa) per evitare il preflight CORS, quindi parsiamo il testo a mano.
+    if (request.method === 'POST' && url.pathname === '/track') {
+      // Accettiamo beacon solo dalle origin del sito: blocco minimo anti-rumore.
+      if (!ALLOWED_ORIGINS.includes(origin)) {
+        return jsonResponse({ error: "Origin non autorizzata" }, 403, corsHeaders);
+      }
+      try {
+        const body = JSON.parse(await request.text());
+
+        // Percorso: deve essere un path assoluto del sito, senza query string.
+        if (!body || typeof body.p !== 'string' || !body.p.startsWith('/')) {
+          return jsonResponse({ error: "Payload non valido" }, 400, corsHeaders);
+        }
+        const path = body.p.split('?')[0].substring(0, MAX_PATH);
+
+        // Visite (0 o 1) e secondi di lettura, con tetti anti-abuso.
+        const views = body.v === 1 ? 1 : 0;
+        let seconds = 0;
+        if (typeof body.s === 'number' && Number.isFinite(body.s) && body.s > 0) {
+          seconds = Math.min(Math.round(body.s), MAX_BEACON_SECONDS);
+        }
+        if (views === 0 && seconds === 0) {
+          return jsonResponse({ error: "Niente da registrare" }, 400, corsHeaders);
+        }
+
+        // UPSERT aggregato: una riga per giorno+percorso, nessun dato individuale.
+        await env.DB
+          .prepare(
+            `INSERT INTO page_stats (day, path, views, seconds) VALUES (date('now'), ?, ?, ?)
+             ON CONFLICT(day, path) DO UPDATE SET
+               views = views + excluded.views,
+               seconds = seconds + excluded.seconds`,
+          )
+          .bind(path, views, seconds)
+          .run();
+
+        return jsonResponse({ success: true }, 201, corsHeaders);
+      } catch (e) {
+        return jsonResponse({ error: "Errore interno del server" }, 500, corsHeaders);
+      }
+    }
+
+    // 5. GET /stats: lettura delle statistiche aggregate, riservata all'admin.
+    // Richiede l'header "Authorization: Bearer <STATS_TOKEN>".
+    if (request.method === 'GET' && url.pathname === '/stats') {
+      if (!env.STATS_TOKEN) {
+        return jsonResponse({ error: "STATS_TOKEN non configurato sul worker" }, 503, corsHeaders);
+      }
+      const auth = request.headers.get("Authorization") || "";
+      if (auth !== `Bearer ${env.STATS_TOKEN}`) {
+        return jsonResponse({ error: "Non autorizzato" }, 401, corsHeaders);
+      }
+      try {
+        const requested = parseInt(url.searchParams.get("days") || "", 10);
+        const days = Math.min(
+          Number.isFinite(requested) && requested > 0 ? requested : STATS_DEFAULT_DAYS,
+          STATS_MAX_DAYS,
+        );
+
+        const { results } = await env.DB
+          .prepare(
+            `SELECT day, path, views, seconds FROM page_stats
+             WHERE day >= date('now', ?) ORDER BY day ASC, views DESC`,
+          )
+          .bind(`-${days} days`)
+          .all();
+
+        return jsonResponse({ days, rows: results }, 200, corsHeaders);
+      } catch (e) {
+        return jsonResponse({ error: "Errore lettura Database" }, 500, corsHeaders);
       }
     }
 

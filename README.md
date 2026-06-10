@@ -38,6 +38,33 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
+## 📊 Statistiche (analytics privacy-friendly)
+
+Il sito conta visite e tempo di lettura **senza dati personali**: niente cookie,
+niente IP, niente fingerprinting. Solo contatori aggregati per giorno+pagina,
+salvati nel D1 del worker `chat-api`. Il beacon (`public/stats-beacon.js`)
+rispetta Do Not Track / Global Privacy Control.
+
+Componenti:
+
+- `chat-api` — endpoint `POST /track` (beacon anonimo) e `GET /stats` (lettura, protetta da token)
+- `public/stats-beacon.js` — script incluso in ogni pagina via `Seo.astro`
+- `/stats` — pannello admin (non linkato, noindex, fuori sitemap); chiede il token
+
+### Attivazione (da fare una volta sola)
+
+```sh
+cd chat-api
+# 1. Crea la tabella delle statistiche nel D1 di produzione
+npx wrangler d1 execute sturmmolo-chat --remote --file=./migrations/0002_add_page_stats.sql
+# 2. Imposta il token segreto per leggere le statistiche (inventane uno lungo)
+npx wrangler secret put STATS_TOKEN
+# 3. Rideploya il worker
+npx wrangler deploy
+```
+
+Poi vai su `https://www.strummolo.com/stats` e inserisci il token.
+
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).

@@ -73,3 +73,7 @@ const TWITTER_HANDLE = '@strummolo123';
 <link rel="manifest" href="/site.webmanifest" />
 
 {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+
+{/* Analytics anonimo (conteggio visite + tempo di lettura, senza dati personali).
+    Lo script rispetta Do Not Track / GPC e si auto-esclude su /admin e /stats. */}
+<script is:inline defer src="/stats-beacon.js"></script>

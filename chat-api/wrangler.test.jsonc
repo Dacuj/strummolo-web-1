@@ -9,6 +9,9 @@
 	"main": "src/index.js",
 	"compatibility_date": "2026-04-30",
 	"compatibility_flags": ["nodejs_compat"],
+	// In produzione STATS_TOKEN è un secret (npx wrangler secret put STATS_TOKEN);
+	// qui è una var fissa così i test possono verificare l'autenticazione di /stats.
+	"vars": { "STATS_TOKEN": "token-di-test" },
 	"d1_databases": [
 		{
 			"binding": "DB",

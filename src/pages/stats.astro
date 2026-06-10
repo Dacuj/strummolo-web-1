@@ -1,0 +1,244 @@
+---
+// Pagina riservata con le statistiche del sito (visite e tempo di lettura).
+// Non è linkata da nessuna parte, è noindex ed esclusa dalla sitemap: per
+// entrare serve il token STATS_TOKEN configurato sul worker chat-api.
+import Seo from '../components/Seo.astro';
+---
+
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <Seo
+    title="STATS — strummolo"
+    description="Pannello statistiche riservato."
+    noindex={true}
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <main class="crt">
+    <header>
+      <h1>&gt; STRUMMOLO_STATS</h1>
+      <p class="sub">visite e tempo di lettura — dati aggregati, zero tracciamento personale</p>
+    </header>
+
+    <section id="login" hidden>
+      <p>&gt; inserisci il token admin</p>
+      <form id="login-form">
+        <input id="token-input" type="password" autocomplete="current-password" placeholder="STATS_TOKEN" />
+        <button type="submit">[ ENTRA ]</button>
+      </form>
+      <p id="login-error" class="error" hidden>&gt; token rifiutato.</p>
+    </section>
+
+    <section id="dashboard" hidden>
+      <nav class="range">
+        <span>&gt; periodo:</span>
+        <button data-days="7">7g</button>
+        <button data-days="30" class="active">30g</button>
+        <button data-days="90">90g</button>
+        <button id="logout">[ ESCI ]</button>
+      </nav>
+
+      <div class="cards">
+        <div class="card"><span class="label">visite oggi</span><span class="value" id="v-today">–</span></div>
+        <div class="card"><span class="label">visite nel periodo</span><span class="value" id="v-total">–</span></div>
+        <div class="card"><span class="label">tempo letto (totale)</span><span class="value" id="t-total">–</span></div>
+        <div class="card"><span class="label">tempo medio / visita</span><span class="value" id="t-avg">–</span></div>
+      </div>
+
+      <h2>&gt; visite per giorno</h2>
+      <div id="chart" class="chart"></div>
+
+      <h2>&gt; pagine</h2>
+      <table>
+        <thead>
+          <tr><th>pagina</th><th>visite</th><th>tempo totale</th><th>media/visita</th></tr>
+        </thead>
+        <tbody id="pages-body"></tbody>
+      </table>
+    </section>
+
+    <p id="loading" hidden>&gt; carico dati…</p>
+  </main>
+
+  <script is:inline>
+    const API = "https://chat-api.davidecucciardi.workers.dev/stats";
+    const TOKEN_KEY = "strummolo_stats_token";
+    let days = 30;
+
+    const $ = (id) => document.getElementById(id);
+
+    function fmtTime(totalSeconds) {
+      const s = Math.round(totalSeconds);
+      if (s < 60) return s + "s";
+      const m = Math.floor(s / 60);
+      if (m < 60) return m + "m " + (s % 60) + "s";
+      return Math.floor(m / 60) + "h " + (m % 60) + "m";
+    }
+
+    function showLogin(failed) {
+      $("dashboard").hidden = true;
+      $("loading").hidden = true;
+      $("login").hidden = false;
+      $("login-error").hidden = !failed;
+    }
+
+    async function load() {
+      const token = sessionStorage.getItem(TOKEN_KEY);
+      if (!token) return showLogin(false);
+
+      $("login").hidden = true;
+      $("loading").hidden = false;
+      try {
+        const res = await fetch(API + "?days=" + days, {
+          headers: { Authorization: "Bearer " + token },
+        });
+        if (res.status === 401) {
+          sessionStorage.removeItem(TOKEN_KEY);
+          return showLogin(true);
+        }
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        render((await res.json()).rows || []);
+      } catch (e) {
+        $("loading").textContent = "> errore di rete o worker non raggiungibile.";
+        return;
+      }
+      $("loading").hidden = true;
+      $("dashboard").hidden = false;
+    }
+
+    function render(rows) {
+      const today = new Date().toISOString().slice(0, 10);
+      const byDay = new Map();
+      const byPath = new Map();
+      let totViews = 0, totSeconds = 0, todayViews = 0;
+
+      for (const r of rows) {
+        totViews += r.views;
+        totSeconds += r.seconds;
+        if (r.day === today) todayViews += r.views;
+        byDay.set(r.day, (byDay.get(r.day) || 0) + r.views);
+        const p = byPath.get(r.path) || { views: 0, seconds: 0 };
+        p.views += r.views;
+        p.seconds += r.seconds;
+        byPath.set(r.path, p);
+      }
+
+      $("v-today").textContent = todayViews;
+      $("v-total").textContent = totViews;
+      $("t-total").textContent = fmtTime(totSeconds);
+      $("t-avg").textContent = totViews ? fmtTime(totSeconds / totViews) : "–";
+
+      // Grafico a barre: un giorno per riga, larghezza proporzionale al massimo.
+      const chart = $("chart");
+      chart.innerHTML = "";
+      const daysSorted = [...byDay.keys()].sort();
+      const max = Math.max(1, ...byDay.values());
+      for (const d of daysSorted) {
+        const v = byDay.get(d);
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        row.innerHTML =
+          '<span class="bar-day">' + d.slice(5) + '</span>' +
+          '<span class="bar" style="width:' + (v / max) * 100 + '%"></span>' +
+          '<span class="bar-val">' + v + "</span>";
+        chart.appendChild(row);
+      }
+      if (daysSorted.length === 0) chart.textContent = "> ancora nessun dato.";
+
+      // Tabella pagine, ordinata per visite.
+      const body = $("pages-body");
+      body.innerHTML = "";
+      const paths = [...byPath.entries()].sort((a, b) => b[1].views - a[1].views);
+      for (const [path, p] of paths) {
+        const tr = document.createElement("tr");
+        const cells = [path, p.views, fmtTime(p.seconds), p.views ? fmtTime(p.seconds / p.views) : "–"];
+        for (const c of cells) {
+          const td = document.createElement("td");
+          td.textContent = c;
+          tr.appendChild(td);
+        }
+        body.appendChild(tr);
+      }
+    }
+
+    $("login-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const value = $("token-input").value.trim();
+      if (!value) return;
+      sessionStorage.setItem(TOKEN_KEY, value);
+      load();
+    });
+
+    $("logout").addEventListener("click", () => {
+      sessionStorage.removeItem(TOKEN_KEY);
+      showLogin(false);
+    });
+
+    document.querySelectorAll(".range button[data-days]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".range button[data-days]").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        days = parseInt(btn.dataset.days, 10);
+        load();
+      });
+    });
+
+    load();
+  </script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #050a05;
+      color: #33ff33;
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      min-height: 100vh;
+    }
+    .crt { max-width: 860px; margin: 0 auto; padding: 30px 16px 60px; }
+    header { margin-bottom: 30px; }
+    h1 { font-size: 34px; letter-spacing: 2px; }
+    .sub { color: #1f9e1f; }
+    h2 { margin: 34px 0 12px; font-size: 24px; }
+
+    #login input {
+      background: #000; color: #33ff33; border: 1px solid #33ff33;
+      font: inherit; padding: 6px 10px; width: 260px; max-width: 100%;
+    }
+    button {
+      background: #000; color: #33ff33; border: 1px solid #33ff33;
+      font: inherit; padding: 6px 12px; cursor: pointer;
+    }
+    button:hover, .range button.active { background: #33ff33; color: #000; }
+    .error { color: #ff5555; margin-top: 10px; }
+    #login-form { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+
+    .range { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .range #logout { margin-left: auto; }
+
+    .cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px; margin-top: 20px;
+    }
+    .card { border: 1px solid #1f9e1f; padding: 12px; }
+    .card .label { display: block; color: #1f9e1f; font-size: 16px; }
+    .card .value { font-size: 32px; }
+
+    .chart { display: flex; flex-direction: column; gap: 4px; }
+    .bar-row { display: flex; align-items: center; gap: 8px; }
+    .bar-day { width: 56px; color: #1f9e1f; flex-shrink: 0; }
+    .bar { background: #33ff33; height: 14px; min-width: 2px; display: inline-block; }
+    .bar-val { color: #1f9e1f; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px dashed #1f9e1f; }
+    th { color: #1f9e1f; font-weight: normal; }
+    td:first-child { word-break: break-all; }
+  </style>
+</body>
+</html>

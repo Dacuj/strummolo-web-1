@@ -3,8 +3,8 @@ import { defineConfig } from 'astro/config';
 
 import sitemap from '@astrojs/sitemap';
 
-// Pagine bozza/duplicate da escludere dalla sitemap (sono anche noindex).
-const EXCLUDED = /\/(index2|index3|archive1|pacpunk|accept-bacheka)\/?$/;
+// Pagine bozza/duplicate/riservate da escludere dalla sitemap (sono anche noindex).
+const EXCLUDED = /\/(index2|index3|archive1|pacpunk|accept-bacheka|stats)\/?$/;
 
 // https://astro.build/config
 export default defineConfig({
