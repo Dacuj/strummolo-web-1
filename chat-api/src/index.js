@@ -11,6 +11,9 @@
 //    fingerprinting. Si salvano SOLO contatori aggregati per giorno+percorso
 //    (visite e secondi di lettura). Non è possibile risalire al singolo visitatore.
 //  - GET /stats è protetto dal secret STATS_TOKEN (npx wrangler secret put STATS_TOKEN).
+// Moderazione bacheca (GET/DELETE /admin/messages):
+//  - protetta dallo stesso STATS_TOKEN; permette di elencare e cancellare i messaggi
+//    dal pannello /stats del sito.
 
 // I tuoi domini autorizzati (Whitelist)
 const ALLOWED_ORIGINS = [
@@ -54,7 +57,7 @@ export default {
     // Headers CORS applicati a TUTTE le risposte
     const corsHeaders = {
       "Access-Control-Allow-Origin": corsOrigin,
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
     };
 
@@ -222,6 +225,47 @@ export default {
         return jsonResponse({ days, rows: results }, 200, corsHeaders);
       } catch (e) {
         return jsonResponse({ error: "Errore lettura Database" }, 500, corsHeaders);
+      }
+    }
+
+    // 6. Moderazione bacheca, riservata all'admin (stesso token delle statistiche).
+    //    GET    /admin/messages      → elenco degli ultimi 200 messaggi
+    //    DELETE /admin/messages/<id> → elimina un messaggio
+    if (url.pathname === '/admin/messages' || url.pathname.startsWith('/admin/messages/')) {
+      if (!env.STATS_TOKEN) {
+        return jsonResponse({ error: "STATS_TOKEN non configurato sul worker" }, 503, corsHeaders);
+      }
+      const auth = request.headers.get("Authorization") || "";
+      if (auth !== `Bearer ${env.STATS_TOKEN}`) {
+        return jsonResponse({ error: "Non autorizzato" }, 401, corsHeaders);
+      }
+
+      if (request.method === 'GET' && url.pathname === '/admin/messages') {
+        try {
+          // Anche qui l'IP non viene mai esposto.
+          const { results } = await env.DB
+            .prepare("SELECT id, content, nickname, created_at FROM messages ORDER BY created_at DESC LIMIT 200")
+            .all();
+          return jsonResponse(results, 200, corsHeaders);
+        } catch (e) {
+          return jsonResponse({ error: "Errore lettura Database" }, 500, corsHeaders);
+        }
+      }
+
+      if (request.method === 'DELETE') {
+        const id = parseInt(url.pathname.split('/').pop(), 10);
+        if (!Number.isInteger(id) || id <= 0) {
+          return jsonResponse({ error: "Id non valido" }, 400, corsHeaders);
+        }
+        try {
+          const res = await env.DB.prepare("DELETE FROM messages WHERE id = ?").bind(id).run();
+          if (!res.meta || res.meta.changes === 0) {
+            return jsonResponse({ error: "Messaggio non trovato" }, 404, corsHeaders);
+          }
+          return jsonResponse({ success: true }, 200, corsHeaders);
+        } catch (e) {
+          return jsonResponse({ error: "Errore interno del server" }, 500, corsHeaders);
+        }
       }
     }
 

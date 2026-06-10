@@ -186,3 +186,46 @@ describe("analytics (/track e /stats)", () => {
 		expect((await res.json()).days).toBe(365);
 	});
 });
+
+function adminMessages(method, token, id) {
+	const url = "https://chat-api.example.com/admin/messages" + (id ? `/${id}` : "");
+	const headers = { Origin: ORIGIN };
+	if (token) headers.Authorization = `Bearer ${token}`;
+	return new Request(url, { method, headers });
+}
+
+describe("moderazione bacheca (/admin/messages)", () => {
+	beforeEach(async () => {
+		await resetDb();
+	});
+
+	it("richiede il token sia per elencare sia per cancellare (401)", async () => {
+		expect((await run(adminMessages("GET"))).status).toBe(401);
+		expect((await run(adminMessages("DELETE", "token-sbagliato", 1))).status).toBe(401);
+	});
+
+	it("elenca i messaggi con id e senza colonna ip", async () => {
+		await run(postMessage({ content: "da moderare", nickname: "troll" }));
+		const res = await run(adminMessages("GET", env.STATS_TOKEN));
+		expect(res.status).toBe(200);
+		const data = await res.json();
+		expect(data.length).toBe(1);
+		expect(data[0]).toHaveProperty("id");
+		expect(data[0]).not.toHaveProperty("ip");
+		expect(data[0].content).toBe("da moderare");
+	});
+
+	it("cancella un messaggio per id", async () => {
+		await run(postMessage({ content: "spam da togliere" }));
+		const list = await (await run(adminMessages("GET", env.STATS_TOKEN))).json();
+		const res = await run(adminMessages("DELETE", env.STATS_TOKEN, list[0].id));
+		expect(res.status).toBe(200);
+		const { results } = await env.DB.prepare("SELECT * FROM messages").all();
+		expect(results.length).toBe(0);
+	});
+
+	it("DELETE risponde 404 per id inesistente e 400 per id non valido", async () => {
+		expect((await run(adminMessages("DELETE", env.STATS_TOKEN, 12345))).status).toBe(404);
+		expect((await run(adminMessages("DELETE", env.STATS_TOKEN, "abc"))).status).toBe(400);
+	});
+});

@@ -60,13 +60,17 @@ import Seo from '../components/Seo.astro';
         </thead>
         <tbody id="pages-body"></tbody>
       </table>
+
+      <h2>&gt; bacheka — moderazione</h2>
+      <div id="messages" class="messages"></div>
     </section>
 
     <p id="loading" hidden>&gt; carico dati…</p>
   </main>
 
   <script is:inline>
-    const API = "https://chat-api.davidecucciardi.workers.dev/stats";
+    const API_BASE = "https://chat-api.davidecucciardi.workers.dev";
+    const API = API_BASE + "/stats";
     const TOKEN_KEY = "strummolo_stats_token";
     let days = 30;
 
@@ -109,6 +113,68 @@ import Seo from '../components/Seo.astro';
       }
       $("loading").hidden = true;
       $("dashboard").hidden = false;
+      loadMessages();
+    }
+
+    // --- Moderazione bacheca ---
+    async function loadMessages() {
+      const token = sessionStorage.getItem(TOKEN_KEY);
+      const box = $("messages");
+      box.textContent = "> carico messaggi…";
+      try {
+        const res = await fetch(API_BASE + "/admin/messages", {
+          headers: { Authorization: "Bearer " + token },
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        renderMessages(await res.json());
+      } catch (e) {
+        box.textContent = "> errore nel caricare i messaggi.";
+      }
+    }
+
+    function renderMessages(messages) {
+      const box = $("messages");
+      box.innerHTML = "";
+      if (messages.length === 0) {
+        box.textContent = "> bacheca vuota.";
+        return;
+      }
+      for (const m of messages) {
+        const row = document.createElement("div");
+        row.className = "msg";
+
+        const meta = document.createElement("span");
+        meta.className = "msg-meta";
+        meta.textContent = m.created_at + " — " + m.nickname + ": ";
+
+        const content = document.createElement("span");
+        content.className = "msg-content";
+        content.textContent = m.content; // textContent: niente XSS nel pannello
+
+        const del = document.createElement("button");
+        del.className = "msg-del";
+        del.textContent = "[ X ]";
+        del.addEventListener("click", async () => {
+          if (!confirm("Eliminare questo messaggio?\n\n" + m.content)) return;
+          const token = sessionStorage.getItem(TOKEN_KEY);
+          try {
+            const res = await fetch(API_BASE + "/admin/messages/" + m.id, {
+              method: "DELETE",
+              headers: { Authorization: "Bearer " + token },
+            });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            row.remove();
+            if (!box.querySelector(".msg")) box.textContent = "> bacheca vuota.";
+          } catch (e) {
+            alert("Eliminazione fallita, riprova.");
+          }
+        });
+
+        row.appendChild(del);
+        row.appendChild(meta);
+        row.appendChild(content);
+        box.appendChild(row);
+      }
     }
 
     function render(rows) {
@@ -234,6 +300,13 @@ import Seo from '../components/Seo.astro';
     .bar-day { width: 56px; color: #1f9e1f; flex-shrink: 0; }
     .bar { background: #33ff33; height: 14px; min-width: 2px; display: inline-block; }
     .bar-val { color: #1f9e1f; }
+
+    .messages { display: flex; flex-direction: column; gap: 6px; }
+    .msg { border: 1px dashed #1f9e1f; padding: 6px 8px; display: flex; gap: 8px; align-items: baseline; }
+    .msg-meta { color: #1f9e1f; flex-shrink: 0; }
+    .msg-content { word-break: break-word; }
+    .msg-del { border-color: #ff5555; color: #ff5555; padding: 0 6px; }
+    .msg-del:hover { background: #ff5555; color: #000; }
 
     table { width: 100%; border-collapse: collapse; }
     th, td { text-align: left; padding: 6px 8px; border-bottom: 1px dashed #1f9e1f; }
