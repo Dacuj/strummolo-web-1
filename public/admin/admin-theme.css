@@ -1,0 +1,122 @@
+/* Tema moderno per Decap CMS — caricato da /admin/index.html.
+   Decap genera classi Emotion con hash + nome componente (es. css-xxx-AppHeader),
+   quindi usiamo selettori [class*="NomeComponente"]: sopravvivono agli update minori.
+   Solo colori, font e raggi: niente layout, così non si rompe nulla.
+   Rollback: rimuovere il <link> di questo file da admin/index.html. */
+
+:root {
+  --adm-bg: #f6f7f9;
+  --adm-surface: #ffffff;
+  --adm-border: #e4e7ec;
+  --adm-text: #1a202c;
+  --adm-muted: #667085;
+  --adm-accent: #2563eb;
+  --adm-accent-dark: #1d4ed8;
+  --adm-radius: 10px;
+}
+
+/* Font di sistema ovunque (le icone sono SVG, non vengono toccate) */
+#nc-root,
+#nc-root input,
+#nc-root textarea,
+#nc-root select,
+#nc-root button {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* Sfondo generale più chiaro e neutro */
+#nc-root,
+#nc-root [class*="AppMainContainer"] {
+  background-color: var(--adm-bg) !important;
+}
+
+/* Header dell'app: bianco, bordo sottile invece dell'ombra pesante */
+#nc-root [class*="AppHeader"] {
+  background-color: var(--adm-surface) !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--adm-border) !important;
+}
+#nc-root [class*="AppHeaderButton"] {
+  color: var(--adm-muted) !important;
+}
+#nc-root [class*="AppHeaderButton"]:hover,
+#nc-root [class*="AppHeaderButton"]:focus {
+  color: var(--adm-accent) !important;
+}
+
+/* Card delle collection e degli articoli: angoli morbidi, bordo, hover delicato */
+#nc-root [class*="Card"] {
+  border-radius: var(--adm-radius) !important;
+  border: 1px solid var(--adm-border) !important;
+  box-shadow: none !important;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+#nc-root [class*="Card"]:hover {
+  box-shadow: 0 4px 16px rgba(16, 24, 40, 0.08) !important;
+}
+
+/* Sidebar delle collection */
+#nc-root [class*="SidebarContainer"] {
+  background-color: var(--adm-surface) !important;
+  border-radius: var(--adm-radius) !important;
+  border: 1px solid var(--adm-border) !important;
+  box-shadow: none !important;
+}
+#nc-root [class*="SidebarNavLink"] {
+  border-radius: 8px !important;
+}
+#nc-root [class*="SidebarNavLink"]:hover {
+  color: var(--adm-accent) !important;
+}
+
+/* Bottoni: raggio uniforme e accent coerente col pannello statistiche */
+#nc-root button {
+  border-radius: 8px !important;
+}
+#nc-root [class*="PublishButton"],
+#nc-root [class*="StyledDropdownButton"],
+#nc-root [class*="SaveButton"] {
+  border-radius: 8px !important;
+}
+
+/* Campi del form editor */
+#nc-root input[type="text"],
+#nc-root input[type="number"],
+#nc-root input[type="password"],
+#nc-root textarea {
+  border-radius: 8px !important;
+}
+#nc-root [class*="FieldLabel"] {
+  border-radius: 6px 6px 0 0 !important;
+}
+
+/* Pannello di controllo dell'editor */
+#nc-root [class*="ControlContainer"],
+#nc-root [class*="ObjectWidgetTopBar"] {
+  border-radius: 8px !important;
+}
+
+/* Pagina di login: card centrata in stile admin */
+#nc-root [class*="AuthenticationPage"] {
+  background-color: var(--adm-bg) !important;
+}
+#nc-root [class*="LoginButton"] {
+  background-color: var(--adm-accent) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+#nc-root [class*="LoginButton"]:hover,
+#nc-root [class*="LoginButton"]:focus {
+  background-color: var(--adm-accent-dark) !important;
+}
+
+/* Barra di ricerca in alto */
+#nc-root [class*="SearchInput"] {
+  border-radius: 8px !important;
+  background-color: var(--adm-bg) !important;
+}
+
+/* Toast/notifiche meno squadrate */
+#nc-root [class*="Toast"] {
+  border-radius: var(--adm-radius) !important;
+}
