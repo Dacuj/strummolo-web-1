@@ -1,0 +1,409 @@
+---
+// Pannello admin con statistiche del sito e moderazione bacheca.
+// Vive sotto /admin/stats accanto a Decap CMS (/admin): non è linkato dal sito,
+// è noindex ed escluso dalla sitemap. Per entrare serve il token STATS_TOKEN
+// configurato sul worker chat-api.
+import Seo from '../../components/Seo.astro';
+---
+
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <Seo
+    title="Statistiche — admin strummolo"
+    description="Pannello admin riservato."
+    noindex={true}
+  />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <span class="brand">strummolo <span class="brand-dim">/ admin</span></span>
+      <nav>
+        <a class="current" href="/admin/stats">Statistiche</a>
+        <a href="/admin/">CMS</a>
+        <a href="/">Vai al sito ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="login" class="login-card" hidden>
+      <h1>Accesso admin</h1>
+      <p class="muted">Inserisci il token configurato sul worker (STATS_TOKEN).</p>
+      <form id="login-form">
+        <input id="token-input" type="password" autocomplete="current-password" placeholder="Token" />
+        <button type="submit" class="btn primary">Entra</button>
+      </form>
+      <p id="login-error" class="error" hidden>Token rifiutato, riprova.</p>
+    </section>
+
+    <section id="dashboard" hidden>
+      <div class="toolbar">
+        <h1>Statistiche</h1>
+        <div class="toolbar-right">
+          <div class="segmented" role="group" aria-label="Periodo">
+            <button data-days="7">7 giorni</button>
+            <button data-days="30" class="active">30 giorni</button>
+            <button data-days="90">90 giorni</button>
+          </div>
+          <button id="logout" class="btn">Esci</button>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card"><span class="label">Visite oggi</span><span class="value" id="v-today">–</span></div>
+        <div class="card"><span class="label">Visite nel periodo</span><span class="value" id="v-total">–</span></div>
+        <div class="card"><span class="label">Tempo di lettura totale</span><span class="value" id="t-total">–</span></div>
+        <div class="card"><span class="label">Tempo medio per visita</span><span class="value" id="t-avg">–</span></div>
+      </div>
+
+      <div class="panel">
+        <h2>Visite per giorno</h2>
+        <div id="chart" class="chart"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Pagine più viste</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Pagina</th><th>Visite</th><th>Tempo totale</th><th>Media/visita</th></tr>
+            </thead>
+            <tbody id="pages-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Bacheca — moderazione</h2>
+        <p class="muted">Ultimi 200 messaggi. L'eliminazione è immediata e definitiva.</p>
+        <div id="messages" class="messages"></div>
+      </div>
+    </section>
+
+    <p id="loading" class="muted" hidden>Carico i dati…</p>
+  </main>
+
+  <script is:inline>
+    const API_BASE = "https://chat-api.davidecucciardi.workers.dev";
+    const API = API_BASE + "/stats";
+    const TOKEN_KEY = "strummolo_stats_token";
+    let days = 30;
+
+    const $ = (id) => document.getElementById(id);
+
+    function fmtTime(totalSeconds) {
+      const s = Math.round(totalSeconds);
+      if (s < 60) return s + "s";
+      const m = Math.floor(s / 60);
+      if (m < 60) return m + "m " + (s % 60) + "s";
+      return Math.floor(m / 60) + "h " + (m % 60) + "m";
+    }
+
+    function showLogin(failed) {
+      $("dashboard").hidden = true;
+      $("loading").hidden = true;
+      $("login").hidden = false;
+      $("login-error").hidden = !failed;
+    }
+
+    async function load() {
+      const token = sessionStorage.getItem(TOKEN_KEY);
+      if (!token) return showLogin(false);
+
+      $("login").hidden = true;
+      $("loading").hidden = false;
+      try {
+        const res = await fetch(API + "?days=" + days, {
+          headers: { Authorization: "Bearer " + token },
+        });
+        if (res.status === 401) {
+          sessionStorage.removeItem(TOKEN_KEY);
+          return showLogin(true);
+        }
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        render((await res.json()).rows || []);
+      } catch (e) {
+        $("loading").textContent = "Errore di rete o worker non raggiungibile.";
+        return;
+      }
+      $("loading").hidden = true;
+      $("dashboard").hidden = false;
+      loadMessages();
+    }
+
+    function render(rows) {
+      const today = new Date().toISOString().slice(0, 10);
+      const byDay = new Map();
+      const byPath = new Map();
+      let totViews = 0, totSeconds = 0, todayViews = 0;
+
+      for (const r of rows) {
+        totViews += r.views;
+        totSeconds += r.seconds;
+        if (r.day === today) todayViews += r.views;
+        byDay.set(r.day, (byDay.get(r.day) || 0) + r.views);
+        const p = byPath.get(r.path) || { views: 0, seconds: 0 };
+        p.views += r.views;
+        p.seconds += r.seconds;
+        byPath.set(r.path, p);
+      }
+
+      $("v-today").textContent = todayViews;
+      $("v-total").textContent = totViews;
+      $("t-total").textContent = fmtTime(totSeconds);
+      $("t-avg").textContent = totViews ? fmtTime(totSeconds / totViews) : "–";
+
+      // Grafico a barre orizzontali: un giorno per riga.
+      const chart = $("chart");
+      chart.innerHTML = "";
+      const daysSorted = [...byDay.keys()].sort();
+      const max = Math.max(1, ...byDay.values());
+      for (const d of daysSorted) {
+        const v = byDay.get(d);
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        row.innerHTML =
+          '<span class="bar-day">' + d.slice(5) + '</span>' +
+          '<span class="bar-track"><span class="bar" style="width:' + (v / max) * 100 + '%"></span></span>' +
+          '<span class="bar-val">' + v + "</span>";
+        chart.appendChild(row);
+      }
+      if (daysSorted.length === 0) chart.innerHTML = '<p class="muted">Ancora nessun dato.</p>';
+
+      // Tabella pagine, ordinata per visite.
+      const body = $("pages-body");
+      body.innerHTML = "";
+      const paths = [...byPath.entries()].sort((a, b) => b[1].views - a[1].views);
+      for (const [path, p] of paths) {
+        const tr = document.createElement("tr");
+        const cells = [path, p.views, fmtTime(p.seconds), p.views ? fmtTime(p.seconds / p.views) : "–"];
+        for (const c of cells) {
+          const td = document.createElement("td");
+          td.textContent = c;
+          tr.appendChild(td);
+        }
+        body.appendChild(tr);
+      }
+    }
+
+    // --- Moderazione bacheca ---
+    async function loadMessages() {
+      const token = sessionStorage.getItem(TOKEN_KEY);
+      const box = $("messages");
+      box.innerHTML = '<p class="muted">Carico messaggi…</p>';
+      try {
+        const res = await fetch(API_BASE + "/admin/messages", {
+          headers: { Authorization: "Bearer " + token },
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        renderMessages(await res.json());
+      } catch (e) {
+        box.innerHTML = '<p class="error">Errore nel caricare i messaggi.</p>';
+      }
+    }
+
+    function renderMessages(messages) {
+      const box = $("messages");
+      box.innerHTML = "";
+      if (messages.length === 0) {
+        box.innerHTML = '<p class="muted">Bacheca vuota.</p>';
+        return;
+      }
+      for (const m of messages) {
+        const row = document.createElement("div");
+        row.className = "msg";
+
+        const body = document.createElement("div");
+        body.className = "msg-body";
+
+        const meta = document.createElement("div");
+        meta.className = "msg-meta";
+        meta.textContent = m.nickname + " · " + m.created_at;
+
+        const content = document.createElement("div");
+        content.className = "msg-content";
+        content.textContent = m.content; // textContent: niente XSS nel pannello
+
+        body.appendChild(meta);
+        body.appendChild(content);
+
+        const del = document.createElement("button");
+        del.className = "btn danger";
+        del.textContent = "Elimina";
+        del.addEventListener("click", async () => {
+          if (!confirm("Eliminare questo messaggio?\n\n" + m.content)) return;
+          const token = sessionStorage.getItem(TOKEN_KEY);
+          try {
+            const res = await fetch(API_BASE + "/admin/messages/" + m.id, {
+              method: "DELETE",
+              headers: { Authorization: "Bearer " + token },
+            });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            row.remove();
+            if (!box.querySelector(".msg")) box.innerHTML = '<p class="muted">Bacheca vuota.</p>';
+          } catch (e) {
+            alert("Eliminazione fallita, riprova.");
+          }
+        });
+
+        row.appendChild(body);
+        row.appendChild(del);
+        box.appendChild(row);
+      }
+    }
+
+    $("login-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const value = $("token-input").value.trim();
+      if (!value) return;
+      sessionStorage.setItem(TOKEN_KEY, value);
+      load();
+    });
+
+    $("logout").addEventListener("click", () => {
+      sessionStorage.removeItem(TOKEN_KEY);
+      showLogin(false);
+    });
+
+    document.querySelectorAll(".segmented button[data-days]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".segmented button[data-days]").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        days = parseInt(btn.dataset.days, 10);
+        load();
+      });
+    });
+
+    load();
+  </script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --border: #e4e7ec;
+      --text: #1a202c;
+      --muted: #667085;
+      --accent: #2563eb;
+      --danger: #dc2626;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .topbar-inner {
+      max-width: 960px; margin: 0 auto; padding: 12px 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    }
+    .brand { font-weight: 700; }
+    .brand-dim { color: var(--muted); font-weight: 400; }
+    .topbar nav { display: flex; gap: 4px; }
+    .topbar nav a {
+      color: var(--muted); text-decoration: none; padding: 6px 10px; border-radius: 8px;
+    }
+    .topbar nav a:hover { background: var(--bg); color: var(--text); }
+    .topbar nav a.current { color: var(--accent); font-weight: 600; }
+
+    main { max-width: 960px; margin: 0 auto; padding: 24px 20px 80px; }
+    h1 { font-size: 22px; }
+    h2 { font-size: 16px; margin-bottom: 12px; }
+    .muted { color: var(--muted); }
+    .error { color: var(--danger); margin-top: 10px; }
+
+    .btn {
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px;
+      font: inherit; padding: 8px 14px; cursor: pointer;
+    }
+    .btn:hover { border-color: var(--muted); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { filter: brightness(1.08); }
+    .btn.danger { color: var(--danger); border-color: #fecaca; }
+    .btn.danger:hover { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+    .login-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      max-width: 420px; margin: 60px auto 0; padding: 28px;
+    }
+    .login-card h1 { margin-bottom: 4px; }
+    #login-form { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    #login-form input {
+      flex: 1; min-width: 200px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font: inherit; padding: 8px 12px;
+    }
+    #login-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+
+    .toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .toolbar-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .segmented {
+      display: inline-flex; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    }
+    .segmented button {
+      background: none; border: 0; font: inherit; color: var(--muted);
+      padding: 8px 14px; cursor: pointer;
+    }
+    .segmented button + button { border-left: 1px solid var(--border); }
+    .segmented button.active { background: var(--accent); color: #fff; }
+
+    .cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px;
+    }
+    .card .label { display: block; color: var(--muted); font-size: 13px; }
+    .card .value { font-size: 28px; font-weight: 700; }
+
+    .panel {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px; margin-bottom: 20px;
+    }
+    .panel .muted { font-size: 13px; margin: -6px 0 12px; }
+
+    .chart { display: flex; flex-direction: column; gap: 6px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; }
+    .bar-day { width: 48px; color: var(--muted); font-size: 13px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+    .bar-track { flex: 1; background: var(--bg); border-radius: 6px; height: 18px; overflow: hidden; }
+    .bar { background: var(--accent); height: 100%; display: block; min-width: 3px; border-radius: 6px; }
+    .bar-val { width: 40px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-size: 13px; font-weight: 600; }
+    tbody tr:last-child td { border-bottom: 0; }
+    td:first-child { word-break: break-all; }
+    td:not(:first-child), th:not(:first-child) { white-space: nowrap; }
+
+    .messages { display: flex; flex-direction: column; gap: 10px; }
+    .msg {
+      display: flex; gap: 14px; align-items: center; justify-content: space-between;
+      border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+    }
+    .msg-body { min-width: 0; }
+    .msg-meta { color: var(--muted); font-size: 13px; margin-bottom: 2px; }
+    .msg-content { word-break: break-word; }
+  </style>
+</body>
+</html>

@@ -50,8 +50,8 @@ Componenti:
 - `chat-api` — endpoint `POST /track` (beacon anonimo), `GET /stats` (lettura, protetta da token)
   e `GET/DELETE /admin/messages` (moderazione bacheca, stesso token)
 - `public/stats-beacon.js` — script incluso in ogni pagina via `Seo.astro`
-- `/stats` — pannello admin (non linkato, noindex, fuori sitemap); chiede il token e
-  include statistiche + moderazione dei messaggi della bacheca
+- `/admin/stats` — pannello admin (non linkato, noindex, fuori sitemap); chiede il token e
+  include statistiche + moderazione dei messaggi della bacheca (il CMS Decap resta su `/admin`)
 
 ### Attivazione (da fare una volta sola)
 
@@ -65,7 +65,7 @@ npx wrangler secret put STATS_TOKEN
 npx wrangler deploy
 ```
 
-Poi vai su `https://www.strummolo.com/stats` e inserisci il token.
+Poi vai su `https://www.strummolo.com/admin/stats` e inserisci il token.
 
 ## 👀 Want to learn more?
 
